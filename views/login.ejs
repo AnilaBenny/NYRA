@@ -1,0 +1,58 @@
+
+
+
+<%- include('header') -%>
+<body style="background:url(/public/assets/images/banner/loginbanner.jpg);background-repeat: no-repeat;background-size: cover;">
+
+
+
+<div class="container p-5" >
+
+<div class="card mb-3 p-5 " id="card-login">
+    <div class="row">
+      
+      <div class="col-md-6">
+        <div class="card-body">
+            <div>
+                <form action="/login" method="post">
+                    <% if (typeof message !== 'undefined') { %>
+                        <p class="text-success"><%= message %></p>
+                    <% } %>
+            
+                    <div class="container p-4 form-group">
+                        <h2 class="text-center">Login System</h2>
+                        <p class="text-center">Login for existing user</p>
+            
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" placeholder="Enter Your email address" class="form-control mb-2" required>
+            
+                        <label class="form-label"> Password</label>
+                
+                        <input type="password" name="password" placeholder="Enter password" class="form-control mb-2" required>
+                        
+                        <p class="mt-2">
+                           <a href="/forgot"> Forgot password?</a> 
+                        </p>
+                        <button class="btn btn-success rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2">
+                            Login
+                        </button>
+            
+                        <p class="mt-2">
+                            Don't have an account? <a href="/register">Create Now</a>
+                        </p>
+                       
+            
+                    </div>
+                </form>
+            </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <img src="/public/assets/images/The Mood Guide.jpeg" class="img-fluid rounded-start" alt="image">
+      </div>
+    </div>
+  </div>
+      
+</div>
+
+<%- include('footer') -%>
