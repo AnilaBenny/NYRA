@@ -14809,7 +14809,7 @@ input {
 }
 .banner-single-item .content {
     position: absolute;
-    z-index: 9;
+    z-index: 1;
 }
 
 /*Banner Animation*/
@@ -15128,7 +15128,7 @@ input {
 
 .banner-style-5 .image {
     display: block;
-    z-index: 99;
+   
 }
 
 /*Banner Style - 6*/

@@ -1,18 +1,15 @@
 const express = require('express');
-const user_route=express();
-//controller connection
-const userController=require('../controllers/userController')
+const userRoute = express.Router();
+const userController = require('../controllers/userController');
 
-user_route.get('/home',userController.loadLogin);
+userRoute.get('/home', userController.enterHome);
 
-user_route.get('/login',userController.loadLoginpage);
+userRoute.get('/', userController.loadLoginpage);
+userRoute.post('/', userController.verifyUser);
 
-user_route.get('/register',userController.loadregisterpage);
+userRoute.get('/register', userController.loadregisterpage);
+userRoute.post('/register', userController.insertUser);
 
-user_route.post('/register',userController.insertUser);
+userRoute.get('/forgot', userController.forgotpassword);
 
-user_route.get('/forgot',userController.forgotpassword);
-
-
-
-module.exports=user_route;
+module.exports = userRoute;

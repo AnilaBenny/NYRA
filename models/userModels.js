@@ -1,42 +1,40 @@
-const mongoose=require('mongoose');
-const connect=mongoose.connect('mongodb://localhost:27017/NYRA');
-connect.then(()=>{console.log('Data base connected')}).catch(()=>{console.log('database not connected')});
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const validator = require('validator');
 
-//user schema
-const userSchema=new mongoose.Schema({
-    name:{
-        type:String,
-        required:true
+const userSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+        trim: true
     },
-    address:{
-        type:String,
-        required:true
-    },
-    mobile:{
-        type:String,
-        required:true,
+    mobile: {
+        type: String,
+        required: true,
         unique: true,
+        trim: true
     },
-    email:{
-        type:String,
-        required:true,
+    email: {
+        type: String,
+        required: true,
         unique: true,
-        lowercase: true
+        lowercase: true,
+        validate: [validator.isEmail, 'Invalid email format'],
+        trim: true
     },
-    password:{
-        type:String,
-        required:true,
+    password: {
+        type: String,
+        required: true,
         minlength: 6
     },
-
-   image:{
-        type:String,
-        required:true
-    },
-    is_varified:{
-        type:Number,
-        default:0
+    is_verified: {
+        type: Boolean,
+        default: false
     }
 });
-module.exports=mongoose.model('user',userSchema);
+
+
+
+module.exports = mongoose.model('user', userSchema);
+
 
