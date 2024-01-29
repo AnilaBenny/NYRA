@@ -12,7 +12,8 @@
 
                                 <!-- Full Name -->
                                 <label class="form-label">Enter your full name</label>
-                                <input type="text" name="name" class="form-control mb-2">
+                                <input type="text" name="name" id="name" class="form-control mb-2" onblur="validateName()" required>
+                                <p id="nameError" class="text-danger"></p>
                                 <% if (errors && errors.some(error => error.path === 'name')) { %>
                                     <% errors.filter(error => error.path === 'name').forEach(error => { %>
                                         <p class="text-danger"><%= error.msg %></p>
@@ -21,7 +22,8 @@
 
                                 <!-- Email -->
                                 <label class="form-label">Enter your email</label>
-                                <input type="email" name="email" class="form-control mb-2">
+                                <input type="email" name="email" id="email" class="form-control mb-2" onblur="validateEmail()" required>
+                                <p id="emailError" class="text-danger"></p>
                                 <% if (errors && errors.some(error => error.path === 'email')) { %>
                                     <% errors.filter(error => error.path === 'email').forEach(error => { %>
                                         <p class="text-danger"><%= error.msg %></p>
@@ -30,17 +32,19 @@
 
                                 <!-- Mobile Number -->
                                 <label class="form-label">Mobile Number</label>
-                                <input type="tel" name="mobile" class="form-control mb-2">
+                                
+                                <input type="tel" name="mobile" id="mobile" class="form-control mb-2" onblur="validateMobile()" required>
                                 <% if (errors && errors.some(error => error.path === 'mobile')) { %>
                                     <% errors.filter(error => error.path === 'mobile').forEach(error => { %>
                                         <p class="text-danger"><%= error.msg %></p>
                                     <% }); %>
                                 <% } %>
+                                <p id="mobileError" class="text-danger"></p>
 
                                 <!-- Password -->
                                 <label class="form-label">Set Password</label>
                                 <div class="d-flex form-group">
-                                    <input type="password" name="password" id="password" class="form-control mb-2 me-1">
+                                    <input type="password" name="password" id="password" class="form-control mb-2 me-1" onblur="validatePassword()" required>
                                     <i class="bi bi-eye-slash" id="togglePassword"></i>
                                 </div>
                                  <!-- Password Error Message -->
@@ -49,15 +53,15 @@
                                         <p class="text-danger"><%= error.msg %></p>
                                     <% }); %>
                                 <% } %>
-                                    
+                                <p id="passwordError" class="text-danger"></p>
                                 
                                 <!-- Confirm Password -->
                                 <label class="form-label">Confirm Password</label>
                                 <div class="d-flex form-group">
-                                    <input type="password" name="confirmPassword" id="confirmPassword" class="form-control mb-2 me-1">
+                                    <input type="password" name="confirmPassword" id="confirmPassword" class="form-control mb-2 me-1" onblur="validateConfirmPassword()" required>
                                     <i class="bi bi-eye-slash" id="toggleConfirmPassword"></i>
                                 </div>
-
+                                <p id="confirmPasswordError" class="text-danger"></p>
                                
 
 
@@ -100,6 +104,67 @@
         confirmPassword.setAttribute('type', type);
         this.classList.toggle('bi-eye');
     });
+
+    
+    // Client-side validation functions
+    function validateName() {
+        const nameInput = document.getElementById('name');
+        const nameError = document.getElementById('nameError');
+        if (!nameInput.value.trim()) {
+            nameError.textContent = 'Name is required';
+        } else {
+            nameError.textContent = '';
+        }
+    }
+
+    function validateEmail() {
+        const emailInput = document.getElementById('email');
+        const emailError = document.getElementById('emailError');
+        if (!emailInput.value.trim()) {
+            emailError.textContent = 'Email is required';
+        } else if (!/^\S+@\S+\.\S+$/.test(emailInput.value.trim())) {
+            emailError.textContent = 'Invalid email format';
+        } else {
+            emailError.textContent = '';
+        }
+    }
+
+    function validateMobile() {
+        const mobileInput = document.getElementById('mobile');
+        const mobileError = document.getElementById('mobileError');
+        if (!mobileInput.value.trim()) {
+            mobileError.textContent = 'Mobile number is required';
+        } else if (!/^\d{10}$/.test(mobileInput.value.trim())) {
+            mobileError.textContent = 'Mobile number must be 10 digits long';
+        } else {
+            mobileError.textContent = '';
+        }
+    }
+
+    function validatePassword() {
+        const passwordInput = document.getElementById('password');
+        const passwordError = document.getElementById('passwordError');
+        if (!passwordInput.value.trim()) {
+            passwordError.textContent = 'Password is required';
+        } else if (passwordInput.value.trim().length < 6 || passwordInput.value.trim().length > 15) {
+            passwordError.textContent = 'Password must be between 6 and 15 characters';
+        } else {
+            passwordError.textContent = '';
+        }
+    }
+
+    function validateConfirmPassword() {
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const confirmPasswordError = document.getElementById('confirmPasswordError');
+        const passwordInput = document.getElementById('password');
+        if (!confirmPasswordInput.value.trim()) {
+            confirmPasswordError.textContent = 'Confirm password is required';
+        } else if (confirmPasswordInput.value.trim() !== passwordInput.value.trim()) {
+            confirmPasswordError.textContent = 'Passwords do not match';
+        } else {
+            confirmPasswordError.textContent = '';
+        }
+    }
 </script>
 
 <%- include('footer') -%>
