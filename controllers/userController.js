@@ -139,7 +139,10 @@ const insertUser = async (req, res) => {
         return res.render('register', { errors: errors});
       }
 
-    // Proceed with saving user if validations pass...
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newUser = new userModel({ name, email, password: passwordHash, mobile });
+    const userData = await newUser.save();
+        
 
     if (userData) {
       res.render('register', { message: 'Your registration has been successfully completed!!!' });
