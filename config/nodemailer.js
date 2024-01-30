@@ -16,7 +16,8 @@ function sentOtp(email) {
   const otp = randomstring.generate({
     length: 6,
     charset: 'numeric',
-  });
+  }
+  );
 
   const mailOptions = {
     from: 'rmtipop@gmail.com',
@@ -36,4 +37,4 @@ function sentOtp(email) {
   return otp;
 }
 
-module.exports = { sentOtp,transporter };
+module.exports = { sentOtp,transporter};

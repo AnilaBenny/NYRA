@@ -4,6 +4,8 @@ const path = require('path');
 const userRoute = require('./routes/userRoute'); 
 const adminRoute=require('./routes/adminRoute');
 const expressvalidator = require('express-validator');
+const session=require('express-session');
+
 
 
 //database connection

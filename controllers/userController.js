@@ -50,6 +50,7 @@ const forgotpassword = async (req, res) => {
 const insertUser = async (req, res) => {
   try {
     const { name, email, mobile, password, confirmPassword } = req.body;
+    
 
     // Validate request body using express-validator
     const validators = [
@@ -140,7 +141,7 @@ const insertUser = async (req, res) => {
    
      
     // const passwordHash = await bcrypt.hash(password, 10);
-    sentOtp(email)
+
 
     
     const existingUser = await userModel.findOne({
@@ -203,11 +204,11 @@ let postVerifyOtp = async (req, res, next) => {
   try {
     // Check if OTP is a valid numeric value
     if (!isNaN(otp)) {
-      // Retrieve the OTP sent to the user (you need to implement this logic)
-      const storedOTP = await getStoredOTP(); // Implement this function to retrieve the stored OTP
+     
+      const storedOtp = sentOtp(email);;
       
       // Check if the submitted OTP matches the stored OTP
-      if (otp === storedOTP) {
+      if (otp === storedOtp) {
         // OTP matched, proceed to insert user data into the database
         
         // Retrieve user details submitted during registration (you need to implement this logic)
