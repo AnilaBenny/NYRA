@@ -42,7 +42,7 @@ const enterHome = async (req, res) => {
 //load login page
 const loadLoginpage = async (req, res) => {
     try {
-        res.render('login.ejs');
+        res.render('login.ejs',{message:null});
     } catch (error) {
         console.log(error.message);
     }
@@ -52,7 +52,7 @@ const loadLoginpage = async (req, res) => {
 //load register page
 const loadregisterpage = async (req, res) => {
     try {
-        res.render('register', { errors: [], message: null });
+        res.render('register', { errors, message: null });
     } catch (error) {
         console.log(error.message);
     }
@@ -241,6 +241,7 @@ const postVerifyOtp = async (req, res, next) => {
     }
 };
 
+//get otp page
 const loadOtp = async (req, res) => {
     try {
       res.render('otp',{message:null});
@@ -249,17 +250,30 @@ const loadOtp = async (req, res) => {
     }
 };
 
+//verify user
 const verifyUser = async (req, res) => {
     try {
-      
-        const userData = await userModel.findOne({ email: req.body.email });
+      const {email,password}=req.body;
+      if (!(email.includes('@gmail.com') && email.trim() === email)) {
+        const errMsg = 'Email is not a valid Gmail address';
+        return res.render('login', { message: errMsg });
+    }
+    
+        
+    
+      else{
+        const userData = await userModel.findOne({ email: req.body.email});
+        //console.log(userData);
         if (userData) {
           const isPasswordValid = await bcrypt.compare(req.body.password, userData.password);
-          if (isPasswordValid) {
+          if (isPasswordValid && userData.is_verified && req.body.email===userData.email) {
+            
             res.redirect('/home');
           } else {
-            res.render('login', { alert: "Login Failed!!!, please verify your email and password" });
+            res.render('login', { message: "Login Failed!!!, please verify your email and password" });
           }
+      }
+        
         }
       
     } catch (error) {
