@@ -1,60 +1,85 @@
 const userModel = require('../models/userModels');
 const bcrypt = require('bcrypt');
-const {check, validationResult } = require('express-validator');
-const {sentOtp,transporter}=require('../config/nodemailer');
+const { check, validationResult } = require('express-validator');
+const nodemailer = require("nodemailer");
+const randomstring = require('randomstring');
+
+// const Email = process.env.Email;
+// const Pass = process.env.Pass;
+
+const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    requireTLS: true,
+    auth: {
+        user:'nyraproduct@gmail.com' ,
+        pass: 'gcnmqgwrjkuculam'
+    }
+});
+
+//password hashing
 
 const securePassword = async (password) => {
-  try {
-    const passwordHash = await bcrypt.hash(password, 10);
-    return passwordHash;
-  } catch (error) {
-    console.log(error.message);
-  }
+    try {
+        const passwordHash = await bcrypt.hash(password, 10);
+        return passwordHash;
+    } catch (error) {
+        console.log(error.message);
+    }
 };
 
+//load home
 const enterHome = async (req, res) => {
-  try {
-    res.render('home.ejs');
-  } catch (error) {
-    console.log(error.message);
-  }
+    try {
+        res.render('home.ejs');
+    } catch (error) {
+        console.log(error.message);
+    }
 };
 
+
+//load login page
 const loadLoginpage = async (req, res) => {
-  try {
-    res.render('login.ejs');
-  } catch (error) {
-    console.log(error.message);
-  }
+    try {
+        res.render('login.ejs');
+    } catch (error) {
+        console.log(error.message);
+    }
 };
 
-//load registration page(get)
 
+//load register page
 const loadregisterpage = async (req, res) => {
-  try {
-    res.render('register', { errors: [] ,message:null});
-  } catch (error) {
-    console.log(error.message);
-  }
+    try {
+        res.render('register', { errors: [], message: null });
+    } catch (error) {
+        console.log(error.message);
+    }
 };
+
+
+//forgot password
 
 const forgotpassword = async (req, res) => {
-  try {
-    res.render('forgot.ejs');
-  } catch (error) {
-    console.log(error.message);
-  }
+    try {
+        res.render('forgot.ejs');
+    } catch (error) {
+        console.log(error.message);
+    }
 };
 
 
-const insertUser = async (req, res) => {
-  try {
-    const { name, email, mobile, password, confirmPassword } = req.body;
-    
 
-    // Validate request body using express-validator
-    const validators = [
-        check('name')
+//insert user & send the otp
+const insertUser=async(req,res)=>{
+  
+  try{
+    const { name, email, mobile, password } = req.body;
+
+        // Validate request body using express-validator
+        const validators = [
+          check('name')
         
           .exists({ checkFalsy: true })
           .withMessage('Name is required').bail()
@@ -133,144 +158,126 @@ const insertUser = async (req, res) => {
             }
             return true;
           }).bail()
-      ];
+      
   
-      await Promise.all(validators.map((validator) => validator.run(req)));
+        ];
 
-    const errors = validationResult(req).array() ;
-   
-     
-    // const passwordHash = await bcrypt.hash(password, 10);
+        await Promise.all(validators.map((validator) => validator.run(req)));
 
-
-    
-    const existingUser = await userModel.findOne({
-      $or: [{
-          email: email,
-        },
+        const errors = validationResult(req).array();
+        console.log(errors);
+        if (errors.length>0)
         {
-          mobile: mobile,
-        },
-      ],
-    });
-
-    //check existing user 
-
-    if (existingUser) {
-      if (existingUser.email === email && existingUser.mobile == mobile) {
-         message='Email and phone number is already registered';
-       
-      } else if (existingUser.email === email) {
-       message='Email is already registered' ;
-        
-      }
-      
-      else if (existingUser.mobile == mobile) {
-        message=' phone number is already registered';
-       
-      }
-     
-      return res.render('register', { errors: [], message: message });
-    }
-      else{
-        let passwordHash = await securePassword(password);
-        const newUser = new userModel({ name, email, password: passwordHash, mobile });
-        if(newUser){
-          // Generate OTP and send it via email
-        const otp = sentOtp(email);
-
-        // Redirect to the OTP page with email and otp details
-        return res.redirect(`/otp?email=${email}&otp=${otp}`);
+          // console.log(errors);
+          res.render('register',{errors})
         }
-        // const userData = await newUser.save();
+        else{
+         
+          
+          const data={name,email,mobile,password};
+          req.session.data=data;
+          console.log(req.session.data);
+          const otp= randomstring.generate({
+            length: 6,
+            charset: 'numeric',
+          });
+          req.session.otp=otp;
+          // console.log(otp);
 
-    // if (userData) {
-    //   res.render('register', { message: 'Your registration has been successfully completed!!!' });
-    // } else {
-    //   res.render('register', { message: 'Your registration has failed!!!' });
-    // }
-      }
-      
-  } catch (error) {
-    console.error(error.message);
-    }
-    
-  };
+          // Send OTP via email
+            const mailOptions = await{
+                from: 'nyraproduct@gmail.com',
+                to: email,
+                subject: 'Your OTP Code for verification',
+                text: `Your OTP code is: ${otp}`,
+            };
 
-//post otp
-let postVerifyOtp = async (req, res, next) => {
-  let { otp } = req.body;
-
-  try {
-    // Check if OTP is a valid numeric value
-    if (!isNaN(otp)) {
-     
-      const storedOtp = sentOtp(email);;
-      
-      // Check if the submitted OTP matches the stored OTP
-      if (otp === storedOtp) {
-        // OTP matched, proceed to insert user data into the database
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Error sending email:', error);
+                } else {
+                    console.log('Email sent:', info.response);
+                }
+            });
+          res.redirect('/otp');
+        }
         
-        // Retrieve user details submitted during registration (you need to implement this logic)
-        const userDetails = await getStoredUserDetails(); // Implement this function to retrieve user details
-      
-        // Create a new user with the retrieved userDetails
-        const newUser = new userModel(userDetails);
 
-        // Save the new user to the database
-        await newUser.save();
-
-        return res.status(200).send("User registered successfully!");
-      } else {
-        // Invalid OTP
-        return res.status(400).send("Invalid OTP.");
-      }
-    } else {
-      // Invalid OTP format
-      return res.status(400).send("Invalid OTP format.");
-    }
-  } catch (error) {
-    console.error(error.message);
-   
   }
+  catch(error){
+    console.log(error.message)
+  }
+}
+
+//post verify
+const postVerifyOtp = async (req, res, next) => {
+    try {
+    
+          const { otp } = req.body;
+          if (req.session.otp != null) {
+                  if (!isNaN(otp)) {
+                    if (otp === req.session.otp) {
+                      const passwordHash = await securePassword(req.session.data.password);
+                      const newUser = new userModel({
+                        name:req.session.data.name,
+                      email:req.session.data.email,
+                      mobile:req.session.data.mobile,
+                    password: passwordHash ,
+                    is_admin:false,
+                  is_verified:true});
+                      const userData = await newUser.save();
+                      
+                      if (userData) {
+                        return res.redirect('/');
+                      }
+                    } 
+                    }}
+                    else {
+                      return res.render('otp', { message: 'Your registration has failed!!!' });
+                    }}
+     catch (error) {
+        console.log(error.message);
+        res.redirect("/otp");
+    }
 };
 
-  // load otp
-  const loadOtp=async(req,res)=>{
-    try{
-        res.render('otp');
-    }
-    catch(error){
+const loadOtp = async (req, res) => {
+    try {
+      res.render('otp',{message:null});
+    } catch (error) {
         console.log(error.message);
     }
-
-  }
-
+};
 
 const verifyUser = async (req, res) => {
-  try {
-    const userData = await userModel.findOne({ email: req.body.email });
-    if (userData) {
-      const isPasswordValid = await bcrypt.compare(req.body.password, userData.password);
-      if (isPasswordValid) {
-        res.redirect('/home');
-      } else {
-        res.render('login', { alert: "Login Failed!!!, please verify your email and password" });
-      }
+    try {
+      
+        const userData = await userModel.findOne({ email: req.body.email });
+        if (userData) {
+          const isPasswordValid = await bcrypt.compare(req.body.password, userData.password);
+          if (isPasswordValid) {
+            res.redirect('/home');
+          } else {
+            res.render('login', { alert: "Login Failed!!!, please verify your email and password" });
+          }
+        }
+      
+    } catch (error) {
+        console.error(error.message);
     }
-  } catch (error) {
-    console.error(error.message);
-  }
 };
 
-module.exports = { 
-  enterHome,
-  loadLoginpage,
-  loadregisterpage,
-  forgotpassword,
-  insertUser,
-  verifyUser,
-  loadOtp,
-  postVerifyOtp
-
+module.exports = {
+    enterHome,
+    loadLoginpage,
+    loadregisterpage,
+    forgotpassword,
+    insertUser,
+    verifyUser,
+    loadOtp,
+    postVerifyOtp
 };
+
+
+
+

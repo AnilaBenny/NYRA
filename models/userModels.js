@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
     is_verified: {
         type: Boolean,
         default: false
+    },
+    is_admin: {
+        type: Boolean,
+        default: false
     }
 });
 

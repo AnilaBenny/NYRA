@@ -5,6 +5,7 @@ const userRoute = require('./routes/userRoute');
 const adminRoute=require('./routes/adminRoute');
 const expressvalidator = require('express-validator');
 const session=require('express-session');
+const nocache=require('nocache');
 
 
 
@@ -22,6 +23,17 @@ app.use(express.urlencoded({
    extended: true
 }));
 
+//Session configuration
+app.use(session({
+    secret: 'secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+       maxAge: 3600000
+    }
+ }));
+
+ app.use(nocache());
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));

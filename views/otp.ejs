@@ -5,9 +5,14 @@
             <div class="row">
                 
                     <div class="card-body">
+                        
                         <form action="/otp" method="POST" enctype="application/json">
                             <div class="container p-1 form-group">
                                 <h2 class="text-center">Email verification with OTP</h2>
+                                <%if(message){%>
+                                    <p class="text-danger"><%=message%></p>
+                                    <%}%>
+                               
 
                 <!-- <div class="mb-3">
                     <input class="form-control" name="email" placeholder="Enter your email" type="text">
