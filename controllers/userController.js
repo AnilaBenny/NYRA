@@ -1,6 +1,7 @@
 const userModel = require('../models/userModels');
 const bcrypt = require('bcrypt');
 const {check, validationResult } = require('express-validator');
+const {sentOtp,transporter}=require('../config/nodemailer');
 
 const securePassword = async (password) => {
   try {
@@ -27,9 +28,11 @@ const loadLoginpage = async (req, res) => {
   }
 };
 
+//load registration page(get)
+
 const loadregisterpage = async (req, res) => {
   try {
-    res.render('register', { errors: [] });
+    res.render('register', { errors: [] ,message:null});
   } catch (error) {
     console.log(error.message);
   }
@@ -134,106 +137,113 @@ const insertUser = async (req, res) => {
       await Promise.all(validators.map((validator) => validator.run(req)));
 
     const errors = validationResult(req).array() ;
-    console.log(errors);
-    if (errors.length>0) {
-        return res.render('register', { errors: errors});
-      }
+   
+     
+    // const passwordHash = await bcrypt.hash(password, 10);
+    sentOtp(email)
 
-    const passwordHash = await bcrypt.hash(password, 10);
-    const newUser = new userModel({ name, email, password: passwordHash, mobile });
-    const userData = await newUser.save();
+    
+    const existingUser = await userModel.findOne({
+      $or: [{
+          email: email,
+        },
+        {
+          mobile: mobile,
+        },
+      ],
+    });
+
+    //check existing user 
+
+    if (existingUser) {
+      if (existingUser.email === email && existingUser.mobile == mobile) {
+         message='Email and phone number is already registered';
+       
+      } else if (existingUser.email === email) {
+       message='Email is already registered' ;
         
+      }
+      
+      else if (existingUser.mobile == mobile) {
+        message=' phone number is already registered';
+       
+      }
+     
+      return res.render('register', { errors: [], message: message });
+    }
+      else{
+        let passwordHash = await securePassword(password);
+        const newUser = new userModel({ name, email, password: passwordHash, mobile });
+        if(newUser){
+          // Generate OTP and send it via email
+        const otp = sentOtp(email);
 
-    if (userData) {
-      res.render('register', { message: 'Your registration has been successfully completed!!!' });
+        // Redirect to the OTP page with email and otp details
+        return res.redirect(`/otp?email=${email}&otp=${otp}`);
+        }
+        // const userData = await newUser.save();
+
+    // if (userData) {
+    //   res.render('register', { message: 'Your registration has been successfully completed!!!' });
+    // } else {
+    //   res.render('register', { message: 'Your registration has failed!!!' });
+    // }
+      }
+      
+  } catch (error) {
+    console.error(error.message);
+    }
+    
+  };
+
+//post otp
+let postVerifyOtp = async (req, res, next) => {
+  let { otp } = req.body;
+
+  try {
+    // Check if OTP is a valid numeric value
+    if (!isNaN(otp)) {
+      // Retrieve the OTP sent to the user (you need to implement this logic)
+      const storedOTP = await getStoredOTP(); // Implement this function to retrieve the stored OTP
+      
+      // Check if the submitted OTP matches the stored OTP
+      if (otp === storedOTP) {
+        // OTP matched, proceed to insert user data into the database
+        
+        // Retrieve user details submitted during registration (you need to implement this logic)
+        const userDetails = await getStoredUserDetails(); // Implement this function to retrieve user details
+      
+        // Create a new user with the retrieved userDetails
+        const newUser = new userModel(userDetails);
+
+        // Save the new user to the database
+        await newUser.save();
+
+        return res.status(200).send("User registered successfully!");
+      } else {
+        // Invalid OTP
+        return res.status(400).send("Invalid OTP.");
+      }
     } else {
-      res.render('register', { message: 'Your registration has failed!!!' });
+      // Invalid OTP format
+      return res.status(400).send("Invalid OTP format.");
     }
   } catch (error) {
-    console.error(error);
-    res.render('register', { message: 'An error occurred during registration!!!' });
+    console.error(error.message);
+   
   }
 };
 
+  // load otp
+  const loadOtp=async(req,res)=>{
+    try{
+        res.render('otp');
+    }
+    catch(error){
+        console.log(error.message);
+    }
 
-
-
-// const insertUser = async (req, res) => {
-//     let errors = [];
-//     try {
-//       const { name, email, mobile, password, confirmPassword } = req.body;
-      
-  
-//       // Custom validation functions
-//       const validateName = (value) => {
-//         if (!value || value.trim() === '') {
-//           throw new Error('Name is required');
-//         }
-//         // Additional validation rules for name if needed
-//       };
-  
-//       const validateEmail = (value) => {
-//         if (!value || value.trim() === '') {
-//           throw new Error('Email is required');
-//         }
-//         // Additional validation rules for email if needed
-//       };
-  
-//       const validateMobile = (value) => {
-//         if (!value || value.trim() === '') {
-//           throw new Error('Mobile number is required');
-//         }
-//         // Additional validation rules for mobile if needed
-//       };
-  
-//       const validatePassword = (value) => {
-//         if (!value || value.trim() === '') {
-//           throw new Error('Password is required');
-//         }
-//         // Additional validation rules for password if needed
-//       };
-  
-//       // Perform custom validations
-//       validateName(name);
-//       validateEmail(email);
-//       validateMobile(mobile);
-//       validatePassword(password);
-  
-//       if (password !== confirmPassword) {
-//         errors.push({ param: 'confirmPassword', msg: 'Passwords do not match' });
-//       }
-  
-//       // Proceed with saving user if validations pass
-//       const passwordHash = await bcrypt.hash(password, 10);
-//       const newUser = new userModel({ name, email, password: passwordHash, mobile });
-//       const userData = await newUser.save();
-  
-//       if (userData) {
-//         res.render('register', { message: 'Your registration has been successfully completed!!!' });
-//       } else {
-//         res.render('register', { message: 'Your registration has failed!!!' });
-//       }
-//     } catch (validationError) {
-//       // Add field-specific error messages to the errors array
-//       if (validationError.message.includes('Name')) {
-//         errors.push({ param: 'name', msg: validationError.message });
-//       }
-//       if (validationError.message.includes('Email')) {
-//         errors.push({ param: 'email', msg: validationError.message });
-//       }
-//       if (validationError.message.includes('Mobile number')) {
-//         errors.push({ param: 'mobile', msg: validationError.message });
-//       }
-//       if (validationError.message.includes('Password')) {
-//         errors.push({ param: 'password', msg: validationError.message });
-//       }
-//       console.log('Validation Errors:', errors);
-//       res.render('register', { errors });
-//     }
-//   };
-  
-  
-  
+  }
 
 
 const verifyUser = async (req, res) => {
@@ -258,5 +268,8 @@ module.exports = {
   loadregisterpage,
   forgotpassword,
   insertUser,
-  verifyUser
+  verifyUser,
+  loadOtp,
+  postVerifyOtp
+
 };

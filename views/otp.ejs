@@ -1,0 +1,106 @@
+<%- include('header') -%>
+<body style="background:url(/public/assets/images/banner/loginbanner.jpg);background-repeat: no-repeat;background-size: cover;">
+    <div class="container" style="margin-left: 500px;margin-top: 140px;">
+        <div class="card mb-3 p-5 w-50" id="card-register">
+            <div class="row">
+                
+                    <div class="card-body">
+                        <form action="/otp" method="POST" enctype="application/json">
+                            <div class="container p-1 form-group">
+                                <h2 class="text-center">Email verification with OTP</h2>
+
+                <!-- <div class="mb-3">
+                    <input class="form-control" name="email" placeholder="Enter your email" type="text">
+                </div> 
+                <div class="mb-3">
+                    <button type="button" class="btn btn-primary w-100 mx-0" id="sendOtpBtn">Send OTP</button>
+                </div> -->
+              
+                <div class="mb-3" id="otpField">
+                    <div class="mobile-text mb-2 text-center">Enter the code that we just send on your email <b
+                            class="text-danger"></b></div>
+                    <input class="form-control" class="w-25" required="" type="text" id='otp' name="otp"
+                        placeholder="Enter OTP">
+                </div>
+
+                <!-- <div class="mb-4" id="loginBtn">
+                    <button type="submit" class="btn btn-primary w-100"> Verify OTP </button>
+                    <a><h6 id="resend-otp-button" style="display: none;"> Resend OTP</h6></a>
+                </div>  -->
+
+                <div class="mb-4" id="loginBtn">
+                    <button type="submit" class="btn btn-primary w-100">Verify OTP</button>
+                    <center>
+                        <button id="start-countdown-button" class="btn btn-primary w-100"
+                            style="display: none;">Start Countdown</button>
+                        <button id="reset-countdown-button" class="btn btn-secondary w-100"
+                            style="display: none;">Reset Countdown</button>
+
+                        <div id="countdown-timer" class="text-danger mt-3 md-3">0<span
+                                id="minute">0</span>:<span id="seconds">59</span></div>
+
+                        <button class="btn btn-primary w-75 mt-2" onclick="resendotp()" id="resend-otp-button" style="display: none;">
+                            <h6 class="text-light">Resend OTP</h6>
+                        </button>
+                    </center>
+                </div>
+
+
+
+
+                <!-- <div class="text-center ">
+                    <span class="d-block mobile-text">Don't receive the code?</span>
+
+                </div> -->
+               
+            </form>
+        </div>
+
+
+    </div>
+</section>
+
+<script>
+    let interval = null
+
+    function mainCounter(resend) {
+        let seconds = document.getElementById('seconds')
+        let counter = (resend) ? 60 : 59
+        let minute = 0
+        interval = setInterval(() => {
+            counter -= 1
+            if (counter < 10 && counter >= 0) {
+                counter = "0" + counter
+            }
+            if (counter === -1) {
+                counter = 59
+                minute -= 1
+                document.getElementById("minute").innerHTML = minute
+            }
+
+            seconds.innerHTML = counter
+
+            if (minute === -1) {
+                clearInterval(interval);
+                document.getElementById('countdown-timer').innerHTML = " "
+                // Display the Resend OTP button after the countdown ends
+                document.getElementById('resend-otp-button').style.display = 'block';
+            }
+        }, 1000)
+    }
+    mainCounter(false)
+
+
+    function resendotp() {
+        fetch('/resendOtp').then((response) => {
+
+            clearInterval(interval)
+            document.getElementById('resend-otp-button').style.display = 'none';
+            document.getElementById('countdown-timer').innerHTML = "0<span id='minute'>0</span>:<span id='seconds'>59</span>";
+            mainCounter(true)
+            // document.getElementById('resend-otp-button').style.display = 'none';
+        })
+    }
+</script> 
+
+<%- include('footer') -%>

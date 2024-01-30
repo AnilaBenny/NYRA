@@ -9,7 +9,11 @@
                         <form action="/register" method="POST" enctype="application/json">
                             <div class="container p-4 form-group">
                                 <h2 class="text-center">Register Account</h2>
-
+                                <% if (message) { %>
+                                    <div class="alert-danger text-center">
+                                        <%= message %>
+                                    </div>
+                                <% } %>
                                 <!-- Full Name -->
                                 <label class="form-label">Enter your full name</label>
                                 <input type="text" name="name" id="name" class="form-control mb-2" onblur="validateName()" required>
@@ -69,7 +73,17 @@
                                 <div class="d-flex justify-content-start">
                                     <input type="checkbox" style="width: 20px;" id="checkbox">I agree all statements in <a href="#">Terms of service</a>
                                 </div>
-
+                                <% if (errors && errors.some(error => error.path === 'password')) { %>
+                                    <% errors.filter(error => error.path === 'password').forEach(error => { %>
+                                        <p class="text-danger"><%= error.msg %></p>
+                                    <% }); %>
+                                <% } %>
+                                <% if (errors && errors.some(error => error.path === 'password')) { %>
+                                    <% errors.filter(error => error.path === 'password').forEach(error => { %>
+                                        <p class="text-danger"><%= error.msg %></p>
+                                    <% }); %>
+                                <% } %>
+                                
                                 <!-- Buttons -->
                                 <button type="submit" class="btn btn-info rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2">Sign up</button>
                                 <a href="/" class="btn btn-success text-white rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2">Existing User? Log in</a>

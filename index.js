@@ -5,6 +5,7 @@ const userRoute = require('./routes/userRoute');
 const adminRoute=require('./routes/adminRoute');
 const expressvalidator = require('express-validator');
 
+
 //database connection
 
 const connectToDatabase = require('./config/databaseconnect');
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({
    extended: true
 }));
+
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
