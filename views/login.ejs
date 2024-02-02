@@ -1,86 +1,112 @@
-
-
-
 <%- include('header') -%>
 <body style="background:url(/public/assets/images/banner/loginbanner.jpg);background-repeat: no-repeat;background-size: cover;">
-
-
-
-<div class="container p-3" >
-
-<div class="card mb-3 p-5 " id="card-login">
-    <div class="row">
-      
-      <div class="col-md-6">
-        <div class="card-body">
-            <div>
-                <form action="/" method="post" enctype="application/json">
-                   
-            
-                    <div class="container p-4 form-group">
-                        <h2 class="text-center">Login System</h2>
-                        <p class="text-center">Login for existing user</p>
-                        <% if (message) { %>
-                          <p class="text-danger"><%= message %></p>
-                      <% } %>
-            
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" id="email" placeholder="Enter Your email address" class="form-control mb-2" onblur="validateEmail()" required>
-                        <p id="emailError" class="text-danger"></p>
-                        <label class="form-label"> Password</label>
-                
-                        <input type="password" name="password" id="password" placeholder="Enter password" class="form-control mb-2" required onblur="validatePassword()">
-                        <p id="passwordError" class="text-danger"></p>
-                        <p class="mt-2">
-                           <a href="/forgot"> Forgot password?</a> 
-                        </p>
-                        
-                        <button class="btn btn-success rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2">
-                            Login
-                        </button>
-            
-                        <p class="mt-2">
-                            Don't have an account? <a href="/register">Create Now</a>
-                        </p>
-                       
-            
+    <div class="container p-3">
+        <div class="card mb-3 p-5 " id="card-login">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card-body">
+                        <div>
+                            <form action="/" method="POST" onsubmit="return validateForm()" enctype="application/json">
+                                <div class="container p-4 form-group">
+                                    <h2 class="text-center">Login System</h2>
+                                    <p class="text-center">Login for existing user</p>
+                                    <% if (message) { %>
+                                        <p class="text-danger"><%= message %></p>
+                                    <% } %>
+                                    <label class="form-label">Email</label>
+                                    <input type="email" name="email" id="email" class="form-control mb-2" autocomplete="off" onblur="validateEmail()" required>
+                                    <p id="emailError" class="text-danger"></p>
+                                    <label class="form-label">Password</label>
+                                    <div class="d-flex form-group">
+                                    <input type="password" name="password" id="password" class="form-control mb-2"   onblur="validatePassword()" required><i class="bi bi-eye-slash" id="togglePassword"></i></div>
+                                    <p id="passwordError" class="text-danger"></p>
+                                    <p class="mt-2">
+                                        <a href="/forgot"> Forgot password?</a>
+                                    </p>
+                                    <button type="submit" class="btn btn-success rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2">
+                                        Login
+                                    </button>
+                                    <p class="mt-2">
+                                        Don't have an account? <a href="/register">Create Now</a>
+                                    </p>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </form>
+                </div>
+                <div class="col-md-6">
+                    <img src="/public/assets/images/The Mood Guide.jpeg" class="img-fluid rounded-start" alt="image">
+                </div>
             </div>
         </div>
-      </div>
-      <div class="col-md-6">
-        <img src="/public/assets/images/The Mood Guide.jpeg" class="img-fluid rounded-start" alt="image">
-      </div>
     </div>
-  </div>
-      
-</div>
-<script>
-   function validateEmail() {
-        const emailInput = document.getElementById('email');
-        const emailError = document.getElementById('emailError');
-        if (!emailInput.value.trim()) {
-            emailError.textContent = 'Email is required';
-        } else if (!/^\S+@\S+\.\S+$/.test(emailInput.value.trim())) {
-            emailError.textContent = 'Invalid email format';
-        } else {
-            emailError.textContent = '';
+    <script>
+
+const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+    togglePassword.addEventListener('click', function() {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        this.classList.toggle('bi-eye');
+    });
+
+        function validateEmail() {
+            const emailInput = document.getElementById('email');
+            const emailError = document.getElementById('emailError');
+            const email = emailInput.value.trim();
+
+            if (!email) {
+                emailError.textContent = 'Email is required';
+            } else if (!/^[a-z0-9._%+-]+@gmail.com$/.test(email)) {
+                emailError.textContent = 'Invalid email format or not a Gmail address';
+            } else {
+                emailError.textContent = '';
+            }
         }
-    }
-    window.addEventListener('load', function() {
-        // Clear email and password fields
+
+        function validatePassword() {
+            const passwordInput = document.getElementById('password');
+            const passwordError = document.getElementById('passwordError');
+            const password = passwordInput.value.trim();
+
+            if (!password) {
+                passwordError.textContent = 'Password is required';
+            } else if (password.length < 6 || password.length > 15) {
+                passwordError.textContent = 'Password must be between 6 and 15 characters';
+            } else if (!/^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9])(?!.*\s).*$/.test(password)) {
+                passwordError.textContent = 'Password must contain at least one uppercase letter, one special character, and one number, and no spaces';
+            } else {
+                passwordError.textContent = '';
+            }
+        }
+
+        function validateForm() {
+            // Perform validation for all fields
+            validateEmail();
+            validatePassword();
+
+            // Check if any error messages are displayed
+            const errorMessages = document.querySelectorAll('.text-danger');
+            for (let i = 0; i < errorMessages.length; i++) {
+                if (errorMessages[i].textContent) {
+                    return false; // Form validation failed
+                }
+            }
+            return true; // Form validation passed
+        }
+
+        const formFields = document.querySelectorAll('.form-control');
+        formFields.forEach(field => {
+            field.addEventListener('focus', function() {
+                const errorElement = document.getElementById(`${field.id}Error`);
+                errorElement.textContent = '';
+            });
+        });
+        // Add this code to clear input fields when the page loads
+        window.onload = function() {
         document.getElementById('email').value = '';
         document.getElementById('password').value = '';
-    });
-    function validatePassword() {
-        const passwordInput = document.getElementById('password');
-        const passwordError = document.getElementById('passwordError');
-        if (!passwordInput.value.trim()) {
-            passwordError.textContent = 'Password is required';
-        } else {
-            passwordError.textContent = '';
-        }
-    }
-</script>
+    };
+    </script>
+   
 <%- include('footer') -%>

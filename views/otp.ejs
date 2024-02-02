@@ -9,7 +9,7 @@
                         <form action="/otp" method="POST" enctype="application/json">
                             <div class="container p-1 form-group">
                                 <h2 class="text-center">Email verification with OTP</h2>
-                                <%if(message){%>
+                                <%if(message!==undefined){%>
                                     <p class="text-danger"><%=message%></p>
                                     <%}%>
                                
@@ -35,6 +35,7 @@
 
                 <div class="mb-4" id="loginBtn">
                     <button type="submit" class="btn btn-primary w-100">Verify OTP</button>
+                    <a href="/">Go back to login page</a>
                     <center>
                         <button id="start-countdown-button" class="btn btn-primary w-100"
                             style="display: none;">Start Countdown</button>

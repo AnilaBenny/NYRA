@@ -214,7 +214,7 @@
                                         </li>
                                         
                                         <li>
-                                            <a href="/" class="btn btn-outline-dark">LogOut </a>
+                                            <a href="/logout" class="btn btn-outline-dark">LogOut </a>
     
                                         </li>
                                     </ul>
@@ -841,6 +841,16 @@
         </div>
     </div>
     <!-- End Banner Section -->
+    <table class="table table-hover">
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Actions</th>
+            
+
+            
+        </tr>
+       
 
     <!-- Start Product Default Slider Section -->
     <div class="product-default-slider-section section-top-gap-100 section-fluid">
@@ -851,7 +861,7 @@
                     <div class="col-12">
                         <div class="section-content-gap">
                             <div class="secton-content">
-                                <h3 class="section-title">the New arrivals</h3>
+                               <h3 class="section-title"> The Product details</h3> <!-- the New arrivals -->
                                 <p>Preorder now to receive exclusive deals & gifts</p>
                             </div>
                         </div>
@@ -859,6 +869,8 @@
                 </div>
             </div>
         </div>
+        
+                    
         <!-- Start Section Content Text Area -->
         <div class="product-wrapper" data-aos="fade-up" data-aos-delay="200">
             <div class="container">
@@ -866,16 +878,19 @@
                     <div class="col-12">
                         <div class="product-slider-default-1row default-slider-nav-arrow">
                             <!-- Slider main container -->
+                            
                             <div class="swiper-container product-default-slider-4grid-1row">
-                                <!-- Additional required wrapper -->
+                               
+                                
                                 <div class="swiper-wrapper">
-                                    <!-- End Product Default Single Item -->
-                                    <!-- Start Product Default Single Item -->
-                                    <div class="product-default-single-item product-color--green swiper-slide">
+                                    <%
+                                if(pro.length > 0) {
+                                for(let i=0; i<pro.length; i++) { %> 
+                                    <div class="product-default-single-item product-color--green swiper-slide" style="width: 270px; margin-right: 30px;">
                                         <div class="image-box">
-                                            <a href="product-details-default.html" class="image-link">
-                                                <img src="/public/assets/images/product/default/home-2/default-9.webp" alt="">
-                                                <img src="/public/assets/images/product/default/home-2/default-10.webp" alt="">
+                                            <a href="/productdetails?id=<%=pro[i]._id %>" class="image-link">
+                                                <img src="/uploads/productImages/<%=pro[i].images[0]%>" alt="">
+                                                <img src="/uploads/productImages/<%=pro[i].images[1]%>" alt="">
                                             </a>
                                             <div class="action-link">
                                                 <div class="action-link-left">
@@ -893,8 +908,8 @@
                                         </div>
                                         <div class="content">
                                             <div class="content-left">
-                                                <h6 class="title"><a href="product-details-default.html">Deyga Lip Balm
-                                </a></h6>
+                                                <h6 class="title"><a href="product-details-default.html"><%=pro[i].name%>
+                                     </a></h6>
                                                 <ul class="review-star">
                                                     <li class="fill"><i class="ion-android-star"></i></li>
                                                     <li class="fill"><i class="ion-android-star"></i></li>
@@ -904,300 +919,17 @@
                                                 </ul>
                                             </div>
                                             <div class="content-right">
-                                                <span class="price">Rs.290.00</span>
+                                                <span class="price">Rs.<%=pro[i].price%></span>
                                             </div>
+                                            
 
                                         </div>
+                                          
                                     </div>
-                                    <!-- End Product Default Single Item -->
-                                    <!-- Start Product Default Single Item -->
-                                    <div class="product-default-single-item product-color--green swiper-slide">
-                                        <div class="image-box">
-                                            <a href="product-details-default.html" class="image-link">
-                                                <img src="/public/assets/images/product/default/home-2/Charc_400x.webp" alt="">
-                                                <img src="/public/assets/images/product/default/home-2/Charc_600x.webp" alt="">
-                                            </a>
-                                            <div class="action-link">
-                                                <div class="action-link-left">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalAddcart">Add to Cart</a>
-                                                </div>
-                                                <div class="action-link-right">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalQuickview"><i
-                                                            class="icon-magnifier"></i></a>
-                                                    <a href="wishlist.html"><i class="icon-heart"></i></a>
-                                                    <a href="compare.html"><i class="icon-shuffle"></i></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="content">
-                                            <div class="content-left">
-                                                <h6 class="title"><a href="product-details-default.html">Vilvah Charcol Soap
-                                                        </a></h6>
-                                                <ul class="review-star">
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="empty"><i class="ion-android-star"></i></li>
-                                                </ul>
-                                            </div>
-                                            <div class="content-right">
-                                                <span class="price">Rs.395.00</span>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <!-- End Product Default Single Item -->
-                                    <!-- Start Product Default Single Item -->
-                                    <div class="product-default-single-item product-color--green swiper-slide">
-                                        <div class="image-box">
-                                            <a href="product-details-default.html" class="image-link">
-                                                <img src="/public/assets/images/product/default/home-2/aloe-1.webp" alt="">
-                                                <img src="/public/assets/images/product/default/home-2/aloe-2.webp" alt="">
-                                            </a>
-                                            <div class="action-link">
-                                                <div class="action-link-left">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalAddcart">Add to Cart</a>
-                                                </div>
-                                                <div class="action-link-right">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalQuickview"><i
-                                                            class="icon-magnifier"></i></a>
-                                                    <a href="wishlist.html"><i class="icon-heart"></i></a>
-                                                    <a href="compare.html"><i class="icon-shuffle"></i></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="content">
-                                            <div class="content-left">
-                                                <h6 class="title"><a href="product-details-default.html">Deyga Aloevera Gel
-                                                        </a></h6>
-                                                <ul class="review-star">
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="empty"><i class="ion-android-star"></i></li>
-                                                </ul>
-                                            </div>
-                                            <div class="content-right">
-                                                <span class="price">Rs.495.00</span>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <!-- End Product Default Single Item -->
-                                    <!-- Start Product Default Single Item -->
-                                    <div class="product-default-single-item product-color--green swiper-slide">
-                                        <div class="image-box">
-                                            <a href="product-details-default.html" class="image-link">
-                                                <img src="/public/assets/images/product/default/home-2/soap-1.webp" alt="">
-                                                <img src="/public/assets/images/product/default/home-2/soap-2.webp" alt="">
-                                            </a>
-                                            <div class="action-link">
-                                                <div class="action-link-left">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalAddcart">Add to Cart</a>
-                                                </div>
-                                                <div class="action-link-right">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalQuickview"><i
-                                                            class="icon-magnifier"></i></a>
-                                                    <a href="wishlist.html"><i class="icon-heart"></i></a>
-                                                    <a href="compare.html"><i class="icon-shuffle"></i></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="content">
-                                            <div class="content-left">
-                                                <h6 class="title"><a href="product-details-default.html">Coconut milk soap
-                                                        </a></h6>
-                                                <ul class="review-star">
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="empty"><i class="ion-android-star"></i></li>
-                                                </ul>
-                                            </div>
-                                            <div class="content-right">
-                                                <span class="price">Rs.399</span>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <!-- End Product Default Single Item -->
-                                    <!-- Start Product Default Single Item -->
-                                    <div class="product-default-single-item product-color--green swiper-slide">
-                                        <div class="image-box">
-                                            <a href="product-details-default.html" class="image-link">
-                                                <img style="height: 348px;" src="/public/assets/images/product/default/home-2/milk.jpeg" alt="">
-                                                <img style="height: 348px;" src="/public/assets/images/product/default/home-2/milk-2.jpeg" alt="">
-                                            </a>
-                                            <div class="tag">
-                                                <span>sale</span>
-                                            </div>
-                                            <div class="action-link">
-                                                <div class="action-link-left">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalAddcart">Add to Cart</a>
-                                                </div>
-                                                <div class="action-link-right">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalQuickview"><i
-                                                            class="icon-magnifier"></i></a>
-                                                    <a href="wishlist.html"><i class="icon-heart"></i></a>
-                                                    <a href="compare.html"><i class="icon-shuffle"></i></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="content">
-                                            <div class="content-left">
-                                                <h6 class="title"><a href="product-details-default.html">Vilvah
-                                                        Milk Facial Toner</a></h6>
-                                                <ul class="review-star">
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="empty"><i class="ion-android-star"></i></li>
-                                                </ul>
-                                            </div>
-                                            <div class="content-right">
-                                                <span class="price">Rs.1999</span>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <!-- End Product Default Single Item -->
-                                    <!-- Start Product Default Single Item -->
-                                    <div class="product-default-single-item product-color--green swiper-slide">
-                                        <div class="image-box">
-                                            <a href="product-details-default.html" class="image-link">
-                                                <img style="height: 348px;"src="/public/assets/images/product/default/home-2/product-1.jpeg" alt="">
-                                                <img style="height: 348px;" src="/public/assets/images/product/default/home-2/product-2.jpeg" alt="">
-                                            </a>
-                                            <div class="tag">
-                                                <span>sale</span>
-                                            </div>
-                                            <div class="action-link">
-                                                <div class="action-link-left">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalAddcart">Add to Cart</a>
-                                                </div>
-                                                <div class="action-link-right">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalQuickview"><i
-                                                            class="icon-magnifier"></i></a>
-                                                    <a href="wishlist.html"><i class="icon-heart"></i></a>
-                                                    <a href="compare.html"><i class="icon-shuffle"></i></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="content">
-                                            <div class="content-left">
-                                                <h6 class="title"><a href="product-details-default.html">Vilvah Melt n milk sunscreen
-                                                        </a></h6>
-                                                <ul class="review-star">
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="empty"><i class="ion-android-star"></i></li>
-                                                </ul>
-                                            </div>
-                                            <div class="content-right">
-                                                <span class="price"><del>Rs.999</del> Rs.799</span>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <!-- End Product Default Single Item -->
-                                    <!-- Start Product Default Single Item -->
-                                    <div class="product-default-single-item product-color--green swiper-slide">
-                                        <div class="image-box">
-                                            <a href="product-details-default.html" class="image-link">
-                                                <img style="height: 348px;" src="/public/assets/images/product/default/home-2/default-5.jpg" alt="">
-                                                <img style="height: 348px;" src="/public/assets/images/product/default/home-2/default-6.jpg" alt="">
-                                            </a>
-                                            <div class="tag">
-                                                <span>sale</span>
-                                            </div>
-                                            <div class="action-link">
-                                                <div class="action-link-left">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalAddcart">Add to Cart</a>
-                                                </div>
-                                                <div class="action-link-right">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalQuickview"><i
-                                                            class="icon-magnifier"></i></a>
-                                                    <a href="wishlist.html"><i class="icon-heart"></i></a>
-                                                    <a href="compare.html"><i class="icon-shuffle"></i></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="content">
-                                            <div class="content-left">
-                                                <h6 class="title"><a href="product-details-default.html">Beu Face Cream
-                                                        </a></h6>
-                                                <ul class="review-star">
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="empty"><i class="ion-android-star"></i></li>
-                                                </ul>
-                                            </div>
-                                            <div class="content-right">
-                                                <span class="price"><del>Rs.700</del> Rs.600</span>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <!-- End Product Default Single Item -->
-                                    <!-- Start Product Default Single Item -->
-                                    <div class="product-default-single-item product-color--green swiper-slide">
-                                        <div class="image-box">
-                                            <a href="product-details-default.html" class="image-link">
-                                                <img style="height: 348px;" src="/public/assets/images/product/default/home-2/default-7.jpg" alt="">
-                                                <img style="height: 348px;" src="/public/assets/images/product/default/home-2/default-8.jpg" alt="">
-                                            </a>
-                                            <div class="action-link">
-                                                <div class="action-link-left">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalAddcart">Add to Cart</a>
-                                                </div>
-                                                <div class="action-link-right">
-                                                    <a href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#modalQuickview"><i
-                                                            class="icon-magnifier"></i></a>
-                                                    <a href="wishlist.html"><i class="icon-heart"></i></a>
-                                                    <a href="compare.html"><i class="icon-shuffle"></i></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="content">
-                                            <div class="content-left">
-                                                <h6 class="title"><a href="product-details-default.html">B Lip tint
-                                                        </a></h6>
-                                                <ul class="review-star">
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                                    <li class="empty"><i class="ion-android-star"></i></li>
-                                                </ul>
-                                            </div>
-                                            <div class="content-right">
-                                                <span class="price">Rs.745</span>
-                                            </div>
-
-                                        </div>
-                                    </div> <!-- End Product Default Single Item -->
+                                    <%}}%>
+                                  
+                                    
+                                    
                                 </div>
                             </div>
                             <!-- If we need navigation buttons -->

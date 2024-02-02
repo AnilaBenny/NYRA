@@ -1,65 +1,103 @@
-const adminModel=require('../models/adminModel');
+const adminModel = require('../models/adminModel');
+const userModel = require('../models/userModels');
 const bcrypt = require('bcrypt');
 
-//admin login (get)
-const adminLogin=async(req,res)=>{
-    try{
-        res.render('admin-login.ejs');
+// Admin login (get)
+let adminLogin = async (req, res) => {
+    try {
+        res.render('admin-login', { err: null });
+    } catch (error) {
+        console.error("Error in adminLogin:", error);
+        
     }
-    catch(error){
+};
+
+// Admin login (post)
+let adminPost = async (req, res) => {
+    try {
+        const { email, password} = req.body;
+        console.log(email, password);
+  
+        // Find admin by email
+        const adminExist = await adminModel.findOne({
+            adminEmail: email,
+          });
+        console.log(adminExist);
+
+        if (adminExist) {
+            // Compare passwords
+           
+            if (password===adminExist.adminPassword) {
+                // If password is valid, set session and redirect to admin panel
+                req.session.admin = true;
+                return res.redirect("/admin/adminpanel");
+            } else {
+                // If password is invalid, return error
+                return res.render("admin-login", { err: "Invalid email or password" });
+            }
+        } else {
+            // If admin does not exist, return error
+            return res.render("admin-login", { err: "Invalid email or password" });
+        }
+    } catch (error) {
+        console.error("Error during login:", error);
+      
+    }
+};
+
+// Admin logout
+let adminLogout = (req, res) => {
+    req.session.admin = false;
+    console.log("Session destroyed");
+    res.redirect("/admin");
+};
+
+// Admin panel (get)
+const loadPanel = async (req, res) => {
+    try {
+        res.render('adminpanel.ejs');
+    } catch (error) {
+        console.error(error);
+     
+    }
+};
+
+const loadusermanagement = async (req, res) => {
+    try {
+        const userdetails = await userModel.find();
+        console.log(userdetails)
+        res.render('user-management', { users: userdetails });
+    } catch (error) {
         console.log(error.message);
     }
 };
 
-// //hash admin password
-// const registerAdmin = async (email, password) => {
-//     const hashedPassword = await bcrypt.hash(password, 10);
-//     await adminModel.create({ email, password: hashedPassword });
-// };
-
-
-//admin login(post) 
-const adminPost = async (req, res) => {
+let userblock = async (req, res) => {
     try {
-        const { email, password } = req.body;
-
-        // Find admin by email
-        const adminData = await adminModel.findOne({ email });
-        console.log(adminData.email)
-        if (adminData) {
-            // Compare passwords after hashing
-            const isPasswordValid = await bcrypt.compare(password, adminData.password);
-
-            if (isPasswordValid) {
-                // Redirect to the admin panel if credentials are valid
-                res.redirect('/adminpanel');
-            } else {
-                // Password is invalid
-                res.render('admin-login', { message: 'Invalid email or password!' });
-            }
-        } else {
-            // No admin found with the given email
-            res.render('admin-login', { message: 'Invalid email or password!!!' });
+        const { id } = req.body;
+        const userData = await userModel.findById(id);
+        if(userData.isBlocked){
+            await userModel.findByIdAndUpdate({_id:id},{$set:{ isBlocked:false}});
+            await userData.save(); // Save the updated user data
+            res.status(200).json({ status: true, users: userData });
         }
-    } catch (error) {
-        console.error(error.message);
-        res.render('admin-login', { message: 'An error occurred during login!' });
-    }
-};
+        else{
+            await userModel.findByIdAndUpdate({_id:id},{$set:{ isBlocked:true}});
+            await userData.save(); // Save the updated user data
+            res.status(201).json({ status: true, users: userData });
+        } 
+        } 
+     catch (error) {
+        console.error(error);
+        res.status(500).json({ status: false, message: 'Internal server error' });
+    }};
 
-//admin pannel (get)
-const loadPanel=async(req,res)=>{
-    try{
-        res.render('adminpanel.ejs');
-    }
-    catch(error){
-        console.log(error);
-    }
 
-};
-
-module.exports={
+module.exports = {
     adminLogin,
     adminPost,
-    loadPanel
-}
+    loadPanel,
+    adminLogout,
+    loadusermanagement,
+    userblock
+};

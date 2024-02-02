@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const { check, validationResult } = require('express-validator');
 const nodemailer = require("nodemailer");
 const randomstring = require('randomstring');
+const ProductModel=require('../models/productModel');
+const categoryModel=require('../models/categoryModel');
 
 // const Email = process.env.Email;
 // const Pass = process.env.Pass;
@@ -29,22 +31,47 @@ const securePassword = async (password) => {
     }
 };
 
-//load home
-const enterHome = async (req, res) => {
-    try {
-        res.render('home.ejs');
-    } catch (error) {
-        console.log(error.message);
+
+//load home 
+let enterHome = async (req, res) => {
+  try {
+
+    let products= await ProductModel.find({});
+    
+    const category = await categoryModel.find({});
+
+    if (req.session.email) {
+      let userData = await userModel.findOne({email: req.session.email})
+
+        res.render("home", {
+        
+          pro:products,
+          category
+        });
+      } 
+     else {
+    res.redirect('/');
     }
+  } catch (error) {
+    console.error(error.message);
+   
+  }
 };
+
+
+
+
 
 
 //load login page
 const loadLoginpage = async (req, res) => {
     try {
+      if (req.session.data) {
+        req.session.data={};
+     } 
         res.render('login.ejs',{message:null});
     } catch (error) {
-        console.log(error.message);
+        console.log('loadloginpage',error.message);
     }
 };
 
@@ -52,11 +79,24 @@ const loadLoginpage = async (req, res) => {
 //load register page
 const loadregisterpage = async (req, res) => {
     try {
-        res.render('register', { errors, message: null });
+      // let data = {
+      //   name: "",
+      //   email: "",
+      //   mobile: "",
+      //   password: "",
+      // };
+      if (req.session.data) {
+         req.session.data={};
+      } 
+    
+        res.render('register', { errors:null,message:null});
+    
+        
     } catch (error) {
-        console.log(error.message);
+        console.log('loadregister',error.message);
     }
 };
+
 
 
 //forgot password
@@ -76,7 +116,8 @@ const insertUser=async(req,res)=>{
   
   try{
     const { name, email, mobile, password } = req.body;
-
+    req.session.data = {};
+data={name,email,mobile,password};
         // Validate request body using express-validator
         const validators = [
           check('name')
@@ -166,23 +207,48 @@ const insertUser=async(req,res)=>{
 
         const errors = validationResult(req).array();
         console.log(errors);
+       
         if (errors.length>0)
         {
           // console.log(errors);
-          res.render('register',{errors})
+          res.render('register',{errors:errors,message:null})
         }
         else{
          
-          
           const data={name,email,mobile,password};
           req.session.data=data;
           console.log(req.session.data);
+          const existingUser = await userModel.findOne({
+            $or: [{
+                email: email,
+              },
+              {
+                mobile:mobile,
+              },
+            ],
+          });
+          //console.log(existingUser);
+          if(existingUser){
+            if (existingUser.email === email && existingUser.mobile === mobile) {
+              res.render('register',{errors:null,message:'email and mobile number is already registered'})
+            } else if (existingUser.email === email) {
+              res.render('register',{errors:null,message:"Email is already registered"});
+            }
+            //req.body in string so have to convert existing data to string
+            //  else if(existingUser.phone+"" === phone+"") {
+            else if (existingUser.mobile === mobile) {
+              res.render('register',{errors:null,message:"Mobile number is already registered"});
+          }
+          }else{
+
+
           const otp= randomstring.generate({
             length: 6,
             charset: 'numeric',
           });
           req.session.otp=otp;
-          // console.log(otp);
+           console.log(otp);
+
 
           // Send OTP via email
             const mailOptions = await{
@@ -200,12 +266,13 @@ const insertUser=async(req,res)=>{
                 }
             });
           res.redirect('/otp');
+          }
         }
         
 
   }
   catch(error){
-    console.log(error.message)
+    console.log('insert user',error.message)
   }
 }
 
@@ -223,20 +290,22 @@ const postVerifyOtp = async (req, res, next) => {
                       email:req.session.data.email,
                       mobile:req.session.data.mobile,
                     password: passwordHash ,
-                    is_admin:false,
+                    isBlocked:false,
                   is_verified:true});
+                  
                       const userData = await newUser.save();
                       
                       if (userData) {
+                     
                         return res.redirect('/');
                       }
                     } 
                     }}
-                    else {
-                      return res.render('otp', { message: 'Your registration has failed!!!' });
+                    else{
+                      res.render('otp', { message: 'Your registration has failed!!!' });
                     }}
      catch (error) {
-        console.log(error.message);
+        console.log('postverify otp',error.message);
         res.redirect("/otp");
     }
 };
@@ -254,6 +323,7 @@ const loadOtp = async (req, res) => {
 const verifyUser = async (req, res) => {
     try {
       const {email,password}=req.body;
+      // req.session.logout=email
       if (!(email.includes('@gmail.com') && email.trim() === email)) {
         const errMsg = 'Email is not a valid Gmail address';
         return res.render('login', { message: errMsg });
@@ -263,11 +333,12 @@ const verifyUser = async (req, res) => {
     
       else{
         const userData = await userModel.findOne({ email: req.body.email});
+        
         //console.log(userData);
         if (userData) {
           const isPasswordValid = await bcrypt.compare(req.body.password, userData.password);
-          if (isPasswordValid && userData.is_verified && req.body.email===userData.email) {
-            
+          if (isPasswordValid && userData.is_verified && req.body.email===userData.email && !userData.isBlocked ) {
+            req.session.email=userData.email;
             res.redirect('/home');
           } else {
             res.render('login', { message: "Login Failed!!!, please verify your email and password" });
@@ -281,6 +352,21 @@ const verifyUser = async (req, res) => {
     }
 };
 
+//logout
+let logout = (req, res) => {
+  req.session.email = false;
+  res.redirect("/");
+};
+
+
+
+   
+
+
+
+
+
+
 module.exports = {
     enterHome,
     loadLoginpage,
@@ -289,7 +375,8 @@ module.exports = {
     insertUser,
     verifyUser,
     loadOtp,
-    postVerifyOtp
+    postVerifyOtp,
+    logout
 };
 
 

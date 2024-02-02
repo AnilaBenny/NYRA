@@ -1,4 +1,4 @@
-<%- include('header') -%>
+<%- include('adminheader') -%>
 <body style="background:url(/public/assets/images/banner/loginbanner.jpg);background-repeat: no-repeat;background-size: cover;">
 
 
@@ -11,31 +11,41 @@
       <div class="col-md-6">
         <div class="card-body">
             <div>
-                <form action="/admin" method="post" >
-                   
-            
-                    <div class="container p-4 form-group">
-                        <h2 class="text-center">Admin</h2>
-                        
-            
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" placeholder="Enter Your email address" class="form-control mb-2" required>
-            
-                        <label class="form-label"> Password</label>
-                
-                        <input type="password" name="password" placeholder="Enter password" class="form-control mb-2" required>
-                        
-                        
-                        <% if (typeof message !== 'undefined') { %>
-                          <p class="text-danger"><%= message %></p>
-                      <% } %>
-                        <button class="btn btn-success rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2">
-                            Login
-                        </button>
-            
-            
+              <h2 class="card-title mb-4"> Admin Log in</h4>
+
+              <!-- Add this section to display error messages -->
+              <% if (err ) { %>
+                  <center><p id="error-message" class="text-danger mb-2"><%= err %></p></center>
+              <% } %>
+              <form action="/admin" method="post" onsubmit="return validateForm()" enctype="application/x-www-form-urlencoded">
+                <div class="mb-3">
+                    <input class="form-control" name="email" id="adminEmail" placeholder="Enter your email"
+                        type="text" >
+                    <span id="emailMessage" class="text-danger"></span>
+                </div> <!-- form-group// -->
+
+
+                <div class="mb-3">
+                    <div class="password-input">
+                        <input class="form-control" name="password" id="adminPassword"
+                            placeholder="Enter your Password" type="password" >
+                        <span class="password-toggle-button" onclick="togglePasswordVisibilityAdmin(this)">
+                            <i class="bi bi-eye-slash"></i>
+                        </span>
+                        <span id="passwordMessage" class="text-danger"></span>
                     </div>
-                </form>
+                </div>
+
+
+
+
+
+               
+                <div class="mb-4">
+                    <button type="submit" class="btn btn-primary w-100" name="login"> Login </button>
+                </div>
+                <!-- form-group// -->
+            </form>
             </div>
         </div>
       </div>
@@ -46,5 +56,60 @@
   </div>
       
 </div>
+<script>
+function togglePasswordVisibilityAdmin(button) {
+  const passwordInput = button.parentElement.querySelector('input[name="password"]');
+  if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      button.innerHTML = '<i class="bi bi-eye"></i>'; // Show the "eye-slash" icon
+  } else {
+      passwordInput.type = "password";
+      button.innerHTML = '<i class="bi bi-eye-slash"></i>'; // Show the "eye" icon
+  }
+}
 
+
+
+
+
+//form validation
+function validateForm() {
+  // Get all input fields
+
+  const emailInput = document.getElementById('adminEmail');
+  const passwordInput = document.getElementById('adminPassword');
+
+  // Get all validation messages
+
+  const emailMessage = document.getElementById('emailMessage');
+  const passwordMessage = document.getElementById('passwordMessage');
+
+  // Clear all validation messages
+
+  emailMessage.textContent = '';
+  passwordMessage.textContent = '';
+
+
+
+  // Validate the email field
+  if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(emailInput.value)) {
+      emailMessage.textContent = 'Please enter a valid email address.';
+  }
+
+  // Validate the password field
+  if (passwordInput.value.length < 6) {
+      passwordMessage.textContent = 'Please enter a password of 6 characters.';
+  }
+
+  // If all fields are valid, return true
+  if (emailMessage.textContent === '' &&
+      passwordMessage.textContent === ''
+  ) {
+      return true;
+  }
+
+  // Otherwise, return false
+  return false;
+}
+</script>
 <%- include('footer') -%>
