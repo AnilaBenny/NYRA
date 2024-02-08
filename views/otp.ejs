@@ -24,7 +24,7 @@
                 <div class="mb-3" id="otpField">
                     <div class="mobile-text mb-2 text-center">Enter the code that we just send on your email <b
                             class="text-danger"></b></div>
-                    <input class="form-control" class="w-25" required="" type="text" id='otp' name="otp"
+                    <input class="form-control" class="w-25"  type="text" id='otp' name="otp"
                         placeholder="Enter OTP">
                 </div>
 
@@ -43,11 +43,11 @@
                             style="display: none;">Reset Countdown</button>
 
                         <div id="countdown-timer" class="text-danger mt-3 md-3">0<span
-                                id="minute">0</span>:<span id="seconds">59</span></div>
+                                id="minute">0</span>:<span id="seconds">29</span></div>
 
-                        <button class="btn btn-primary w-75 mt-2" onclick="resendotp()" id="resend-otp-button" style="display: none;">
-                            <h6 class="text-light">Resend OTP</h6>
-                        </button>
+                
+                            <a href="#" class="btn btn-primary w-75 mt-2" onclick="resendOtp()" id="resend-otp-button" style="display: none;">Resend OTP</a>
+
                     </center>
                 </div>
 
@@ -66,47 +66,56 @@
     </div>
 </section>
 
-<script>
-    let interval = null
+    <script>
+        let interval = null;
 
-    function mainCounter(resend) {
-        let seconds = document.getElementById('seconds')
-        let counter = (resend) ? 60 : 59
-        let minute = 0
-        interval = setInterval(() => {
-            counter -= 1
-            if (counter < 10 && counter >= 0) {
-                counter = "0" + counter
-            }
-            if (counter === -1) {
-                counter = 59
-                minute -= 1
-                document.getElementById("minute").innerHTML = minute
-            }
+        function mainCounter(resend) {
+            let seconds = document.getElementById('seconds');
+            let counter = (resend) ? 30 : 29;
+            let minute = 0;
+            interval = setInterval(() => {
+                counter -= 1;
+                if (counter < 10 && counter >= 0) {
+                    counter = "0" + counter;
+                }
+                if (counter === -1) {
+                    counter = 29;
+                    minute -= 1;
+                    document.getElementById("minute").innerHTML = minute;
+                }
 
-            seconds.innerHTML = counter
+                seconds.innerHTML = counter;
 
-            if (minute === -1) {
-                clearInterval(interval);
-                document.getElementById('countdown-timer').innerHTML = " "
-                // Display the Resend OTP button after the countdown ends
-                document.getElementById('resend-otp-button').style.display = 'block';
-            }
-        }, 1000)
-    }
-    mainCounter(false)
+                if (minute === -1) {
+                    clearInterval(interval);
+                    document.getElementById('countdown-timer').innerHTML = " ";
+                    document.getElementById('resend-otp-button').style.display = 'block';
+                }
+            }, 1000);
+        }
+        mainCounter(false);
 
+        async function resendOtp() {
+    try {
+        const response = await fetch('/resendOtp', { method: 'POST' });
+        const responseData = await response.json(); // Parse response JSON
 
-    function resendotp() {
-        fetch('/resendOtp').then((response) => {
-
-            clearInterval(interval)
+        if (responseData.status) {
+            clearInterval(interval);
             document.getElementById('resend-otp-button').style.display = 'none';
-            document.getElementById('countdown-timer').innerHTML = "0<span id='minute'>0</span>:<span id='seconds'>59</span>";
-            mainCounter(true)
-            // document.getElementById('resend-otp-button').style.display = 'none';
-        })
+            document.getElementById('countdown-timer').innerHTML = "0<span id='minute'>0</span>:<span id='seconds'>29</span>";
+            mainCounter(true);
+        } else {
+            throw new Error(responseData.message || 'Failed to resend OTP');
+        }
+    } catch (error) {
+        console.error('Error resending OTP:', error);
+       
     }
-</script> 
+}
+
+        
+
+    </script> 
 
 <%- include('footer') -%>

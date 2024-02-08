@@ -71,7 +71,6 @@ const insertCategory = async (req, res) => {
     // Validation
     const validators=[
       check('name')
-    
       .exists({ checkFalsy: true })
       .withMessage('Name is required').bail()
       .isLength({ min:3 })
@@ -106,10 +105,22 @@ const insertCategory = async (req, res) => {
         if (errors.length>0)
         {
           // console.log(errors);
-          res.render('category',{cate:null,errors,message: null})
+          const categorydetails = await categoryModel.find();
+          res.render('category',{cate:categorydetails,errors,message: null})
         }
       
     else{
+      const existingcate = await categoryModel.findOne({
+        
+            name: name.toLowerCase(),
+        
+      });
+      //console.log(existingUser);
+      if(existingcate ){
+        const categorydetails = await categoryModel.find();
+          res.render('category',{cate:categorydetails,errors:null,message:'name is already entered'})
+      }
+      else{
     const category = new categoryModel({
       name,
       description
@@ -123,7 +134,7 @@ const insertCategory = async (req, res) => {
     }else{
  
         res.render("category", { cate:categorydetails,errors:null,message: "Failed to insert category" });
-    }}
+    }}}
   } catch (error) {
     console.error(error.message);
   }

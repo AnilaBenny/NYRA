@@ -1,58 +1,74 @@
-
-
-
 <%- include('header') -%>
 <body style="background:url(/public/assets/images/banner/loginbanner.jpg);background-repeat: no-repeat;background-size: cover;">
 
-
-
-<div class="container p-5" >
-
-<div class="card mb-3 p-5 " id="card-login">
-    <div class="row">
-      
-      <div class="col-md-6">
-        <div class="card-body">
-            <div>
-                <form action="/login" method="post">
-                    <% if (typeof message !== 'undefined') { %>
-                        <p class="text-success"><%= message %></p>
-                    <% } %>
-            
-                    <div class="container p-4 form-group">
-                        <h2 class="text-center">Forgot Password?</h2>
-                      
-            
-                        <label class="form-label">Enter your Email to get OTP</label>
-                        <input type="email" name="email" class="form-control mb-2" required>
-
-                        <label class="form-label">Enter OTP</label>
-                        <input type="text" name="otp"  class="form-control mb-2" required>
-            
-                        <label class="form-label"> Enter New Password</label>
+<div class="container p-5">
+    <div class="card mb-3 p-3" id="card-login">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card-body">
+                    <div>
+                        <form id="forgotPasswordForm" method="post">
+                            
                 
-                        <input type="password" name="password"  class="form-control mb-2" required>
-                        
-                       
-                        <button class="btn btn-success rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2">
-                            Submit
-                        </button>
-                        
-                            <a href="/login" class="btn btn-success rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2">back</a>
-                        
-                       
-            
+                            <div class="container p-4 form-group">
+                                <h2 class="text-center">Forgot Password?</h2>
+                                <% if (typeof message !== 'undefined') { %>
+                                  <p class="text-danger text-center"><%= message %></p>
+                              <% } %>
+                                <label class="form-label">Enter your Email to get OTP</label>
+                                <input type="email" id="email" name="email" class="form-control mb-2" onblur="validateEmail()">
+                                <div id="emailError" class="text-danger"></div>
+                                
+                                <button type="submit" class="btn btn-success rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2">Send OTP</button>
+                                <a href="/" class="btn btn-success rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2">Back</a>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <img src="/public/assets/images/The Mood Guide.jpeg" class="img-fluid rounded-start" alt="image">
             </div>
         </div>
-      </div>
-      <div class="col-md-6">
-        <img src="/public/assets/images/The Mood Guide.jpeg" class="img-fluid rounded-start" alt="image">
-      </div>
     </div>
-  </div>
-      
 </div>
 
 <%- include('footer') -%>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('forgotPasswordForm');
+        const emailInput = document.getElementById('email');
+        const emailError = document.getElementById('emailError');
+
+        form.addEventListener('submit', function(event) {
+            if (!validateEmail()) {
+                event.preventDefault(); // Prevent form submission
+            }
+        });
+
+        emailInput.addEventListener('blur', function() {
+            validateEmail();
+        });
+
+        function validateInput(inputId, pattern, errorId, errorMessage) {
+            const inputValue = document.getElementById(inputId).value.trim();
+            const errorElement = document.getElementById(errorId);
+
+            if (inputValue === '') {
+                errorElement.innerText = errorMessage + ' is required.';
+                return false;
+            } else if (!pattern.test(inputValue)) {
+                errorElement.innerText = 'Please enter a valid ' + errorMessage.toLowerCase() + '.';
+                return false;
+            } else {
+                errorElement.innerText = '';
+                return true;
+            }
+        }
+
+        function validateEmail() {
+            return validateInput('email', /^[^\s@]+@gmail\.com$/, 'emailError', 'Email');
+        }
+    });
+</script>

@@ -5,6 +5,9 @@ const nodemailer = require("nodemailer");
 const randomstring = require('randomstring');
 const ProductModel=require('../models/productModel');
 const categoryModel=require('../models/categoryModel');
+const newOtp=require('../models/otpModel');
+const otpModel = require('../models/otpModel');
+const addressModel=require('../models/addressModel');
 
 // const Email = process.env.Email;
 // const Pass = process.env.Pass;
@@ -34,33 +37,39 @@ const securePassword = async (password) => {
 
 //load home 
 let enterHome = async (req, res) => {
-  try {
-
-    let products= await ProductModel.find({});
+ 
+    try {
     
-    const category = await categoryModel.find({});
+        if (req.session.email) {
+            
+            const userData = await userModel.findOne({ email: req.session.email });
 
-    if (req.session.email) {
-      let userData = await userModel.findOne({email: req.session.email})
+            // Check if user is not blocked
+            if (userData && !userData.isBlocked) {
+                // Find products and categories
+                const products = await ProductModel.find({});
+                const categories = await categoryModel.find({});
 
-        res.render("home", {
-        
-          pro:products,
-          category
-        });
-      } 
-     else {
-    res.redirect('/');
+                // Render home page
+                return res.render("home", { pro: products, category: categories });
+            } else {
+                
+                req.session.destroy((err) => {
+                    if (err) {
+                        console.error('Error destroying session:', err);
+                    }
+                    res.redirect('/');
+                });
+            }
+        } else {
+            
+            res.redirect('/');
+        }
+    } catch (error) {
+        console.error('Error in enterHome:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-  } catch (error) {
-    console.error(error.message);
-   
-  }
 };
-
-
-
-
 
 
 //load login page
@@ -98,17 +107,15 @@ const loadregisterpage = async (req, res) => {
 };
 
 
-
 //forgot password
-
 const forgotpassword = async (req, res) => {
     try {
-        res.render('forgot.ejs');
+        res.render('forgot.ejs',{message:null});
+        
     } catch (error) {
         console.log(error.message);
     }
 };
-
 
 
 //insert user & send the otp
@@ -116,8 +123,9 @@ const insertUser=async(req,res)=>{
   
   try{
     const { name, email, mobile, password } = req.body;
-    req.session.data = {};
-data={name,email,mobile,password};
+   
+
+
         // Validate request body using express-validator
         const validators = [
           check('name')
@@ -215,9 +223,7 @@ data={name,email,mobile,password};
         }
         else{
          
-          const data={name,email,mobile,password};
-          req.session.data=data;
-          console.log(req.session.data);
+        
           const existingUser = await userModel.findOne({
             $or: [{
                 email: email,
@@ -240,32 +246,16 @@ data={name,email,mobile,password};
               res.render('register',{errors:null,message:"Mobile number is already registered"});
           }
           }else{
-
-
-          const otp= randomstring.generate({
-            length: 6,
-            charset: 'numeric',
-          });
-          req.session.otp=otp;
-           console.log(otp);
-
-
-          // Send OTP via email
-            const mailOptions = await{
-                from: 'nyraproduct@gmail.com',
-                to: email,
-                subject: 'Your OTP Code for verification',
-                text: `Your OTP code is: ${otp}`,
-            };
-
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.error('Error sending email:', error);
-                } else {
-                    console.log('Email sent:', info.response);
-                }
-            });
-          res.redirect('/otp');
+            const data={name,email,mobile,password};
+          
+            req.session.data=data;
+            console.log(req.session.data);
+            
+            const otp = sentOtp(req,req.session.data.email);
+            if (otp) {
+              res.redirect('/otp');
+            }
+      
           }
         }
         
@@ -281,9 +271,11 @@ const postVerifyOtp = async (req, res, next) => {
     try {
     
           const { otp } = req.body;
-          if (req.session.otp != null) {
-                  if (!isNaN(otp)) {
-                    if (otp === req.session.otp) {
+          const dbOtp= await otpModel.findOne({ otp});
+          console.log('dbotp',dbOtp.otp);
+         
+                 
+                    if (otp === dbOtp.otp) {
                       const passwordHash = await securePassword(req.session.data.password);
                       const newUser = new userModel({
                         name:req.session.data.name,
@@ -300,7 +292,7 @@ const postVerifyOtp = async (req, res, next) => {
                         return res.redirect('/');
                       }
                     } 
-                    }}
+                    
                     else{
                       res.render('otp', { message: 'Your registration has failed!!!' });
                     }}
@@ -308,18 +300,21 @@ const postVerifyOtp = async (req, res, next) => {
         console.log('postverify otp',error.message);
         res.redirect("/otp");
     }
-};
+  };
 
 //get otp page
 const loadOtp = async (req, res) => {
     try {
       res.render('otp',{message:null});
+      // await otpNull(req, res);
+    
     } catch (error) {
         console.log(error.message);
     }
 };
 
 //verify user
+
 const verifyUser = async (req, res) => {
     try {
       const {email,password}=req.body;
@@ -328,22 +323,28 @@ const verifyUser = async (req, res) => {
         const errMsg = 'Email is not a valid Gmail address';
         return res.render('login', { message: errMsg });
     }
-    
-        
-    
       else{
         const userData = await userModel.findOne({ email: req.body.email});
         
         //console.log(userData);
         if (userData) {
-          const isPasswordValid = await bcrypt.compare(req.body.password, userData.password);
-          if (isPasswordValid && userData.is_verified && req.body.email===userData.email && !userData.isBlocked ) {
+          
+          if(userData.isBlocked){
+            res.render('login', { message: "User is blocked" });
+          }
+            const isPasswordValid = await bcrypt.compare(req.body.password, userData.password);
+            if(isPasswordValid && userData.is_verified && req.body.email===userData.email && !userData.isBlocked ) {
             req.session.email=userData.email;
             res.redirect('/home');
-          } else {
+           
+        }else {
+          
+          return res.render('login', { message: "Login Failed!!! Please verify your email and password" });
+      } }
+          else{
             res.render('login', { message: "Login Failed!!!, please verify your email and password" });
           }
-      }
+      
         
         }
       
@@ -359,12 +360,335 @@ let logout = (req, res) => {
 };
 
 
+//resend otp
+
+
+//sent otp here
+async function sentOtp(req,email)
+{
+  const otp= randomstring.generate({
+    length: 6,
+    charset: 'numeric',
+  });
+
+  console.log(otp);
+
+  const updatedOtp = await otpModel.findOneAndUpdate(
+    { email: email},
+    { otp: otp },
+    { new: true,upsert: true }
+);
+
+  if(updatedOtp){
+  // Send OTP via email
+    const mailOptions = {
+        from: 'nyraproduct@gmail.com',
+        to: email,
+        subject: 'Your OTP Code for verification',
+        text: `Your OTP code is: ${otp}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Error sending email:', error);
+        } 
+        else {
+            console.log('Email sent:', info.response);
+        }
+    });}
+  
+  
+}
+
+// const otpNull = async (req, res) => {
+//   try {
+    
+//     setTimeout(async () => {
+     
+//       await otpModel.findOneAndUpdate(
+//         { email: req.session.data.email },
+//         { otp: null },
+//         { new: true, upsert: true }
+//       );
+      
+//       console.log('OTP set to null after timeout');
+//     }, 1000 * 30);
+
+    
+//   } catch (error) {
+    
+//     console.error('otpNull error:', error);
+  
+// }};
+
+
+
+let resendOtp = async (req, res) => {
+  try {
+    if (req.session.data && req.session.data.email) {
+    sentOtp(req, req.session.data.email); 
+    res.status(200).json({
+      status: true
+    })}else {
+      console.error('Error resending OTP: req.session.data or req.session.data.email is undefined');
+      res.status(500).json({
+        status: false,
+        message: 'Error resending OTP'
+      });
+    }
+  } catch (error) {
+    console.error('Error resending OTP:', error);
+    res.status(500).json({
+      status: false,
+      message: 'Error resending OTP'
+    });
+  }
+};
+
 
    
+let  postforgot=async(req,res)=>{
+  try{
+    const {email}=req.body;
+    
+    const Checkexist=await userModel.findOne({email:email});
+    if(Checkexist){
+      const otp=sentOtp(req,email);
+      if(otp){
+        req.session.forgotemail=req.body.email;
+        res.redirect('/reset')
+      }
+      
+     
+    }else{
+      res.render('forgot',{message:'please enter registered email'})
+    }
+
+
+  }catch(error){
+    console.log('post forgot',error.message);
+  }
+
+};
+const loadreset=async(req,res)=>{
+  try{
+    res.render('reset-password');
+
+  }
+  catch(error){
+    console.log('loadrest:',error.message);
+  }
+};
+
+const postreset = async (req, res) => {
+  try {
+      const { otp, password } = req.body;
+      const dbOtp = await otpModel.findOne({ otp });
+
+      if (!dbOtp) {
+          return res.render('forgot', { message: 'Invalid OTP' });
+      }
+
+      const updatedUser = await userModel.findOneAndUpdate(
+          { email: req.session.forgotemail },
+          { password: await securePassword(password) },
+          { new: true }
+      );
+
+      if (!updatedUser) {
+          return res.render('forgot', { message: 'Failed to update password' });
+      }
+
+      console.log('Password updated successfully');
+      res.redirect('/');
+  } catch (error) {
+      console.error('postreset', error.message);
+      res.render('forgot', { message: 'An error occurred while resetting password' });
+  }
+};
+
+const loaduserAc=async(req,res)=>{
+  try{
+    if (req.session.email) {
+      const user = await userModel.findOne({ email: req.session.email });
+    res.render('user-detail',{user});
+    }
+    
+  }
+  catch(error){
+    console.log('loaduserAc',error.message);
+  }
+
+};
+
+const editprofile = async (req, res) => {
+  try {
+    const { name, mobile, email } = req.body;
+
+    const existemail = await userModel.findOne({ email: email});
+    const user = await userModel.findOne({ email: req.session.email });
+    if (!existemail) {
+      
+      return res.render('user-detail', { error: 'You cannot change email.' ,user});
+    }
+
+    if (existemail.email !== req.session.email) {
+      const user = await userModel.findOne({ email: req.session.email });
+      return res.render('user-detail', { error: 'You cannot change email.', user });
+    }
+
+    // Check if the mobile already exists for another user
+    const existingUserWithMobile = await userModel.findOne({ mobile: mobile });
+    if (existingUserWithMobile && existingUserWithMobile.email !== req.session.email) {
+      return res.render('user-detail', { error: 'There is a user with this mobile number.', user });
+    }
+
+    // Update user details
+    const updatedUser = await userModel.findOneAndUpdate(
+      { email: req.session.email },
+      {
+        $set: {
+          name: name,
+          mobile: mobile
+        }
+      },
+      { new: true }
+    );
+
+    if (updatedUser) {
+      return res.render('user-detail', { message: 'Updated successfully!', user: updatedUser });
+    } else {
+      return res.render('user-detail', { error: 'Failed to update user details.', user });
+    }
+  } catch (error) {
+    console.log('editprofile', error.message);
+   
+  }
+};
+
+
+//address
+
+const loadAddadd=async(req,res)=>{
+  try{
+res.render('edit-address');
+  }
+  catch(error){
+    console.log('loadAddadd:',error.message);
+  }
+
+};
 
 
 
+const userAddAddress = async (req, res) => {
+  try {
+ 
+    
+    const {
+      addressType,
+      houseNo,
+      street,
+      landmark,
+      pincode,
+      city,
+      district,
+      state,
+      country
+    } = req.body;
 
+    const userId = req.session.userId; // You can get the user's ID from the cookie or authentication system
+
+    // Check if the user exists
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Find the user's address document
+    let useraddresses = await addressModel.findOne({
+      user: userId
+    });
+
+    if (!useraddresses) {
+      // If the useraddresses document doesn't exist, create a new one
+      useraddresses = new addressModel({
+        user: userId,
+        addresses: []
+      });
+    }
+
+    // Check if the address already exists for the user
+    const existingAddress = useraddresses.addresses.find((address) =>
+      address.addressType === addressType &&
+      address.HouseNo === houseNo &&
+      address.Street === street &&
+      address.pincode === pincode &&
+      address.city === city &&
+      address.State === state &&
+      address.Country === country
+    );
+
+    if (existingAddress) {
+      return res.status(400).json({
+        success: false,
+        message: 'Address already exists for this user'
+      });
+    }
+
+    if (useraddresses.addresses.length >= 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'User cannot have more than 3 addresses',
+      });
+    }
+
+    // Create a new address object
+    const newAddress = {
+      addressType: addressType,
+      HouseNo: houseNo,
+      Street: street,
+      Landmark: landmark,
+      pincode: pincode,
+      city: city,
+      district: district,
+      State: state,
+      Country: country,
+    };
+
+    useraddresses.addresses.push(newAddress);
+
+    // Save the updated address document
+    await useraddresses.save();
+
+    // Respond with a success message
+    res.status(200).json({
+      status: true
+    });
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      // Handle validation errors
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: err.errors
+      });
+    } else {
+      console.log(err);
+      res.status(500).render('500error', {
+        success: false,
+        message: 'Internal Server Error'
+      });
+    }
+  }
+};
+
+
+
+ 
 
 
 module.exports = {
@@ -376,7 +700,16 @@ module.exports = {
     verifyUser,
     loadOtp,
     postVerifyOtp,
-    logout
+    logout,
+    resendOtp,
+    postforgot,
+    loadreset,
+    postreset
+
+    ,loaduserAc,
+    editprofile,
+
+    loadAddadd
 };
 
 
