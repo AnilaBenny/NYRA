@@ -511,7 +511,10 @@ const loaduserAc=async(req,res)=>{
   try{
     if (req.session.email) {
       const user = await userModel.findOne({ email: req.session.email });
-    res.render('user-detail',{user});
+      const address = await addressModel.findOne({
+        user: user._id
+      });
+    res.render('user-detail',{user,address});
     }
     
   }
@@ -571,7 +574,7 @@ const editprofile = async (req, res) => {
 
 const loadAddadd=async(req,res)=>{
   try{
-res.render('edit-address');
+res.render('add-address');
   }
   catch(error){
     console.log('loadAddadd:',error.message);
@@ -597,26 +600,24 @@ const userAddAddress = async (req, res) => {
       country
     } = req.body;
 
-    const userId = req.session.userId; // You can get the user's ID from the cookie or authentication system
+ 
 
     // Check if the user exists
-    const user = await userModel.findById(userId);
+    const user = await userModel.findOne({email:req.session.email});
+    // console.log(user);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+     console.log('user is not found');
     }
 
     // Find the user's address document
     let useraddresses = await addressModel.findOne({
-      user: userId
+      user: user._id
     });
 
     if (!useraddresses) {
       // If the useraddresses document doesn't exist, create a new one
       useraddresses = new addressModel({
-        user: userId,
+        user:  user._id,
         addresses: []
       });
     }
@@ -627,25 +628,37 @@ const userAddAddress = async (req, res) => {
       address.HouseNo === houseNo &&
       address.Street === street &&
       address.pincode === pincode &&
+      address.Landmark === landmark &&
       address.city === city &&
+      address.district === district&&
       address.State === state &&
       address.Country === country
     );
-
+    const existtype=useraddresses.addresses.find((address) =>address.addressType === addressType);
     if (existingAddress) {
-      return res.status(400).json({
-        success: false,
-        message: 'Address already exists for this user'
-      });
+      // return res.status(400).json({
+      //   success: false,
+      //   message: 'Address already exists for this user'
+      // });
+      res.render('add-address',{error:'Address already exists for this user'});
     }
-
-    if (useraddresses.addresses.length >= 3) {
-      return res.status(400).json({
-        success: false,
-        message: 'User cannot have more than 3 addresses',
-      });
+    
+    else if(existtype) {
+      // return res.status(400).json({
+      //   success: false,
+      //   message: 'Address already exists for this user'
+      // });
+      res.render('add-address',{error:`${existtype.addressType} is alredy registered`});
     }
-
+  
+    else if (useraddresses.addresses.length >= 3) {
+      // return res.status(400).json({
+      //   success: false,
+      //   message: 'User cannot have more than 3 addresses',
+      // });
+      res.render('add-address',{error:'User cannot have more than 3 addresses'});
+    }
+else{
     // Create a new address object
     const newAddress = {
       addressType: addressType,
@@ -665,29 +678,152 @@ const userAddAddress = async (req, res) => {
     await useraddresses.save();
 
     // Respond with a success message
-    res.status(200).json({
-      status: true
-    });
+   res.render('add-address',{message:' Added successfully'});
+  }
   } catch (err) {
-    if (err.name === 'ValidationError') {
-      // Handle validation errors
-      return res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors: err.errors
-      });
-    } else {
-      console.log(err);
-      res.status(500).render('500error', {
-        success: false,
-        message: 'Internal Server Error'
-      });
-    }
+    // 
+    console.log('userAddaddress:',err.message)
   }
 };
 
+const deleteAddress=async(req,res)=>{
+try{
+ 
+    
+  
+      const user = await userModel.findOne({email:req.session.email});
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+     
+      //console.log(user);
+      const addresses = await addressModel.findOne({
+        user: user._id
+      })
+      // console.log(addresses);
+  
+      // if (!addresses) {
+      //   return res.status(404).json({
+      //     success: false,
+      //     message: 'Addresses not found'
+      //   });
+      // }
+  
+      const addressTypeToDelete = req.query.addressType; 
+      // find  index 
+      const addressIndexToDelete = addresses.addresses.findIndex((address) => address.addressType === addressTypeToDelete);
+  
+      // if (addressIndexToDelete === -1) {
+      //   return res.status(404).json({
+      //     success: false,
+      //     message: `Address with type '${addressTypeToDelete}' not found`
+      //   });
+      // }
+    
+      addresses.addresses.splice(addressIndexToDelete, 1);
+  
+      await addresses.save();
+  
+     
+  
+}
+catch(error){
+  console.log('deleteAddress',error.message);
+
+}
+};
+
+const loadeditAddress=async(req,res)=>{
+  try{
+    const user= await userModel.findOne({email:req.session.email});
+    // console.log(user)
+    let useraddresses = await addressModel.findOne({
+      user:user._id
+    });
+    //console.log(useraddresses)
+    const addressType=req.query.addressType;
+    
+    const address = useraddresses.addresses.find(address => address.addressType === addressType);
+ // console.log(address);
 
 
+if (address) {
+   
+    res.render('edit-address', { address: address });
+} else {
+    
+    console.log('Address or HouseNo not found');
+    
+}
+
+  
+  }
+  catch(error){
+    console.log('editAddress',error.message);
+  }
+
+};
+
+const editAddress = async (req, res) => {
+  try {
+    const {
+      addressType,
+      houseNo,
+      street,
+      landmark,
+      pincode,
+      city,
+      district,
+      state,
+      country
+    } = req.body;
+
+    const user = await userModel.findOne({email:req.session.email});
+  
+    if (!user) {
+     console.log('user not found')
+    }
+    const addresses = await addressModel.findOne({
+      user: user._id
+    })
+
+    if (!addresses) {
+      console.log('address is not found');
+    }
+
+    // Find the address you want to edit based on the provided address type
+    const addressToEdit = addresses.addresses.find(addr => addr.addressType === addressType);
+
+    if (!addressToEdit) {
+      // return res.status(404).json({
+      //   success: false,
+      //   message: `Address with type '${addressType}' not found`
+      // });
+      console.log('Address with type not found')
+    }
+
+    // Update the address details
+    addressToEdit.HouseNo = houseNo;
+    addressToEdit.Street = street;
+    addressToEdit.Landmark = landmark;
+    addressToEdit.pincode = pincode;
+    addressToEdit.city = city;
+    addressToEdit.district = district;
+    addressToEdit.State = state;
+    addressToEdit.Country = country;
+
+    // Save the updated address
+    await addresses.save();
+    res.render('edit-address', { addresses,message:'Updated sucessfully!'});
+
+  } catch (err) {
+    console.error(err);
+   console.log('edit Address:',err.message)
+}
+}
  
 
 
@@ -709,7 +845,13 @@ module.exports = {
     ,loaduserAc,
     editprofile,
 
-    loadAddadd
+    loadAddadd,
+    userAddAddress,
+    deleteAddress,
+    loadeditAddress,
+    editAddress
+
+    
 };
 
 

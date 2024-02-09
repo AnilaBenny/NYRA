@@ -26,12 +26,12 @@ const productSchema = new mongoose.Schema({
       type:String
    },
 
-//    countInStock: {
-//       type: Number,
-//       required: true,
-//       min: 0,
-//       max: 300
-//    },
+   countInStock: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 300
+   },
 
 //    rating: {
 //       type: Number,

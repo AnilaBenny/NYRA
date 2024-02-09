@@ -243,12 +243,7 @@
                     <ul>
                         <li>
                             <a href="#"><span>Home</span></a>
-                            <ul class="mobile-sub-menu">
-                                <li><a href="index.html">Home 1</a></li>
-                                <li><a href="index-2.html">Home 2</a></li>
-                                <li><a href="index-3.html">Home 3</a></li>
-                                <li><a href="index-4.html">Home 4</a></li>
-                            </ul>
+                           
                         </li>
                         <li>
                             <a href="#"><span>Shop</span></a>
@@ -654,67 +649,93 @@
             <div class="checkout_form" data-aos="fade-up" data-aos-delay="400">
                 <div class="row">
                     <div class="col-lg-12 col-md-12">
-                        <form action="#" method="post">
-                            <h3>Add address</h3>
+                        
+                            <h2>Edit address</h2>
+                            
+                        
+                       
+                        <form action="#" method="post" onsubmit="return validateForm()">
+                            
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="default-form-box">
-                                        <label>
-                                            Address Type
-                                        </label>
+                                        <br>
+                                        <%if(typeof message!=='undefined'){%>
+                                        <p class="text-success"><%=message%></p>
+                                        <%}%>
+                                        <%if(typeof error!=='undefined'){%>
+                                            <p class="text-danger"><%=error%></p>
+                                            <%}%>
+                                        
+                                        <%if(typeof address!=='undefined'){%>
                                         <label class="mb-2 form-check form-check-inline" style="width: 45%;">
-                                           
-                                            <input class="form-check-input"   name="addressType" type="radio">
+                                           <p>This is a <%=address.addressType%> Type</p>
+                                            <input class="form-check-input" id="addressType"   name="addressType" value="work" type="radio">
                                             <span class="form-check-label"> work</span>
                                         </label>
                                         <label class="mb-2 form-check form-check-inline" style="width: 45%;">
                                            
-                                            <input class="form-check-input"   name="addressType" type="radio">
+                                            <input class="form-check-input" id="addressType"   name="addressType" value="home" type="radio">
                                             <span class="form-check-label"> Home</span>
                                         </label>
                                         <label class="mb-2 form-check form-check-inline" style="width: 45%;">
                                            
-                                            <input class="form-check-input"   name="addressType" type="radio">
+                                            <input class="form-check-input" id="addressType"  name="addressType" value="temp" type="radio">
                                             <span class="form-check-label"> temporary</span>
                                         </label>
+                                        <div id="addressTypeError" class="text-danger"></div>
                                         <label>House number</label>
-                                        <input type="text" name="houseNo">
+                                        <input type="text" id="houseNo" name="houseNo" value="<%=address.HouseNo%>" placeholder="eg:123">
+                                        <div id="housenoError" class="text-danger"></div>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="default-form-box">
                                         <label>Street</label>
-                                        <input placeholder="street name" type="text" name="street">
+                                        <input type="text" id="street" name="street" value="<%=address.Street%>">
+                                        <div id="streetError" class="text-danger"></div>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="default-form-box">
                                         <label>Landmark</label>
-                                        <input type="text" name="Landmark">
+                                        <input type="text" id="landmark" name="landmark" value="<%=address.Landmark%>">
+                                        <div id="landmarkError" class="text-danger"></div>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="default-form-box">
                                         <label>pincode</label>
-                                        <input type="text" name="pincode">
+                                        <input type="text" id="pincode" name="pincode" value="<%=address.pincode%>">
+                                        <div id="pincodeError" class="text-danger"></div>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="default-form-box">
                                         <label>city </label>
-                                        <input type="text" name="city">
+                                        <input type="text" id="city" name="city" value="<%=address.city%>">
+                                        <div id="cityError" class="text-danger"></div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="default-form-box">
+                                        <label>District</label>
+                                        <input type="text" id="district"  name="district" value="<%=address.district%>">
+                                        <div id="districtError" class="text-danger"></div>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="default-form-box">
                                         <label>State </label>
-                                        <input type="text" name="state">
+                                        <input type="text" id="state" name="state" value="<%=address.State%>">
+                                        <div id="stateError" class="text-danger"></div>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="default-form-box">
                                         <label for="country">country </label>
-                                        <input type="text" name="country">
+                                        <input type="text" id="country" name="country" value="<%=address.Country%>">
+                                        <div id="countryError" class="text-danger"></div>
                                         <!-- <select class="country_option nice-select wide" name="country" id="country">
                                             <option value="2">India</option>
                                             <option value="3">Algeria</option>
@@ -727,13 +748,20 @@
                                         </select> -->
                                     </div>
                                 </div>
-                               
-
+                                <%}%>
+                                <div class="col-12">
+                                    <div class="default-form-box">
+                                        <div id="main-error" class="text-danger"></div>
+                                        <button type="submit" class="btn btn-success">Save</button>
+                                        <a  href="/userAc" class="btn btn-primary">Back</a>
+                                    </div>
+                                </div>
                                    
                                
                             </div>
                         </form>
                     </div>
+                    
                    
                 </div>
             </div> <!-- Start User Details Checkout Form -->
@@ -1120,6 +1148,69 @@
 
     <!-- Main JS -->
     <script src="/public/assets/js/main.js"></script>
+
+    <script>
+        function getElementValue(id) {
+    const element = document.getElementById(id);
+    return element.value;
+}
+
+function validateInput(inputId, pattern, errorId, errorMessage) {
+    const inputValue = getElementValue(inputId);
+    const errorElement = document.getElementById(errorId);
+
+    if (inputValue.trim() === '') {
+        errorElement.innerText = errorMessage + ' is required.';
+        return false;
+    } else if (pattern && !pattern.test(inputValue)) {
+        errorElement.innerText = 'Please enter a valid ' + errorMessage.toLowerCase() + '.';
+        return false;
+    } else {
+        errorElement.innerText = '';
+        return true;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const houseNoInput = document.getElementById('houseNo');
+    const streetInput = document.getElementById('street');
+    const landmarkInput = document.getElementById('landmark');
+    const pincodeInput = document.getElementById('pincode');
+    const cityInput = document.getElementById('city');
+    const districtInput = document.getElementById('district');
+    const stateInput = document.getElementById('state');
+    const countryInput = document.getElementById('country');
+
+    houseNoInput.addEventListener('blur', () => validateInput('houseNo', /^\d{3}$/, 'housenoError', 'House Number'));
+    streetInput.addEventListener('blur', () => validateInput('street', /^[a-zA-Z0-9!@#$%^&*()-_+=\[\]{};:'",.<>?]+$/, 'streetError', 'Street'));
+    landmarkInput.addEventListener('blur', () => validateInput('landmark', null, 'landmarkError', 'Landmark'));
+    pincodeInput.addEventListener('blur', () => validateInput('pincode', /^\d{6}$/, 'pincodeError', 'Pincode (6 digits)'));
+    cityInput.addEventListener('blur', () => validateInput('city', /^[a-zA-Z\s]+$/, 'cityError', 'City'));
+    districtInput.addEventListener('blur', () => validateInput('district', /^[a-zA-Z\s]+$/, 'districtError', 'District'));
+    stateInput.addEventListener('blur', () => validateInput('state', /^[a-zA-Z\s]+$/, 'stateError', 'State'));
+    countryInput.addEventListener('blur', () => validateInput('country', /^[a-zA-Z\s]+$/, 'countryError', 'Country'));
+});
+
+function validateForm() {
+    const isValidHouseNo = validateInput('houseNo', /^\d{3}$/, 'housenoError', 'House Number');
+    const isValidStreet = validateInput('street', /^[a-zA-Z0-9!@#$%^&*()-_+=\[\]{};:'",.<>?]+$/, 'streetError', 'Street');
+    const isValidLandmark = validateInput('landmark', null, 'landmarkError', 'Landmark');
+    const isValidPincode = validateInput('pincode', /^\d{6}$/, 'pincodeError', 'Pincode (6 digits)');
+    const isValidCity = validateInput('city', /^[a-zA-Z\s]+$/, 'cityError', 'City');
+    const isValidDistrict = validateInput('district', /^[a-zA-Z\s]+$/, 'districtError', 'District');
+    const isValidState = validateInput('state', /^[a-zA-Z\s]+$/, 'stateError', 'State');
+    const isValidCountry = validateInput('country', /^[a-zA-Z\s]+$/, 'countryError', 'Country');
+
+    if (!isValidHouseNo || !isValidStreet || !isValidLandmark || !isValidPincode || !isValidCity || !isValidDistrict || !isValidState || !isValidCountry) {
+        document.getElementById('mainError').innerText = 'Cannot submit form. Please fix errors.';
+        return false;
+    }
+    return true;
+}
+
+    </script>
+    
+
 </body>
 
 
