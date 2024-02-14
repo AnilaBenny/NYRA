@@ -13,8 +13,8 @@
         </div>
         <nav>
             <ul class="menu-aside">
-                <li class="menu-item">
-                    <a class="menu-link" href="/admin/adminpanel"> <i class="icon material-icons md-home"></i>
+                <li class="menu-item active">
+                    <a class="menu-link" href="index.html"> <i class="icon material-icons md-home"></i>
                         <span class="text">Dashboard</span>
                     </a>
                 </li>
@@ -22,34 +22,25 @@
                     <a class="menu-link" href="page-products-list.html"> <i class="icon material-icons md-shopping_bag"></i>
                         <span class="text">Products</span>
                     </a>
-                    <div class="submenu"  active>
-                        <a href="page-products-list.html">Product List</a>
-                       
-                        <a href="page-categories.html">Categories</a>
+                    <div class="submenu">
+                        <a href="/admin/productlist">Product List</a>
+                        <a href="/admin/adminCategory">Categories</a>
                     </div>
                 </li>
-                <!-- <li class="menu-item has-submenu">
-                    <a class="menu-link" href="page-orders-1.html"> <i class="icon material-icons md-shopping_cart"></i>
+                <li class="menu-item has-submenu">
+                    <a class="menu-link" href="/admin/order-list"> <i class="icon material-icons md-shopping_cart"></i>
                         <span class="text">Orders</span>
                     </a>
-                    <div class="submenu">
-                        <a href="page-orders-1.html">Order list 1</a>
-                        <a href="page-orders-2.html">Order list 2</a>
-                        <a href="page-orders-detail.html">Order detail</a>
-                    </div>
-                </li> -->
-                <li class="menu-item has-submenu">
-                    <a class="menu-link" href="/admin/userManage"> <i class="icon material-icons md-store"></i>
-                        <span class="text">user Management</span>
-                    </a>
-                    <!-- <div class="submenu">
-                        <a href="page-sellers-cards.html">Sellers cards</a>
-                        <a href="page-sellers-list.html">Sellers list</a>
-                        <a href="page-seller-detail.html">Seller profile</a>
-                    </div> -->
+                   
                 </li>
-                <li class="menu-item has-submenu">
-                    <a class="menu-link" href="#"> <i class="icon material-icons md-add_box"></i>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/userManage"> <i class="icon material-icons md-store"></i>
+                        <span class="text">User Management</span>
+                    </a>
+                  
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin/productmanagement"> <i class="icon material-icons md-add_box"></i>
                         <span class="text">Add product</span>
                     </a>
                    
@@ -77,8 +68,8 @@
                     <a class="menu-link" href="page-reviews.html"> <i class="icon material-icons md-comment"></i>
                         <span class="text">Reviews</span>
                     </a>
-                </li>
-                <li class="menu-item">
+                </li> -->
+                <!-- <li class="menu-item">
                     <a class="menu-link" href="page-brands.html"> <i class="icon material-icons md-stars"></i>
                         <span class="text">Brands</span> </a>
                 </li>
@@ -86,7 +77,7 @@
                     <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
                         <span class="text">Statistics</span>
                     </a>
-                </li>
+                </li> -->
             </ul>
             <hr> -->
             <!-- <ul class="menu-aside">
@@ -229,9 +220,11 @@
                                        <% if(cate.length > 0) {
                                             for(let i=0; i<cate.length; i++) { %>
                                         <label class="mb-2 form-check form-check-inline" style="width: 45%;">
-                                           
-                                            <input class="form-check-input" checked=""  value="<%=cate[i]._id%>" name="category" type="radio">
-                                            <span class="form-check-label"> <%=cate[i].name%> </span>
+                                           <%if(pro.category.name===cate[i].name){%><input class="form-check-input" checked=""  value="<%=cate[i]._id%>" name="category" checked="" type="radio">
+                                           <span class="form-check-label"> <%=cate[i].name%> </span>
+                                           <%}else{%>
+                                            <input class="form-check-input"   value="<%=cate[i]._id%>" name="category" type="radio">
+                                            <span class="form-check-label"> <%=cate[i].name%> </span><%}%>
                                         </label>
                                       <%}}%>
                                     </div>

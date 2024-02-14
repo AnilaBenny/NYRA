@@ -6,7 +6,7 @@
                 <div class="col-md-6">
                     <div class="card-body">
                         <div>
-                            <form action="/" method="POST" onsubmit="return validateForm()" enctype="application/json">
+                            <form action="/" method="POST" id="#loginForm" onsubmit="return validateForm()" enctype="application/json">
                                 <div class="container p-4 form-group">
                                     <h2 class="text-center">Login System</h2>
                                     <p class="text-center">Login for existing user</p>
@@ -102,11 +102,39 @@ const togglePassword = document.querySelector('#togglePassword');
                 errorElement.textContent = '';
             });
         });
-        // Add this code to clear input fields when the page loads
-        window.onload = function() {
-        document.getElementById('email').value = '';
-        document.getElementById('password').value = '';
-    };
+       
+
+
+    //JWT
+
+//     fetch('/', {
+//     method: 'POST',
+//     body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value }),
+//     headers: {
+//         'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWM0NWNhODM4YmNmZmVjZmJhMjFiOGEiLCJlbWFpbCI6ImFuaWxhY2Jlbm55ODEwQGdtYWlsLmNvbSIsImlhdCI6MTcwNzU0MjYyNCwiZXhwIjoxNzA3NTQ2MjI0fQ.rLPDZl7axehB9T0MVhoYIF0mx0HXnfbN6pJ1dmdjPpA',
+//         'Content-Type': 'application/json'
+//     }
+// })
+// .then(response => response.json())
+// .then(data => {
+//     if (data && data.accessToken) { // Check if data and accessToken property exist
+//         const token = data.accessToken;
+
+//         // Store the token in local storage
+//         localStorage.setItem('token', token);
+
+//         // Redirect to the home page after successfully storing the token
+//         window.location.href = '/home';
+//     } else {
+//         console.error('Error: Access token not found in response');
+//     }
+// })
+// .catch(error => {
+//     console.error('Error:', error);
+// });
+
+
+
     </script>
    
 <%- include('footer') -%>

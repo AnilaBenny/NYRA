@@ -1,0 +1,16 @@
+GET http://localhost:8080/
+
+###
+POST http://localhost:8080/
+content-Type: application/json
+
+{
+
+"email":"anilacbenny810@gmail.com",
+"password":"anila@123"
+
+}
+
+###
+GET http://localhost:8080/home
+

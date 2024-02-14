@@ -1,0 +1,258 @@
+<%-include('header')-%>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');body{font-family: 'Montserrat', sans-serif}.card{border:none}.logo{background-color: #080808}.totals tr td{font-size: 13px}.footer{background-color: #eeeeeea8}.footer span{font-size: 12px}.product-qty span{font-size: 12px;color: #dedbdb}
+.div-container{
+    background-color: #eeeeeea8
+}
+</style>
+<body>
+<div class="container mt-5 mb-5 ">
+
+    <div class="row d-flex justify-content-center">
+
+        <div class="col-md-8">
+
+            <div class="card div-container" >
+
+
+                    <div class="text-left logo p-2 px-5 text-white">
+
+                        <p>NYRA - Order confirmation</p>
+                       
+                        
+
+                    </div>
+
+                    <div class="invoice p-5">
+
+                        <h5>Your order Confirmed!</h5>
+
+                        <span class="font-weight-bold d-block mt-4">Hello, </span>
+                        <span>You order has been confirmed and will be shipped in next two days!</span>
+
+                        <div class="payment border-top mt-3 mb-3 border-bottom table-responsive">
+
+                            <table class="table table-borderless">
+                                
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="py-2">
+                                                <%if(typeof order!=='undefined'){%>
+                                                <span class="d-block text-muted">Order Date</span>
+                                            <span><%=order.orderDate%></span>
+                                                
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <div class="py-2">
+
+                                                <span class="d-block text-muted">Order No</span>
+                                            <span><%=order.oId%></span>
+                                                
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <div class="py-2">
+
+                                                <span class="d-block text-muted">Payment</span>
+                                            <span>
+                                                COD
+                                                <!-- <img src="https://img.icons8.com/color/48/000000/mastercard.png" width="20" /></span> -->
+                                                
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <div class="py-2">
+
+                                                <span class="d-block text-muted">Shiping Address</span>
+                                            <span><%=order.deliveryAddress[0]%></span>
+                                                
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+
+
+
+
+                            
+                        </div>
+
+
+
+
+                            <div class="product border-bottom table-responsive">
+
+                                <table class="table table-borderless">
+
+                                <tbody>
+                                    <tr>
+                                        <td>Image</td>
+                                        <td>
+                                            Product name
+                                        </td>
+                                        <td>Quantity</td>
+                                        <td>price</td>
+                                    </tr>
+                                    <%for(let i=0;i<order.items.length;i++){%>
+                                    <tr>
+                                        
+                                        <td class="product_thumb"><a href="/productdetails?id=<%=order.items[i].productId %>"><img
+                                                    src="uploads/productImages/<%=order.items[i].image%>"
+                                                    alt="" style="width: 60px;"></a></td>
+                                        <td class="product_name"><a href="/productdetails?id=<%=order.items[i].productId %>"><%=order.items[i].name%></a></td>
+                                        
+                                            <td>
+                                        <div class="detail-qty  radius  m-auto">
+                                       
+                                        <span class="qty-val me-3"
+                                            id="qty-<%= order.items[i]._id  %>"><%= order.items[i].quantity %></span>
+                                        
+                                    </div>
+                                        </td>
+                                        <td class="product_total">Rs.<%=order.items[i].price%>.00</td>
+                                    </tr> <!-- End Cart Single Item-->
+                                    <%}%>
+                                </tbody> 
+                                    
+                                </table>
+                                
+
+
+                            </div>
+
+
+
+                            <div class="row d-flex justify-content-end">
+
+                                <div class="col-md-5">
+
+                                    <table class="table table-borderless">
+
+                                        <tbody class="totals">
+
+                                            <tr>
+                                                <td>
+                                                    <div class="text-left">
+
+                                                        <span class="text-muted">Subtotal</span>
+                                                        
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="text-right">
+                                                        <span>Rs.<%=order.billTotal%>.00</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+
+                                             <!-- <tr>
+                                                <td>
+                                                    <div class="text-left">
+
+                                                        <span class="text-muted">Shipping Fee</span>
+                                                        
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="text-right">
+                                                        <span>$22</span>
+                                                    </div>
+                                                </td>
+                                            </tr> -->
+
+
+                                             <!-- <tr>
+                                                <td>
+                                                    <div class="text-left">
+
+                                                        <span class="text-muted">Tax Fee</span>
+                                                        
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="text-right">
+                                                        <span>$7.65</span>
+                                                    </div>
+                                                </td>
+                                            </tr> -->
+
+<!-- 
+                                             <tr>
+                                                <td>
+                                                    <div class="text-left">
+
+                                                        <span class="text-muted">Discount</span>
+                                                        
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="text-right">
+                                                        <span class="text-success">$168.50</span>
+                                                    </div>
+                                                </td>
+                                            </tr> -->
+
+
+                                             <tr class="border-top border-bottom">
+                                                <td>
+                                                    <div class="text-left">
+
+                                                        <span class="font-weight-bold">Subtotal</span>
+                                                        
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="text-right">
+                                                        <span class="font-weight-bold">Rs.<%=order.billTotal%>.00</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            
+                                        </tbody>
+                                        
+                                    </table>
+                                    
+                                </div>
+                                
+
+                                <% } %>
+                            </div>
+
+
+                            <p>We will be sending shipping confirmation email when the item shipped successfully!</p>
+                            <p class="font-weight-bold mb-0">Thanks for shopping with us!</p>
+                            <span>NYRA Team</span>
+
+                            <a href="/myOrder" class="text-white btn btn-primary">Go back to my order</a>
+
+                        
+
+                    </div>
+
+
+                    <div class="d-flex justify-content-between footer p-3">
+                        
+                        <span>Need Help? visit our <a href="#"> help center</a></span>
+                         <span>12 feb, 2024</span>
+                        
+                    </div>
+
+
+
+        
+    </div>
+            
+        </div>
+        
+    </div>
+    
+</div>
+<%-include('footer')-%>

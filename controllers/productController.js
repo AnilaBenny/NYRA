@@ -1,5 +1,6 @@
 const productModel = require('../models/productModel');
 const categoryModel = require('../models/categoryModel');
+const userModels = require('../models/userModels');
 
 const loadproduct = async (req, res) => {
     try {
@@ -33,7 +34,7 @@ const insertproduct = async (req, res) => {
             description: req.body.description,
             images: images,
             brand: req.body.brand,
-            // countInStock: req.body.countInStock,
+            countInStock:req.body.stock,
             category: req.body.category,
             price: req.body.price
             // ,discountPrice: req.body.discountPrice,
@@ -42,12 +43,6 @@ const insertproduct = async (req, res) => {
 
         const savedProduct = await product.save();
 
-        // Associate the product with its category
-        // const category = await categoryModel.findById(product.category);
-        // if (category) {
-        //     category.products.push(savedProduct._id);
-        //     await category.save();
-        // }
         const categorydetails = await categoryModel.find();
         if (savedProduct) {
 
@@ -69,7 +64,7 @@ const insertproduct = async (req, res) => {
 //product list
 const productlist = async (req, res) => {
     try {
-        const productdetails = await productModel.find().populate('category')
+        const productdetails = await productModel.find().populate('category');
         //console.log(productdetails);
         res.render('admin-product-list', { pro: productdetails });
     }
@@ -124,7 +119,9 @@ const updatepro = async (req, res) => {
                 images: allImages,
                 brand: req.body.brand,
                 category: req.body.category,
-                price: req.body.price
+                price: req.body.price,
+                countInStock:req.body.stock,
+
             }
         });
         // console.log(Data);
@@ -168,6 +165,64 @@ const loaduserprodetails = async (req, res) => {
     }
 };
 
+const showproduct = async (req, res) => {
+        try {
+            const cat = req.query.category;
+            const category = await categoryModel.findOne({ name: cat });
+    
+            if (!category) {
+                res.render('shop-product');
+            }
+    
+            const searchQuery = req.query.search || '';
+            
+            let sortQuery = {};
+    
+            const sort = req.query.sort || '';
+
+            if (sort === 'lowtohigh') {
+                sortQuery = { price: 1 };
+            } else if (sort === 'hightolow') {
+                sortQuery = { price: -1 };
+            } else if (sort === 'a-z') {
+                sortQuery = { name: 1 };
+            } else if (sort === 'z-a') {
+                sortQuery = { name: -1 };
+            } else if (sort === 'featured') {
+                sortQuery = { isFeatured: true };
+            } else if (sort === 'popularity') {
+                sortQuery = { popularity: -1 };
+            } else if (sort === 'averagerating') {
+                sortQuery = { rating: -1 };
+            } else if (sort === 'Newarrivals') {
+                sortQuery = { createdAt: -1 };
+            }
+            if (searchQuery !== '') {
+                product = await productModel
+                    .find({
+                        category: category._id,
+                        $or: [
+                            { name: { $regex: searchQuery, $options: 'i' } },
+                            { brand: { $regex: searchQuery, $options: 'i' } }
+                        ]
+                    })
+                    .populate('category')
+                    .sort(sortQuery);
+            }else if(sort){
+                product = await productModel.find({ category: category._id }).populate('category').sort(sortQuery);
+        }else{
+            product = await productModel.find({ category: category._id }).populate('category');
+        }
+            
+            res.render('shop-product', { product, cat});
+        } catch (error) {
+            console.error('Error in showproduct:', error.message);
+            res.redirect('/home');
+            
+        }
+    }
+    
+
 
 
 module.exports = {
@@ -177,7 +232,8 @@ module.exports = {
     loadpro,
     updatepro,
     deletepro,
-    loaduserprodetails
+    loaduserprodetails,
+    showproduct
 
 
 }

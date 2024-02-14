@@ -2,6 +2,7 @@ const express = require('express');
 const admin_route=express();
 const product = require('../controllers/productController');
 const multer=require('multer');
+const {AdminLogSession,adminisLogout}=require('../middlewares/auth')
 
 
 
@@ -25,42 +26,47 @@ const storage=multer.diskStorage({
 
 
 //login
-admin_route.get('/',adminController.adminLogin);
+admin_route.get('/',adminisLogout,adminController.adminLogin);
 
-admin_route.post('/',adminController.adminPost);
+admin_route.post('/',adminisLogout,adminController.adminPost);
 
 //adminpanel
-admin_route.get('/adminpanel',adminController.loadPanel);
+admin_route.get('/adminpanel',AdminLogSession,adminController.loadPanel);
 
 //load category
-admin_route.get('/adminCategory',category.loadCategory);
-admin_route.post('/adminCategory',category.insertCategory);
+admin_route.get('/adminCategory',AdminLogSession,category.loadCategory);
+admin_route.post('/adminCategory',AdminLogSession,category.insertCategory);
 
 //edit category
-admin_route.get('/edit-cate',category.loadcateedit);
-admin_route.post('/edit-cate',category.upcateedit);
+admin_route.get('/edit-cate',AdminLogSession,category.loadcateedit);
+admin_route.post('/edit-cate',AdminLogSession,category.upcateedit);
 
 //delete category
-admin_route.get('/delete-cate',category.deletecate);
+admin_route.get('/delete-cate',AdminLogSession,category.deletecate);
 
 //load product add
-admin_route.get('/productmanagement',product.loadproduct);
-admin_route.post('/productmanagement',upload,product.insertproduct);
+admin_route.get('/productmanagement',AdminLogSession,product.loadproduct);
+admin_route.post('/productmanagement',AdminLogSession,upload,product.insertproduct);
 
 //load productlist
-admin_route.get('/productlist',product.productlist);
+admin_route.get('/productlist',AdminLogSession,product.productlist);
 
 //edit product
-admin_route.get('/edit-pro',product.loadpro);
-admin_route.post('/edit-pro',upload,product.updatepro);
+admin_route.get('/edit-pro',AdminLogSession,product.loadpro);
+admin_route.post('/edit-pro',AdminLogSession,upload,product.updatepro);
 
 //delete product
-admin_route.get('/delete-pro',product.deletepro);
+admin_route.get('/delete-pro',AdminLogSession,product.deletepro);
 
 //userManagement
-admin_route.get('/userManage',adminController.loadusermanagement);
+admin_route.get('/userManage',AdminLogSession,adminController.loadusermanagement);
 
-// Express route handler for blocking/unblocking user
-admin_route.post('/blockUser',adminController.userblock);
+// blocking/unblocking user
+admin_route.post('/blockUser',AdminLogSession,adminController.userblock);
+
+admin_route.get('/order-list',AdminLogSession,adminController.loadordermanagement);
+
+admin_route.post('/cancel',AdminLogSession,adminController.orderCancel);
+admin_route.post('/accept',AdminLogSession,adminController.orderAccept);
 
 module.exports=admin_route;

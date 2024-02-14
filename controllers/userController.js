@@ -8,6 +8,7 @@ const categoryModel=require('../models/categoryModel');
 const newOtp=require('../models/otpModel');
 const otpModel = require('../models/otpModel');
 const addressModel=require('../models/addressModel');
+const orderModel = require('../models/orderModel');
 
 // const Email = process.env.Email;
 // const Pass = process.env.Pass;
@@ -119,8 +120,8 @@ const forgotpassword = async (req, res) => {
 
 
 //insert user & send the otp
+
 const insertUser=async(req,res)=>{
-  
   try{
     const { name, email, mobile, password } = req.body;
    
@@ -514,6 +515,10 @@ const loaduserAc=async(req,res)=>{
       const address = await addressModel.findOne({
         user: user._id
       });
+      const order=await orderModel.findOne({
+        user: user._id
+      });
+      
     res.render('user-detail',{user,address});
     }
     
@@ -825,6 +830,83 @@ const editAddress = async (req, res) => {
 }
 }
  
+const loadorderpage = async (req, res) => {
+  try {
+   
+    const user = await userModel.findOne({email:req.session.email});
+   
+   
+    const order= await orderModel.find({ user: user._id });
+    //console.log(order);
+    res.render('order', { order });
+  } catch (error) {
+   
+    console.error('Error loading order page:', error.message);
+   
+  }
+}
+
+const deleteorder = async (req, res) => {
+  try {
+    const { reason, oId } = req.body;
+    
+    //console.log(reason, oId);
+    if (!reason || !oId) {
+      return res.status(400).json({ success: false, error: "Reason and orderId are required" });
+    }
+
+    const order = await orderModel.findOne({ oId });
+
+    if (!order) {
+      return res.status(404).json({ success: false, error: "Order not found" });
+    }
+
+    // Restock products
+    for (const item of order.items) {
+      const product = await ProductModel.findById(item.productId);
+      //console.log(product);
+      if (!product) {
+        return res.status(404).json({ success: false, error: "Product not found for restocking" });
+      }
+      //console.log(product.countInStock,item.quantity);
+      product.countInStock += item.quantity;
+      await product.save();
+      console.log(product);
+    }
+
+    // Update order status 
+    // const cancelRequest = order.requests.find(req => req.type === 'Cancel');
+    // if (cancelRequest) {
+    //   order.status = cancelRequest.status === 'Accepted' ? 'Canceled' : 'Pending';
+    // } else {
+    //   order.status = 'Pending'; 
+    // }
+
+ 
+    const newCancelRequest = {
+      type: 'Cancel',
+      status: order.paymentMethod === 'COD' ? 'Accepted' : 'Pending',
+      reason: reason
+    };
+    
+    order.requests.push(newCancelRequest);
+   
+    
+    await order.save();
+    const updatedOrder = await orderModel.findOneAndUpdate(
+      { oId: oId },
+      { $set: { status: 'Canceled' } },
+      { new: true } 
+    );
+
+    return res.json({ success: true, message: "Order canceled successfully" });
+  } catch (error) {
+    console.error("deleteorder error:", error);
+    return res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
+
 
 
 module.exports = {
@@ -849,11 +931,13 @@ module.exports = {
     userAddAddress,
     deleteAddress,
     loadeditAddress,
-    editAddress
+    editAddress,
+
+    loadorderpage,
+    deleteorder
 
     
 };
-
 
 
 

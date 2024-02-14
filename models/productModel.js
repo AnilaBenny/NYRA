@@ -33,15 +33,15 @@ const productSchema = new mongoose.Schema({
       max: 300
    },
 
-//    rating: {
-//       type: Number,
-//       default: 0,
-//    },
+   rating: {
+      type: Number,
+      default: 0,
+   },
 
-//    isFeatured: {
-//       type: Boolean,
-//       default: true
-//    },
+   isFeatured: {
+      type: Boolean,
+      default: true
+   },
    
    category: {
       type: mongoose.Schema.Types.ObjectId,
@@ -55,6 +55,15 @@ const productSchema = new mongoose.Schema({
       default: 0,
 
    },
+   popularity:{
+      type:Number,
+      default: 0
+
+   },
+   list:{
+      type: Boolean,
+      default: true
+   }
 
 //    discountPrice:{
 //       type: Number,

@@ -6,6 +6,7 @@ const adminRoute=require('./routes/adminRoute');
 const expressvalidator = require('express-validator');
 const session=require('express-session');
 const nocache=require('nocache');
+const jwt=require('jsonwebtoken');
 
 
 
@@ -16,6 +17,7 @@ connectToDatabase();
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+
 
 //Use body parsing middlewares before session middleware
 app.use(express.json());

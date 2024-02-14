@@ -612,7 +612,7 @@
                                     class="nav-link btn btn-block btn-md btn-black-default-hover">My Wallet</a></li>
                                     <li><a href="#" data-bs-toggle="tab"
                                         class="nav-link btn btn-block btn-md btn-black-default-hover">my wishlist</a></li>
-                            <li><a href="#orders" data-bs-toggle="tab"
+                            <li><a href="/myorder" 
                                     class="nav-link btn btn-block btn-md btn-black-default-hover">Orders</a></li>
                            
                             <li><a href="/logout"
@@ -623,39 +623,60 @@
                 <div class="col-sm-12 col-md-9 col-lg-9">
                     <!-- Tab panes -->
                     <div class="tab-content dashboard_content" data-aos="fade-up" data-aos-delay="200">
-                        
-                        <div class="tab-pane fade" id="orders">
+                        <%if(typeof order!=='undefined'){%>
+                        <div class="tab-pane fade" id="orders" >
                             <h4>Orders</h4>
                             <div class="table_page table-responsive">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Order</th>
-                                            <th>Date</th>
-                                            <th>Status</th>
-                                            <th>Total</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
+                                <table class="table table-borderless">
+
                                     <tbody>
                                         <tr>
-                                            <td>1</td>
-                                            <td>May 10, 2018</td>
-                                            <td><span class="success">Completed</span></td>
-                                            <td>$25.00 for 1 item </td>
-                                            <td><a href="cart.html" class="view">view</a></td>
+                                            <td>Image</td>
+                                            <td>
+                                                Product name
+                                            </td>
+                                            <td>Quantity</td>
+                                            <td>price</td>
+                                            <td>Mode of payment</td>
+                                            <td>Bill Amount</td>
+                                            <td>Status</td>
+                                            <td>
+                                                cancel 
+                                            </td>
                                         </tr>
-                                        <tr>
-                                            <td>2</td>
-                                            <td>May 10, 2018</td>
-                                            <td>Processing</td>
-                                            <td>$17.00 for 1 item </td>
-                                            <td><a href="cart.html" class="view">view</a></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                        <% for (let j = 0; j < order.length; j++) { %>
+                                            <p>Date of order: <%= order[j].orderDate %></p>
+                                            <% for (let i = 0; i < order[j].items.length; i++) { %>
+                                                <tr>
+                                                    <td class="product_thumb">
+                                                        <a href="/productdetails?id=<%= order[j].items[i].productId %>">
+                                                            <img src="uploads/productImages/<%= order[j].items[i].image %>" alt="" style="width: 60px;">
+                                                        </a>
+                                                    </td>
+                                                    <td class="product_name">
+                                                        <a href="/productdetails?id=<%= order[j].items[i].productId %>"><%= order[j].items[i].name %></a>
+                                                    </td>
+                                                    <td>
+                                                        <div class="detail-qty radius m-auto">
+                                                            <span class="qty-val me-3" id="qty-<%= order[j].items[i]._id %>"><%= order[j].items[i].quantity %></span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="product_total">Rs.<%= order[j].items[i].price %>.00</td>
+                                                    <% } %>
+                                                    <td><%= order[j].paymentMethod %></td>
+                                                    <td><%= order[j].billTotal %></td>
+                                                    <td><%= order[j].status %></td>
+                                                    <td><a class="btn btn-black-default-hover">Cancel Order</a></td>
+                                                </tr> <!-- End Cart Single Item-->
+                                           
+                                        <% } %>
+                                        
+                                    </tbody> 
+                                        
+                                    </table>
                             </div>
                         </div>
+                        <%}%>
                         <div class="tab-pane fade" id="downloads">
                             <h4>Downloads</h4>
                             <div class="table_page table-responsive">
@@ -1147,8 +1168,8 @@
     <script>
 
 document.getElementById('editAddressLink').addEventListener('click', function(event) {
-    event.preventDefault(); // Prevent default link behavior
-    window.location.href = '/editAddress'; // Navigate to the specified route
+    event.preventDefault(); 
+    window.location.href = '/editAddress'; 
 });
 </script>
 

@@ -36,18 +36,20 @@ const cartSchema = new mongoose.Schema({
     price: {
       type:Number
     },
+    countInStock: {
+      type: Number
+   },
     selected: {
       type: Boolean, // Add a selected field to mark whether the item is selected
-      default: false, // Initialize as not selected
+      default: false, 
   },
-   }]
-  //  ,
+   }],
  
-// billTotal: {
-//     type: Number,
-//     required: true,
-//    default: 0
-//   }
+billTotal: {
+    type: Number,
+    required: true,
+   default: 0
+  }
 }, {
 timestamps: true
 })
