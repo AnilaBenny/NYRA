@@ -89,12 +89,7 @@ const loadLoginpage = async (req, res) => {
 //load register page
 const loadregisterpage = async (req, res) => {
     try {
-      // let data = {
-      //   name: "",
-      //   email: "",
-      //   mobile: "",
-      //   password: "",
-      // };
+     
       if (req.session.data) {
          req.session.data={};
       } 
@@ -124,8 +119,7 @@ const forgotpassword = async (req, res) => {
 const insertUser=async(req,res)=>{
   try{
     const { name, email, mobile, password } = req.body;
-   
-
+ 
 
         // Validate request body using express-validator
         const validators = [
@@ -172,18 +166,18 @@ const insertUser=async(req,res)=>{
             }
             return true;
           }).bail(),
-        check('mobile')
-          
-          .exists({ checkFalsy: true })
-          .withMessage('Mobile number is required').bail()
-          .isLength({ min: 10, max: 10, checkFalsy: true })
-          .withMessage('Mobile number must be 10 digits long').bail()
+          check('mobile')
+          .exists()
+          .withMessage('Mobile number is required')
+          .isLength({ min: 10, max: 10 })
+          .withMessage('Mobile number must be 10 digits long')
           .custom((value) => {
-            if (!/^\d{10}$/.test(value)) {
-              throw new Error('Mobile number must contain only numbers');
-            }
-            return true;
-          }).bail(),
+              if (!/^\d{10}$/.test(value)) {
+                  throw new Error('Mobile number must contain only numbers');
+              }
+              return true;
+          }).bail()
+      ,
         check('password')
          
           .exists({ checkFalsy: true })
@@ -250,7 +244,7 @@ const insertUser=async(req,res)=>{
             const data={name,email,mobile,password};
           
             req.session.data=data;
-            console.log(req.session.data);
+            //console.log(req.session.data);
             
             const otp = sentOtp(req,req.session.data.email);
             if (otp) {
@@ -283,6 +277,7 @@ const postVerifyOtp = async (req, res, next) => {
                       email:req.session.data.email,
                       mobile:req.session.data.mobile,
                     password: passwordHash ,
+                    image:req.session.data.image,
                     isBlocked:false,
                   is_verified:true});
                   
@@ -683,7 +678,7 @@ else{
     await useraddresses.save();
 
     // Respond with a success message
-   res.render('add-address',{message:' Added successfully'});
+   res.redirect('/userAc');
   }
   } catch (err) {
     // 
@@ -694,8 +689,7 @@ else{
 const deleteAddress=async(req,res)=>{
 try{
  
-    
-  
+
       const user = await userModel.findOne({email:req.session.email});
       if (!user) {
         return res.status(404).json({
@@ -710,23 +704,13 @@ try{
       })
       // console.log(addresses);
   
-      // if (!addresses) {
-      //   return res.status(404).json({
-      //     success: false,
-      //     message: 'Addresses not found'
-      //   });
-      // }
+     
   
       const addressTypeToDelete = req.query.addressType; 
-      // find  index 
+  
       const addressIndexToDelete = addresses.addresses.findIndex((address) => address.addressType === addressTypeToDelete);
   
-      // if (addressIndexToDelete === -1) {
-      //   return res.status(404).json({
-      //     success: false,
-      //     message: `Address with type '${addressTypeToDelete}' not found`
-      //   });
-      // }
+     
     
       addresses.addresses.splice(addressIndexToDelete, 1);
   

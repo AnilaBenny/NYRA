@@ -1,11 +1,11 @@
 const express = require('express');
-const userRoute = express.Router();
 const userController = require('../controllers/userController');
 const product=require('../controllers/productController');
 const cart=require('../controllers/cartController');
 const checkout=require('../controllers/checkoutController');
 const {logSession,isLogout } =  require('../middlewares/auth');
 
+const userRoute = express.Router();
 
 
 userRoute.get('/',isLogout,userController.loadLoginpage);
@@ -13,7 +13,7 @@ userRoute.post('/',isLogout,userController.verifyUser);
 
 userRoute.get('/logout',userController.logout);
 
-userRoute.get('/register',isLogout, userController.loadregisterpage);
+userRoute.get('/register',isLogout,userController.loadregisterpage);
 userRoute.post('/register',isLogout, userController.insertUser);
 
 //otp
