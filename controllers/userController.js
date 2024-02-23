@@ -9,6 +9,7 @@ const newOtp=require('../models/otpModel');
 const otpModel = require('../models/otpModel');
 const addressModel=require('../models/addressModel');
 const orderModel = require('../models/orderModel');
+const wishlistModel=require('../models/wishlistModel');
 
 // const Email = process.env.Email;
 // const Pass = process.env.Pass;
@@ -50,9 +51,11 @@ let enterHome = async (req, res) => {
                 // Find products and categories
                 const products = await ProductModel.find({});
                 const categories = await categoryModel.find({});
+                const wish=await wishlistModel.find({user:userData._id});
+                // console.log(wish);
 
                 // Render home page
-                return res.render("home", { pro: products, category: categories });
+                return res.render("home", { pro: products, category: categories,wish });
             } else {
                 
                 req.session.destroy((err) => {
@@ -356,9 +359,6 @@ let logout = (req, res) => {
 };
 
 
-//resend otp
-
-
 //sent otp here
 async function sentOtp(req,email)
 {
@@ -418,7 +418,7 @@ async function sentOtp(req,email)
 // }};
 
 
-
+//resend otp
 let resendOtp = async (req, res) => {
   try {
     if (req.session.data && req.session.data.email) {
@@ -466,6 +466,7 @@ let  postforgot=async(req,res)=>{
   }
 
 };
+
 const loadreset=async(req,res)=>{
   try{
     res.render('reset-password');
@@ -569,9 +570,7 @@ const editprofile = async (req, res) => {
   }
 };
 
-
 //address
-
 const loadAddadd=async(req,res)=>{
   try{
 res.render('add-address');
@@ -581,7 +580,6 @@ res.render('add-address');
   }
 
 };
-
 
 
 const userAddAddress = async (req, res) => {
@@ -601,15 +599,13 @@ const userAddAddress = async (req, res) => {
     } = req.body;
 
  
-
-    // Check if the user exists
     const user = await userModel.findOne({email:req.session.email});
     // console.log(user);
     if (!user) {
      console.log('user is not found');
     }
 
-    // Find the user's address document
+   
     let useraddresses = await addressModel.findOne({
       user: user._id
     });
@@ -636,26 +632,17 @@ const userAddAddress = async (req, res) => {
     );
     const existtype=useraddresses.addresses.find((address) =>address.addressType === addressType);
     if (existingAddress) {
-      // return res.status(400).json({
-      //   success: false,
-      //   message: 'Address already exists for this user'
-      // });
+     
       res.render('add-address',{error:'Address already exists for this user'});
     }
     
     else if(existtype) {
-      // return res.status(400).json({
-      //   success: false,
-      //   message: 'Address already exists for this user'
-      // });
+     
       res.render('add-address',{error:`${existtype.addressType} is alredy registered`});
     }
   
     else if (useraddresses.addresses.length >= 3) {
-      // return res.status(400).json({
-      //   success: false,
-      //   message: 'User cannot have more than 3 addresses',
-      // });
+      
       res.render('add-address',{error:'User cannot have more than 3 addresses'});
     }
 else{
@@ -674,14 +661,13 @@ else{
 
     useraddresses.addresses.push(newAddress);
 
-    // Save the updated address document
+
     await useraddresses.save();
 
-    // Respond with a success message
    res.redirect('/userAc');
   }
   } catch (err) {
-    // 
+  
     console.log('userAddaddress:',err.message)
   }
 };
@@ -783,18 +769,13 @@ const editAddress = async (req, res) => {
       console.log('address is not found');
     }
 
-    // Find the address you want to edit based on the provided address type
     const addressToEdit = addresses.addresses.find(addr => addr.addressType === addressType);
 
     if (!addressToEdit) {
-      // return res.status(404).json({
-      //   success: false,
-      //   message: `Address with type '${addressType}' not found`
-      // });
+      
       console.log('Address with type not found')
     }
 
-    // Update the address details
     addressToEdit.HouseNo = houseNo;
     addressToEdit.Street = street;
     addressToEdit.Landmark = landmark;
@@ -804,7 +785,6 @@ const editAddress = async (req, res) => {
     addressToEdit.State = state;
     addressToEdit.Country = country;
 
-    // Save the updated address
     await addresses.save();
     res.render('edit-address', { addresses,message:'Updated sucessfully!'});
 
@@ -832,64 +812,66 @@ const loadorderpage = async (req, res) => {
 
 const deleteorder = async (req, res) => {
   try {
-    const { reason, oId } = req.body;
-    
-    //console.log(reason, oId);
-    if (!reason || !oId) {
-      return res.status(400).json({ success: false, error: "Reason and orderId are required" });
-    }
+      const { reason, oId } = req.body;
 
-    const order = await orderModel.findOne({ oId });
-
-    if (!order) {
-      return res.status(404).json({ success: false, error: "Order not found" });
-    }
-
-    // Restock products
-    for (const item of order.items) {
-      const product = await ProductModel.findById(item.productId);
-      //console.log(product);
-      if (!product) {
-        return res.status(404).json({ success: false, error: "Product not found for restocking" });
+      if (!reason || !oId) {
+          return res.status(400).json({ success: false, error: "Reason and orderId are required" });
       }
-      //console.log(product.countInStock,item.quantity);
-      product.countInStock += item.quantity;
-      await product.save();
-      console.log(product);
-    }
 
-    // Update order status 
-    // const cancelRequest = order.requests.find(req => req.type === 'Cancel');
-    // if (cancelRequest) {
-    //   order.status = cancelRequest.status === 'Accepted' ? 'Canceled' : 'Pending';
-    // } else {
-    //   order.status = 'Pending'; 
-    // }
+      const order = await orderModel.findOne({ oId });
 
- 
-    const newCancelRequest = {
-      type: 'Cancel',
-      status: order.paymentMethod === 'COD' ? 'Accepted' : 'Pending',
-      reason: reason
-    };
-    
-    order.requests.push(newCancelRequest);
-   
-    
-    await order.save();
-    const updatedOrder = await orderModel.findOneAndUpdate(
-      { oId: oId },
-      { $set: { status: 'Canceled' } },
-      { new: true } 
-    );
+      if (!order) {
+          return res.status(404).json({ success: false, error: "Order not found" });
+      }
 
-    return res.json({ success: true, message: "Order canceled successfully" });
+      // Add cancellation request to the order
+      const newCancelRequest = {
+          type: 'Cancel',
+          status: 'Pending',
+          reason: reason
+      };
+
+      order.requests.push(newCancelRequest);
+      await order.save();
+
+      res.json({ success: true, message: "Order canceled successfully" });
   } catch (error) {
-    console.error("deleteorder error:", error);
-    return res.status(500).json({ success: false, error: "Internal server error" });
+      console.error("deleteOrder error:", error);
+      return res.status(500).json({ success: false, error: "Internal server error" });
   }
 };
 
+const reqreturn=async(req,res)=>{
+  try{
+const {oId,reason}=req.body;
+if (!reason || !oId) {
+  return res.status(400).json({ success: false, error: "Reason and orderId are required" });
+}
+
+const order = await orderModel.findOne({ oId });
+
+if (!order) {
+  return res.status(404).json({ success: false, error: "Order not found" });
+}
+
+
+const returnRequest = {
+  type: 'Return',
+  status: 'Pending',
+  reason: reason
+};
+
+order.requests.push(returnRequest);
+await order.save();
+
+res.json({ success: true, message: "return requested successfully" });
+
+  }
+  catch(error){
+    console.log('return',error.message);
+  }
+
+}
 
 
 
@@ -918,7 +900,8 @@ module.exports = {
     editAddress,
 
     loadorderpage,
-    deleteorder
+    deleteorder,
+    reqreturn,
 
     
 };

@@ -4,6 +4,8 @@ const product=require('../controllers/productController');
 const cart=require('../controllers/cartController');
 const checkout=require('../controllers/checkoutController');
 const {logSession,isLogout } =  require('../middlewares/auth');
+const coupon=require('../controllers/couponController');
+const wishlist=require('../controllers/wishlistController')
 
 const userRoute = express.Router();
 
@@ -42,6 +44,7 @@ userRoute.post('/address-edit',logSession,userController.editAddress);
 
 userRoute.post('/add-to-cart',logSession,cart.addTocart);
 userRoute.get('/cart',logSession,cart.showcart);
+userRoute.post('/cart',logSession,coupon.Couponcart);
 userRoute.post('/cart-delete',logSession,cart.deleteCart);
 userRoute.post('/update-cart-quantity',logSession,cart.updateCart);
 
@@ -50,10 +53,27 @@ userRoute.get('/shop',logSession,product.showproduct);
 userRoute.get('/checkout',logSession,checkout.loadcheckout);
 userRoute.post('/checkout',logSession,checkout.Postcheckout);
 
+userRoute.post('/verifyPayment')
+
 userRoute.get('/orderConfirmation',logSession,checkout.orderConfirmation);
 userRoute.get('/myorder',logSession,userController.loadorderpage);
 
 userRoute.post('/myorder',logSession,userController.deleteorder);
+
+userRoute.post('/return',logSession,userController.reqreturn);
+
+userRoute.get('/orderDetails',logSession,checkout.loadOrderdetail);
+
+userRoute.get('/applycoupon',coupon.Couponcart);
+userRoute.get('/removecoupon',coupon.removeCoupon);
+
+userRoute.get('/addToWishlist',wishlist.addToWishlist);
+userRoute.get('/removeWishlist',wishlist.removeWishlist);
+userRoute.get('/wishlist',wishlist.loadWishlist);
+
+
+
+
 
 
 

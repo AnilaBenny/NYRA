@@ -1,7 +1,7 @@
 const productModel = require("../models/productModel");
 const userModel = require("../models/userModels");
 const cartModel = require("../models/cartModel");
-
+const {couponModel}=require('../models/couponModel');
 const addTocart = async (req, res) => {
     try {
         const user = await userModel.findOne({ email: req.session.email });
@@ -47,6 +47,7 @@ const addTocart = async (req, res) => {
                 quantity: 1,
                 countInStock: product.countInStock,
                 price: product.price,
+                
             });
         }
 
@@ -67,8 +68,14 @@ const showcart=async(req,res)=>{
         const userId=user._id;
         
         let userCart=await cartModel.findOne({owner:userId});
-        if(userCart){
-            res.render('cart',{cart:userCart})
+        const coupon=await couponModel.find();
+        const eligibleCoupons = coupon.filter(coupon => {
+            return userCart.billTotal >= coupon.minimumAmount && userCart.billTotal <= coupon.maximumAmount && coupon.isActive
+
+        });
+        
+        if(userCart.items.length>0){
+            res.render('cart',{cart:userCart,coupon:eligibleCoupons})
         }
         else{
             res.render('empty-cart');

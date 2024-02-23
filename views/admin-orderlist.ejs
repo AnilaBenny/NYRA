@@ -1,4 +1,65 @@
 <%-include('adminheader')-%>
+<style>
+    .badge.shade-yellow {
+       background-color: #FFD700;
+       /* Yellow */
+       color: #000;
+       /* Black */
+       border: 1px solid #FFD700;
+       padding: 5px 10px;
+       border-radius: 5px;
+    }
+ 
+    .badge.shade-grey {
+       background-color: #808080;
+       /* Grey */
+       color: #FFF;
+       /* White */
+       border: 1px solid #808080;
+       padding: 5px 10px;
+       border-radius: 5px;
+    }
+ 
+    .badge.shade-green {
+       background-color: #008000;
+       /* Green */
+       color: #FFF;
+       /* White */
+       border: 1px solid #008000;
+       padding: 5px 10px;
+       border-radius: 5px;
+    }
+ 
+    .badge.shade-blue {
+       background-color: #0000FF;
+       /* Blue */
+       color: #FFF;
+       /* White */
+       border: 1px solid #0000FF;
+       padding: 5px 10px;
+       border-radius: 5px;
+    }
+ 
+    .badge.shade-red {
+       background-color: #FF0000;
+       /* Red */
+       color: #FFF;
+       /* White */
+       border: 1px solid #FF0000;
+       padding: 5px 10px;
+       border-radius: 5px;
+    }
+ 
+    .badge.shade-orange {
+       background-color: #ff6b26;
+       /* Orange */
+       color: #FFF;
+       /* White */
+       border: 1px solid #ff6b26;
+       padding: 5px 10px;
+       border-radius: 5px;
+    }
+ </style>
 
 <body>
     <div class="screen-overlay"></div>
@@ -164,90 +225,71 @@
                 </div>
             </div>
             <div class="card mb-4">
-                <header class="card-header">
-                    <div class="row gx-3">
-                        <div class="col-lg-4 col-md-6 me-auto">
-                            <input type="text" placeholder="Search..." class="form-control">
-                        </div>
-                        <div class="col-lg-2 col-6 col-md-3">
-                            <select class="form-select">
-                                <option>Status</option>
-                                <option>Active</option>
-                                <option>Disabled</option>
-                                <option>Show all</option>
-                            </select>
-                        </div>
-                        <div class="col-lg-2 col-6 col-md-3">
-                            <select class="form-select">
-                                <option>Show 20</option>
-                                <option>Show 30</option>
-                                <option>Show 40</option>
-                            </select>
-                        </div>
-                    </div>
-                </header> 
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th scope="col">Name</th>
-                                    <th>#ID</th>
-                                    <th scope="col">Product Name</th>
-                                    <th scope="col">Price</th>
-                                    <th scope="col">Quantity</th>
-                                    <th scope="col">Bill Total</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Date</th>
-                                    <th scope="col" >Request from user</th>
-                                    <th scope="col" >Action</th>
-                                    <th scope="col" class="text-end">response</th>
+                                    <th class="col">Name</th>
+                                    <th class="col">#ID</th>
+                                    <th class="col">Date</th>
+                                    <th class="col">Product Name</th>
+                                    <th class="col">Quantity</th>
+                                    <th class="col">Bill Total</th>
+                                    <th class="col">Status</th>
+                                    <th class="col">Action</th> 
                                 </tr>
                             </thead>
-                            <tbody>
-                                <% if (typeof order !== 'undefined' ) {
-                                     %>
-                                        
-                                            
-                                            <% for (let j = 0; j < order.length; j++) { %>
-                                                <tr>
-                                                <td><%= order[j].user.name %></td>
-                                                <td><%= order[j].oId %></td>
-                                                <% for (let k = 0; k < order[j].items.length; k++) { %>
-                                                    <td><%= order[j].items[k].name %></td>
-                                                    <td>Rs.<%= order[j].items[k].productPrice %>.00</td>
-                                                   <td><%=order[j].items[k].quantity%></td> 
+                            <tbody class="border rounded">
+                                <% if (order && order.length > 0) { %>
+                                    <% order.forEach((orderItem, index) => { %> 
+                                        <% orderItem.items.forEach((item, itemIndex) => { %> 
+                                            <tr>
+                                                <% if (itemIndex === 0) { %>
+                                                    <!-- Display user name, order ID, and date only for the first item -->
+                                                    <td rowspan="<%= orderItem.items.length %>"><%= orderItem.user.name %></td>
+                                                    <td rowspan="<%= orderItem.items.length %>"><%= orderItem.oId %></td>
+                                                    <td rowspan="<%= orderItem.items.length %>"><%= orderItem.orderDate.toLocaleDateString() %></td>
                                                 <% } %>
-                                                <td>Rs.<%= order[j].billTotal %>.00</td>
-                                                <td><p class="text-white <% if (order[j].status === 'Canceled') { %> bg-danger <% } else { %> bg-warning <% } %> p-1 rounded-pill" data-status-id="<%= order[j].oId %>"><%= order[j].status %></p></td>
-                                                <td><%= new Date(order[j].orderDate).toLocaleDateString() %></td>
-                                                <% for (let l = 0; l < order[j].requests.length; l++) { %>
-                                                    <td><%= order[j].requests[l].type %></td>
-
+                                                <td><%= item.name %></td>
+                                                <td><%= item.quantity %></td>
+                                                <% if (itemIndex === 0) { %> 
+                                                    <!-- Display bill total and status only for the first item -->
+                                                    <td class="text-bold" rowspan="<%= orderItem.items.length %>">INR <%= orderItem.billTotal %></td>
+                                                    <% const statusColors = {
+                                                           "Pending": "yellow",
+                                                           "Processing": "grey",
+                                                           "Shipped": "blue",
+                                                           "Delivered": "green",
+                                                           "Canceled": "red",
+                                                           "Returned": "orange"
+                                                       };
+                                                    %>
+                                                    <td rowspan="<%= orderItem.items.length %>"><span class="badge shade-<%= statusColors[orderItem.status] %>"><%= orderItem.status %></span></td>
                                                 <% } %>
-                                                <td class="text-end">
-
-                                                    
-                                                        <button onclick="cancel('<%= order[j].oId %>','<%=order[j].requests[0].type%>')" id="blockButton_<%= order[j].oId %>"
-                                                                class="btn btn-danger"  style="width: 90px;">
-                                                            Reject 
-                                                        </button>
-                                                        <button onclick="accept('<%= order[j].oId %>','<%=order[j].status%>')" id="blockButton_<%= order[j].oId %>"
-                                                                class="btn btn-danger"  style="width: 90px;">
-                                                            Accept 
-                                                        </button>
-                                                        
-                                                    
-                                                </td>
-                                                <td><%= order[j].requests[0].status%> </td>
-
-                                        </tr>
-                                            <% } %>
-                                            
-                                    <% 
-                                } %>
+                                                <!-- Action column for the first item -->
+                                                <% if (itemIndex === 0) { %>
+                                                    <td rowspan="<%= orderItem.items.length %>">
+                                                        <a href="/admin/orderdetails?id=<%= orderItem._id %>"
+                                                             class="btn btn-outline-success btn-small">
+                                                                view order details
+                                                            
+                                                        </a>
+                                                    </td>
+                                                <% } %>
+                                            </tr>
+                                        <% }); %>
+                                    <% }); %>
+                                <% } else { %>
+                                    <!-- Display a row for no orders found -->
+                                    <tr>
+                                        <td colspan="8" class="text-center">No orders Found</td>
+                                    </tr>
+                                <% } %>
                             </tbody>
                         </table>
+                        
+                        
                         
                     </div>
                 </div> 

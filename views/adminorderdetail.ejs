@@ -1,0 +1,869 @@
+<%-include('adminheader')-%>
+
+<head>
+
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.7.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"  crossorigin="anonymous" />
+
+    
+    <style>
+        /* Custom CSS for the centered and smaller modal */
+        .btn-edit {
+            display: flex;
+        }
+    
+        .actives {
+            display: inline-block;
+            padding: 2px 5px;
+            background-color: green;
+            color: white;
+            border-radius: 3px;
+        }
+    
+        /* Styles for Inactive */
+        .inactive {
+            display: inline-block;
+            padding: 2px 5px;
+            background-color: red;
+            color: white;
+            border-radius: 3px;
+        }
+    
+        .receipt-modal {
+            text-align: center;
+        }
+    
+        .receipt {
+            text-align: left;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    
+        #generateCodeContainer {
+            display: inline-block;
+            cursor: pointer;
+            /* Make it appear clickable */
+            text-decoration: underline;
+            /* Make the text look like a link */
+            font-weight: normal;
+            /* Remove button's bold text style */
+            background: none;
+            /* Remove background color */
+            border: none;
+            /* Remove border */
+            padding: 0;
+            /* Remove padding */
+            margin: 0;
+            /* Remove margin */
+        }
+    
+        .custom-toast {
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 1000;
+            /* Adjust the z-index to your needs */
+            display: none;
+        }
+    
+        .toast-content {
+            background-color: #f44336;
+            /* Customize the background color */
+            color: #fff;
+            /* Customize the text color */
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin: 10px;
+            max-width: 300px;
+        }
+    
+        .toast-header {
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+    
+        .toast-title {
+            font-weight: bold;
+        }
+    
+        .toast-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    
+        .toast-body {
+            padding: 10px;
+        }
+    
+        #notification-bar {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            /* Center the content horizontally */
+            align-items: center;
+            /* Center the content vertically */
+            background-color: #F4E0E1;
+            color: #A42732;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+    
+        #notification-bar.visible {
+            display: block;
+            transform: translateX(-50%) translateY(20px);
+            transition: transform 0.3s ease;
+        }
+    
+        #notification-icon {
+            width: 30px;
+            /* Adjust the size of the icon */
+            height: 30px;
+            /* Adjust the size of the icon */
+            margin-right: 10px;
+        }
+    
+    
+        /* Styles for success message */
+        .success-message {
+            background-color: #A9DFBF;
+            color: #196F3D;
+        }
+    
+        /* Styles for error message */
+        .error-message {
+            background-color: #F4E0E1;
+            color: #A42732;
+        }
+    
+        .message-box {
+            position: fixed;
+            top: 4%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+    
+        /* CSS for success and error classes */
+        .success {
+            background-color: #4CAF50;
+        }
+    
+        .error {
+            background-color: #f44336;
+        }
+    
+        /* CSS for the icon */
+        .message-icon {
+            display: inline-block;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="screen-overlay"></div>
+
+<aside class="navbar-aside" id="offcanvas_aside">
+    <div class="aside-top">
+        <a href="index.html" class="brand-wrap">
+            <img src="/assets/imgs/theme/inloop-logo.png" class="logo" alt="NYRA">
+        </a>
+        <div>
+            <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i>
+            </button>
+        </div>
+    </div>
+    <nav>
+        <ul class="menu-aside">
+            <li class="menu-item active">
+                <a class="menu-link" href="index.html"> <i class="icon material-icons md-home"></i>
+                    <span class="text">Dashboard</span>
+                </a>
+            </li>
+            <li class="menu-item has-submenu">
+                <a class="menu-link" href='#'> <i class="icon material-icons md-shopping_bag"></i>
+                    <span class="text">Products</span>
+                </a>
+                <div class="submenu">
+                    <a href="/admin/productlist">Product List</a>
+                    <a href="/admin/adminCategory">Categories</a>
+                </div>
+            </li>
+            <li class="menu-item has-submenu">
+                <a class="menu-link" href="/admin/order-list"> <i class="icon material-icons md-shopping_cart"></i>
+                    <span class="text">Orders</span>
+                </a>
+               
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/userManage"> <i class="icon material-icons md-store"></i>
+                    <span class="text">User Management</span>
+                </a>
+              
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/productmanagement"> <i class="icon material-icons md-add_box"></i>
+                    <span class="text">Add product</span>
+                </a>
+               
+            </li>
+            <!-- <li class="menu-item has-submenu">
+                <a class="menu-link" href="page-transactions-1.html"> <i class="icon material-icons md-monetization_on"></i>
+                    <span class="text">Transactions</span>
+                </a>
+                <div class="submenu">
+                    <a href="page-transactions-1.html">Transaction 1</a>
+                    <a href="page-transactions-2.html">Transaction 2</a>
+                </div>
+            </li> -->
+            <!-- <li class="menu-item has-submenu">
+                <a class="menu-link" href="#"> <i class="icon material-icons md-person"></i>
+                    <span class="text">Account</span>
+                </a>
+                <div class="submenu">
+                    <a href="page-account-login.html">User login</a>
+                    <a href="page-account-register.html">User registration</a>
+                    <a href="page-error-404.html">Error 404</a>
+                </div>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="page-reviews.html"> <i class="icon material-icons md-comment"></i>
+                    <span class="text">Reviews</span>
+                </a>
+            </li> -->
+            <!-- <li class="menu-item">
+                <a class="menu-link" href="page-brands.html"> <i class="icon material-icons md-stars"></i>
+                    <span class="text">Brands</span> </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
+                    <span class="text">Statistics</span>
+                </a>
+            </li> -->
+        </ul>
+        <hr>
+        <!-- <ul class="menu-aside">
+            <li class="menu-item has-submenu">
+                <a class="menu-link" href="#"> <i class="icon material-icons md-settings"></i>
+                    <span class="text">Settings</span>
+                </a>
+                <div class="submenu">
+                    <a href="page-settings-1.html">Setting sample 1</a>
+                    <a href="page-settings-2.html">Setting sample 2</a>
+                </div>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" href="page-blank.html"> <i class="icon material-icons md-local_offer"></i>
+                    <span class="text"> Starter page </span>
+                </a>
+            </li>
+        </ul> -->
+        <br>
+        <br>
+    </nav>
+</aside>
+
+<main class="main-wrap">
+    <header class="main-header navbar">
+        <!-- <div class="col-search">
+            <form class="searchform">
+                <div class="input-group">
+                    <input list="search_terms" type="text" class="form-control" placeholder="Search term">
+                    <button class="btn btn-light bg" type="button"> <i class="material-icons md-search"></i></button>
+                </div>
+                <datalist id="search_terms">
+                    <option value="Products">
+                    <option value="New orders">
+                    <option value="Apple iphone">
+                    <option value="Ahmed Hassan">
+                </datalist>
+            </form>
+        </div> -->
+        <div class="col-nav ms-auto">
+            <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i
+                    class="material-icons md-apps"></i> </button>
+            <ul class="nav">
+                <!-- <li class="nav-item">
+                    <a class="nav-link btn-icon" href="#">
+                        <i class="material-icons md-notifications animation-shake"></i>
+                        <span class="badge rounded-pill">3</span>
+                    </a>
+                </li> -->
+                <li class="nav-item">
+                    <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i> </a>
+                </li>
+                <!-- <li class="nav-item">
+                    <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
+                </li> -->
+                <li class="dropdown nav-item">
+                    <a class="dropdown-item text-danger" href="/admin/logout"><i
+                        class="material-icons md-exit_to_app"></i>Logout</a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <div
+        class="d-flex ms-4 me-4 justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom my-4 ">
+        <h3 class="h3">Order details</h3>
+        <div class="btn-toolbar mb-2 mb-md-0">
+
+
+        </div>
+    </div>
+
+    <!-- Content wrapper scroll start -->
+    <div class="container content-wrapper-scroll">
+        <div class="content-wrapper">
+            <div class="row gutters bg-white">
+                <!-- Product Table Section -->
+                <div class="col-lg-12">
+                    <div class="card-body">
+                        <div class="row mt-20 order-info-wrap">
+                            <div class="col-lg-10">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th width="40%">Product</th>
+                                                <th width="20%">Unit Price</th>
+                                                <th width="20%">Quantity</th>
+                                                <th width="20%" class="text-end">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Loop through products in the order -->
+                                            <% 
+                                             orders.items.forEach((item) => { %>
+                                            <tr>
+                                                <td>
+                                                    <a class="itemside" href="#">
+                                                        <div class="left">
+                                                            <img src="/uploads/productImages/<%= item.image %>" width="40" height="40"
+                                                                class="img-xs" alt="<%= item.name %>">
+                                                        </div>
+                                                        <div class="info"> <%= item.name %> </div>
+                                                    </a>
+                                                </td>
+                                                <td> &#8377;<%= item.productPrice %></td>
+                                                <td> <%= item.quantity %></td>
+                                                <td class="text-end"> &#8377;<%= item.price %></td>
+                                            </tr>
+
+                                            <% }); %>
+                                            <tr>
+                                                <td colspan="4">
+                                                    <article class="float-end">
+                                                        <dl class="dlist">
+                                                            <dt>Subtotal:</dt>
+                                                            <dd>&#8377;<%= orders.billTotal %></dd>
+                                                        </dl>
+                                                        <dl class="dlist">
+                                                            <dt>Grand total:</dt>
+                                                            <dd> <b class="h5">&#8377;<%= orders.billTotal %></b> </dd>
+                                                        </dl>
+                                                        <dl class="dlist">
+                                                            <dt class="text-muted">Payment Status:</dt>
+                                                            <dd>
+                                                                <span
+                                                                    class="badge rounded-pill alert-success text-success"><%= orders.paymentStatus %></span>
+                                                            </dd>
+                                                        </dl>
+                                                    </article>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Three Sections Below Product Table -->
+                <div class="col-lg-4 col-md-12 col-sm-12 ">
+                    <!-- General Details Section -->
+                    <div class="card ">
+                        <div class="card-header" style="font-weight: bolder;">General Details</div>
+                        <div class="card-body">
+                            <form id="orderStatusForm"
+                                onsubmit="submitOrderStatusForm('<%= orders.oId %>'); return false;">
+                                <label for="orderId" style="font-weight: bolder;">Order Id:</label><br>
+                                <%= orders.oId %><br /><br />
+                                <label for="orderDate" style="font-weight: bolder;">Order Date:</label><br>
+                                <input type="text" class="mt-2 mb-2 text-brand border-0"
+                                    value="<%= orders.orderDate %>" disabled /><br>
+
+                                <label for="orderStatus mt-4" style="font-weight: bolder;">Order Status:</label><br>
+                                <select name="orderStatus" class="form-select mt-2" data-live-search="true">
+                                    <% switch (orders.status) {
+                                        case 'Pending': %>
+                                    <option value="Pending" selected>Pending</option>
+                                    <option value="Processing">Processing</option>
+                                    <option value="Shipped">Shipped</option>
+                                    <option value="Canceled">Canceled</option>
+                                    <% break;
+                                        case 'Processing': %>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Processing" selected>Processing</option>
+                                    <option value="Shipped">Shipped</option>
+                                    <option value="Canceled">Canceled</option>
+                                    <% break;
+                                        case 'Shipped': %>
+                                    <option value="Shipped" selected>Shipped</option>
+                                    <option value="Canceled">Canceled</option>
+                                    <option value="Delivered">Delivered</option>
+                                    <% break;
+                                       case 'Canceled': %>
+                                    <option value="Canceled">Canceled</option>
+                                    <% break;                                                  
+                                        default: %>
+                                    <option value="Delivered">Delivered</option>
+                                    <% } %>
+                                </select><br>
+                                <button type="submit" class="btn btn-primary">Save Order</button>
+                            </form>
+
+
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header" style="font-weight: bolder;">User Details</div>
+                        <div class="card-body">
+                            <strong style="font-weight: bold;"> Name:</strong>
+                            <span class="text-brand"> <%= orders.user.name %></span><br>
+                            <strong style="font-weight: bold;">Email:</strong>
+                            <span class="text-brand"> <%= orders.user.email %></span><br>
+                           
+                            <strong style="font-weight: bold;">Blocked:</strong>
+                            <span class="text-brand"><%=orders.user.isBlocked ? "Yes" : "No" %></span><br>
+                            <strong style="font-weight: bold;">Mobile:</strong>
+                            <span class="text-brand"> <%= orders.user.mobile %></span>
+
+                        </div>
+                    </div>
+
+
+
+
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="card-header" style="font-weight: bolder;">User Requests</div>
+
+
+
+                            <% if (orders && orders.requests &&orders.requests.status ) { 
+    if (orders.requests[0].status === 'Pending') { %>
+        <h6>Request for :<%= orders.requests[0].type %></h6>
+        <label for="reason">Reason:</label>
+        <input type="text" value="<%= orders.requests[0].reason %>" readonly class="mb-3 text-center">
+        <br><br>
+        <p>request status :<%= orders.requests[0].status %></p>
+
+        <button class="btn btn-success" onclick="acceptCancel('<%=orders.oId %>')">Accept</button>
+        <button class="btn btn-danger" onclick="rejectCancel('<%=orders.oId %>')">Reject</button>
+       
+        
+        <button class="btn btn-primary" onclick="refundAmount('<%= orders._id %>','<%= orders.user._id %>')">Refund Amount</button>
+<% } else if (orders.status === 'Delivered' && orders.requests[0].status === 'Pending') { %>
+        <strong class="text-brand mb-3 mt-2 text-center">Order Returned <span style="font-size: 14px; color: black;">(Reason)</span></strong>
+        <input type="text" value="<%= orders.requests[0].reason %>" readonly class="mb-3 text-center border-0">
+        <button class="btn btn-success w-50 mb-3 text-center ms-5" onclick="refundAmount('<%= orders._id %>','<%= orders.user._id %>')">Accept Return Order</button>
+<% } else { %>
+        <!-- Display other request details as needed -->
+        <% orders.requests.forEach(request => { %>
+            <% if (request.type === 'Return') { %>
+                <div class="pt-3">Order return accepted</div>
+                <span><a href="#" class="text-decoration-underline" target="_blank"></a> <i class="bi bi-box-arrow-up-right"></i></span>
+            <% } %>
+        <% }) %>
+<% } %>
+<% } else { %>
+    <p class="h6 text-center">No requests available.</p>
+<% } %>
+
+
+
+                        </div>
+                       
+                    </div>
+                    <hr>
+
+                </div>
+
+                <div class="col-lg-4 col-md-12 col-sm-12">
+                    <div class="card">
+
+                        <div class="card-header" style="font-weight: bolder;">Shipping Details</div>
+                        <div class="card-body">
+                            <label for="Address" style="font-weight: bolder;">Address Type: </label>
+                            <span class="text-brand"
+                                style="font-weight: bolder;"><%= orders.deliveryAddress.addressType %></span><br>
+
+                            <label for="HouseNo" style="font-weight: bolder;">House Number:</label>
+                            <span class="text-brand"
+                                style="font-weight: bolder;"><%= orders.deliveryAddress.HouseNo %></span><br>
+
+                            <label for="Street" style="font-weight: bolder;">Street:</label>
+                            <span class="text-brand"
+                                style="font-weight: bolder;"><%= orders.deliveryAddress.Street %></span><br>
+
+                            <label for="Landmark" style="font-weight: bolder;">Landmark:</label>
+                            <span class="text-brand"
+                                style="font-weight: bolder;"><%= orders.deliveryAddress.Landmark %></span><br>
+
+                            <label for="Pincode" style="font-weight: bolder;">Pincode:</label>
+                            <span class="text-brand"
+                                style="font-weight: bolder;"><%= orders.deliveryAddress.pincode %></span><br>
+
+                            <label for="City" style="font-weight: bolder;">City:</label>
+                            <span class="text-brand"
+                                style="font-weight: bolder;"><%= orders.deliveryAddress.city %></span><br>
+
+                            <label for="District" style="font-weight: bolder;">District:</label>
+                            <span class="text-brand"
+                                style="font-weight: bolder;"><%= orders.deliveryAddress.district %></span><br>
+
+                            <label for="State" style="font-weight: bolder;">State:</label>
+                            <span class="text-brand"
+                                style="font-weight: bolder;"><%= orders.deliveryAddress.State %></span><br>
+
+                            <label for="Country" style="font-weight: bolder;">Country:</label>
+                            <span class="text-brand"
+                                style="font-weight: bolder;"><%= orders.deliveryAddress.Country %></span><br>
+                        </div>
+                    </div>
+
+
+                    <!--payment details section -->
+                    <div class="card">
+                        <div class="card-header" style="font-weight: bolder;">Payment Details</div>
+                        <div class="card-body">
+                            <label for="BillTotal" style="font-weight: bolder;">Bill Total:</label>
+                            <span class="text-brand"> INR <%= orders.billTotal %></span><br>
+
+                            <label for="PaymentMethod" style="font-weight: bolder;">Payment Method:</label>
+                            <span class="text-brand"><%= orders.paymentMethod %></span><br>
+
+                            <label for="PaymentStatus" style="font-weight: bolder;">Payment Status:</label>
+                            <span class="text-brand"><%= orders.paymentStatus %></span><br>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function submitOrderStatusForm(orderId) {
+            const newStatus = document.querySelector('select[name="orderStatus"]').value;
+            // Make the fetch request
+          
+            fetch('/admin/uporderstatus', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                         newStatus,
+                        orderId
+                    }),
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        // Handle success
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Order Status Updated',
+                            text: 'The order status has been updated successfully.',
+                        });
+                    } else {
+                        // Handle error
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error Updating Order Status',
+                            text: data.message || 'An error occurred while updating the order status.',
+                        });
+                    }
+                })
+                .catch((error) => {
+                    // Handle fetch error
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Fetch Error',
+                        text: 'An error occurred while making the request.',
+                    });
+                });
+        }
+
+
+        function refundAmount(orderId, userId) {
+            // Prepare the data to be sent
+            const requestData = {
+                orderId: orderId,
+                userId: userId,
+            };
+            alert(orderId)
+            alert(userId)
+
+            // Make a POST request to the backend endpoint
+            fetch('/admin/refund-amount', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                })
+                .then(response => {
+                    //     if (!response.ok) {
+                    //         throw new Error('Network response was not ok');
+                    //     }
+                    //     return response.json();
+                    // })
+                    console.log("Response status:", response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    // Handle successful response
+                    console.log(data); // You can replace this with your desired logic
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Amount refunded to user successfully',
+                        text: 'The order status has been updated successfully.',
+                    })
+                    // Show a success message using SweetAlert
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 1000)
+                })
+                .catch(error => {
+                    // Handle errors
+                    console.error('Error:', error);
+
+                    Swal.fire({
+                        icon: 'Error!',
+                        title: 'Failed to refund amount',
+                        text: error,
+                    });
+
+                }) // Show an error message using SweetAlert
+        }
+
+        function acceptCancel(orderId) {
+    // Validate orderId (if needed)
+
+    fetch('/admin/acceptCancel', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            orderId
+        }),
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok.');
+        }
+        return response.json();
+    })
+    .then((data) => {
+        if (data.success) {
+            // Handle success
+            Swal.fire({
+                icon: 'success',
+                title: 'request accepted',
+                text: 'User request accepted.',
+            });
+        } else {
+            // Handle error
+            Swal.fire({
+                icon: 'error',
+                title: 'Error Updating Request',
+                text: data.message || 'An error occurred while updating the user request.',
+            });
+        }
+    })
+    .catch((error) => {
+        // Handle fetch error
+        console.error('Fetch Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Fetch Error',
+            text: 'An error occurred while making the request.',
+        });
+    });
+}
+
+function refundAmount(orderId, userId) {
+            // Prepare the data to be sent
+            const requestData = {
+                orderId: orderId,
+                userId: userId,
+            };
+            alert(orderId)
+            alert(userId)
+
+            // Make a POST request to the backend endpoint
+            fetch('/admin/refund-amount', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                })
+                .then(response => {
+                    //     if (!response.ok) {
+                    //         throw new Error('Network response was not ok');
+                    //     }
+                    //     return response.json();
+                    // })
+                    console.log("Response status:", response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    // Handle successful response
+                    console.log(data); // You can replace this with your desired logic
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Amount refunded to user successfully',
+                        text: 'The order status has been updated successfully.',
+                    })
+                    // Show a success message using SweetAlert
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 1000)
+                })
+                .catch(error => {
+                    // Handle errors
+                    console.error('Error:', error);
+
+                    Swal.fire({
+                        icon: 'Error!',
+                        title: 'Failed to refund amount',
+                        text: error,
+                    });
+
+                }) // Show an error message using SweetAlert
+        }
+
+        function rejectCancel(orderId) {
+   
+
+    fetch('/admin/rejectCancel', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            orderId
+        }),
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok.');
+        }
+        return response.json();
+    })
+    .then((data) => {
+        if (data.success) {
+            // Handle success
+            Swal.fire({
+                icon: 'error',
+                title: 'request rejected',
+                text: 'User request Rejected.',
+            });
+        } else {
+            // Handle error
+            Swal.fire({
+                icon: 'error',
+                title: 'Error Updating Request',
+                text: data.message || 'An error occurred while updating the user request.',
+            });
+        }
+    })
+    .catch((error) => {
+        // Handle fetch error
+        console.error('Fetch Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Fetch Error',
+            text: 'An error occurred while making the request.',
+        });
+    });
+}
+
+    </script>
+
+    <footer class="main-footer font-xs">
+   <div class="row pb-30 pt-15">
+       <div class="col-sm-6">
+           <script>
+           document.write(new Date().getFullYear())
+           </script> © <a href="/">Nyra</a>.
+       </div>
+       <div class="col-sm-6">
+           <div class="text-sm-end">
+               All rights reserved
+           </div>
+       </div>
+   </div>
+</footer>
+</main>
+
+
+<!-- Include JavaScript -->
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>  -->
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" ></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="/public/assets/js/vendor/jquery-3.6.0.min.js"></script>
+<script src="/public/assets/js/vendor/jquery.fullscreen.min.js"></script>
+<script src="/public/assets/js/vendor/bootstrap.bundle.min.js"></script>
+<script src="/public/assets/js/vendor/select2.min.js"></script>
+<script src="/public/assets/js/vendor/perfect-scrollbar.js"></script>
+
+
+<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajaxy/1.6.1/scripts/jquery.ajaxy.min.js"></script> -->
+
+<!-- Main Script -->
+<script src="/public/assets/js/main.js" type="text/javascript"></script>
+</body>
+
+</html>
+

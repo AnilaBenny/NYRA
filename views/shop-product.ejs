@@ -160,9 +160,12 @@
                                                                     <a href="#" data-bs-toggle="modal"
                                                                         data-bs-target="#modalQuickview"><i
                                                                             class="icon-magnifier"></i></a>
-                                                                    <a href="wishlist.html"><i
-                                                                            class="icon-heart"></i></a>
-                                                                    <a href="compare.html"><i
+                                                                            <% if (wish && wish.length > 0 && wish.some(wishItem => wishItem.product.includes(product[i]._id))) { %>
+    <a href="#" onclick="removewishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
+<% } else { %>
+    <a href="#" onclick="addtowishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart " id="heart"></i></a>
+<% } %>
+                                                                    <a href="#"><i
                                                                             class="icon-shuffle"></i></a>
                                                                 </div>
                                                             </div>
@@ -597,9 +600,72 @@
 
     <!-- Main JS -->
     <script src="/public/assets/js/main.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+
+        async function addtowishlist(productid) {
+    try {
+        const response = await fetch(`/addToWishlist?id=${productid}`);
+       
+        if (response.ok) {
+            
+            
+            await Swal.fire({
+                title: 'Success',
+                text: 'Added to wishlist',
+                icon: 'success',
+                showConfirmButton: true
+            });
+            location.reload();
+            
+        } else {
+            
+            throw new Error('Failed to add to wishlist');
+        }
+    } catch (error) {
+        console.error('Error:', error.message);
+        await Swal.fire({
+            title: 'Error',
+            text: 'Failed to add to wishlist',
+            icon: 'error',
+            showConfirmButton: true
+        });
+    }
+}
+
+
+async function removewishlist(productid) {
+    try {
+        const response = await fetch(`/removeWishlist?id=${productid}`);
+       
+        if (response.ok) {
+            
+           
+            await Swal.fire({
+                title: 'removed ',
+                text: 'removed from wishlist',
+                icon: 'success',
+                showConfirmButton: true
+            });
+            location.reload();
+            
+        } else {
+            
+            throw new Error('Failed to add to wishlist');
+        }
+    } catch (error) {
+        console.error('Error:', error.message);
+        await Swal.fire({
+            title: 'Error',
+            text: 'Failed to add to wishlist',
+            icon: 'error',
+            showConfirmButton: true
+        });
+    }
+}
+
+
         
         async function addProductCart(productId) {
     try {
@@ -757,7 +823,7 @@
         
 </script>
 
-</script>
+
 
 </body>
 

@@ -1,6 +1,8 @@
 const productModel = require('../models/productModel');
 const categoryModel = require('../models/categoryModel');
 const userModels = require('../models/userModels');
+const cartModel = require('../models/cartModel');
+const wishlistModel=require('../models/wishlistModel')
 
 const loadproduct = async (req, res) => {
     try {
@@ -46,7 +48,7 @@ const insertproduct = async (req, res) => {
         const categorydetails = await categoryModel.find();
         if (savedProduct) {
 
-           // res.render('admin-product', { cate: categorydetails, message: 'Product saved successfully.' })
+        //    res.render('admin-product', { cate: categorydetails, message: 'Product saved successfully.' })
            res.redirect('/admin/productlist')
 
         } else {
@@ -150,11 +152,12 @@ const loaduserprodetails = async (req, res) => {
     try {
         const id = req.query.id;
         const productdetails = await productModel.findById({ _id: id }).populate('category');
+        const cartqty=await cartModel.find({'items.productId':id})
 
         if (productdetails) {
             console.log(productdetails);
 
-            res.render('user-product-details', { pro: productdetails });
+            res.render('user-product-details', { pro: productdetails,cart:cartqty.quantity });
         }
         else {
             res.redirect('/home');
@@ -213,8 +216,9 @@ const showproduct = async (req, res) => {
         }else{
             product = await productModel.find({ category: category._id }).populate('category');
         }
-            
-            res.render('shop-product', { product, cat});
+        const userData = await userModels.findOne({ email: req.session.email });
+             const wish=await wishlistModel.find({user:userData._id});
+            res.render('shop-product', { product, cat,wish});
         } catch (error) {
             console.error('Error in showproduct:', error.message);
             res.redirect('/home');

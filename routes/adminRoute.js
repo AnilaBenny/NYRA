@@ -66,7 +66,22 @@ admin_route.post('/blockUser',AdminLogSession,adminController.userblock);
 
 admin_route.get('/order-list',AdminLogSession,adminController.loadordermanagement);
 
-admin_route.post('/cancel',AdminLogSession,adminController.orderCancel);
-admin_route.post('/accept',AdminLogSession,adminController.orderAccept);
+admin_route.get('/orderdetails',AdminLogSession,adminController.loadorderdetail);
+
+admin_route.post('/acceptcancel',AdminLogSession,adminController.orderAccept);
+
+admin_route.post('/rejectcancel',AdminLogSession,adminController.orderCancel);
+
+admin_route.post('/uporderstatus',AdminLogSession,adminController.uporder);
+
+//coupon
+admin_route.get('/coupon',AdminLogSession,adminController.couponManager);
+
+admin_route.post('/coupon',AdminLogSession,adminController.couponCreate);
+
+admin_route.post('/coupon/list',AdminLogSession,adminController.listunlist);
+
+admin_route.get('/salesdetails',AdminLogSession,adminController.salesdetails)
+
 
 module.exports=admin_route;

@@ -89,7 +89,7 @@ const orderSchema = new Schema({
       requests: [{
         type: {
           type: String,
-          enum: ['Cancel', 'Return','-'],
+          enum: ['Cancel', 'Return'],
         },
         status: {
           type: String,

@@ -49,6 +49,10 @@ billTotal: {
     type: Number,
     required: true,
    default: 0
+  },
+  isApplied:{
+    type: Boolean, 
+    default: false,
   }
 }, {
 timestamps: true
