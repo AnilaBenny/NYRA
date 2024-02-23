@@ -102,7 +102,9 @@ const Postcheckout = async (req,res) => {
             oId: order_id,
             paymentStatus: "Success",
             paymentMethod: paymentOption,
-            deliveryAddress: addressdetails
+            deliveryAddress: addressdetails,
+            coupon:cart.coupon,
+            discountPrice:cart.discountPrice
         });
 
         await orderData.save();

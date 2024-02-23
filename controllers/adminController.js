@@ -77,7 +77,19 @@ try{
     
       let averageSales = orders.length / date; 
       let averageRevenue = totalRevenue / date; 
-    
+    //   const coupons = await couponModel.find();
+
+    //   const filteredCoupons = coupons.filter(coupon => {
+    //       return coupon.usersUsed.length > 0;
+    //   });
+      
+    //   // Retrieve only the 'code' and 'discountPrice' fields from the filtered coupons
+    //   const couponDetails = filteredCoupons.map(coupon => {
+    //       return {
+    //           code: coupon.code,
+    //           discountPrice: coupon.discountPrice
+    //       };
+    //   });
      
       return {
         users,
@@ -88,13 +100,131 @@ try{
         averageSales,
         averageRevenue,
         Revenue,
-        productEntered:productEntered.length
+        productEntered:productEntered.length,
+        // couponDetails,
+        totalOrder:orders
       };
 }
 catch(err){
 console.log('salesreport',err.message);
 }
 }
+
+const pdf = async (req, res) => {
+    try {
+      
+      let salesData = null; 
+  
+      if (req.query.type === 'daily') {
+        salesData = await salesReport(1);
+      } else if (req.query.type === 'weekly') {
+        salesData = await salesReport(7);
+      } else if (req.query.type === 'monthly') {
+        salesData = await salesReport(30);
+      } else if (req.query.type === 'yearly') {
+        salesData = await salesReport(365);
+      }
+  
+      let doc = new PDFDocument();
+  
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="sales_report.pdf"');
+  
+      doc.pipe(res);
+  
+      doc.fontSize(20).text('Sales Report', { align: 'center' });
+      
+      if (salesData) {
+        console.log(salesData.totalOrder);
+        const couponDetails = salesData.totalOrder.map(order => {
+    
+                return {
+                    coupon:order.coupon,
+                    discountPrice:order.discountPrice};
+        });
+
+
+        // console.log(salesData);
+        // console.log(couponDetails);
+        doc.fontSize(12).text(`Total Revenue: INR ${salesData.totalRevenue}`);
+        doc.text(`Total Orders: ${salesData.totalOrders}`);
+        doc.text(`Total Order Count: ${salesData.totalOrderCount}`);
+        doc.text(`Total Count In Stock: ${salesData.totalCountInStock}`);
+        doc.text(`Average Sales: ${salesData.averageSales ? salesData.averageSales.toFixed(2) : 'N/A'}%`);
+        doc.text(`Average Revenue: ${salesData.averageRevenue ? salesData.averageRevenue.toFixed(2) : 'N/A'}%`);
+       let couponText = "Coupon codes used in this report:\n";
+        couponDetails.forEach((detail) => {
+         couponText += `${detail.coupon}: ${detail.discountPrice}\n`;
+        });
+
+        doc.text(couponText, 70, 190); 
+        const overallDiscountPrice = salesData.totalOrder.reduce((total, order) => {
+        return total + order.discountPrice;
+        }, 0);
+
+        doc.text(`Overall discount Price deducted from the actual price via applied coupons: INR ${overallDiscountPrice}`, 70, 180 + couponDetails.length * 20 + 30);
+
+      } else {
+        doc.text('No sales data available.');
+      }
+      doc.end();
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).send('Error generating PDF.');
+    }
+  };
+
+  const generateExcel = async (req, res, next) => {
+    try {
+      const salesDatas = await salesReport(365);
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Sales Report');
+      const overallDiscountPrice=salesDatas.totalOrder.reduce((total, order) => total + order.discountPrice, 0);
+      const couponcode = salesDatas.totalOrder.map(order => { return order.coupon;});
+      const couponCodesString = couponcode.join(', ');
+    //   console.log(couponCodesString,overallDiscountPrice);
+      worksheet.columns = [
+        { header: 'Total Revenue', key: 'totalRevenue', width: 15 },
+        { header: 'Total Orders', key: 'totalOrders', width: 15 },
+        { header: 'Total Count In Stock', key: 'totalCountInStock', width: 15 },
+        { header: 'Average Sales', key: 'averageSales', width: 15 },
+        { header: 'Average Revenue', key: 'averageRevenue', width: 15 },
+        { header: 'Revenue', key: 'Revenue', width: 15 },
+        { header: 'Applied coupon code', key: 'couponCodesString', width: 15 },
+        { header: 'overall discount price', key: 'overalldiscountprice', width: 15 }
+      ];
+      
+      // Set up worksheet columns
+
+
+
+      worksheet.addRow({
+        totalRevenue: salesDatas.totalRevenue,
+        totalOrders: salesDatas.totalOrders,
+        totalCountInStock: salesDatas.totalCountInStock,
+        averageSales: salesDatas.averageSales ? salesDatas.averageSales.toFixed(2) : 'N/A',
+        averageRevenue: salesDatas.averageRevenue ? salesDatas.averageRevenue.toFixed(2) : 'N/A',
+        Revenue: salesDatas.Revenue,
+        couponCodesString:couponCodesString,
+        overalldiscountprice:overallDiscountPrice
+        
+        
+      });
+      
+    
+
+  
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="sales_report.xlsx"');
+  
+      workbook.xlsx.write(res).then(() => res.end());
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send('Error generating Excel file.');
+    }
+  };
+
 
 async function orderPieChart() {
     const statuses = ["Pending", "Processing", "Shipped", "Delivered", "Canceled", "Returned"];
@@ -170,7 +300,7 @@ const loadPanel = async (req, res) => {
         
         //pie chart
         let orderChart=await orderPieChart();
-        console.log(orderChart);
+        // console.log(orderChart);
 
         // console.log(daily,weekly,monthly,yearly,allProductsCount,orders);
         res.render('adminpanel.ejs',{daily,weekly,monthly,yearly,allProductsCount,orders,orderChart});
@@ -428,6 +558,59 @@ catch(err){
 }
 }
 
+const filterData=async(req,res)=>{
+    try{
+        const filterData=req.body;
+        console.log(filterData);
+        if(filterData.type==='today'){
+            date=1
+        }else if(filterData.type==='week'){
+            date=7
+        }else{
+            date=30
+        }
+        if(filterData.type==='custom'){
+            const endDate = new Date(filterData.endDate);
+            const startDate = new Date(filterData.startDate);
+            
+            const differenceMs = endDate.getTime() - startDate.getTime();
+            const differenceDays = differenceMs / (1000 * 3600 * 24);
+           date = Math.round(differenceDays);
+            
+            console.log(date);
+            
+        }
+        const currentDate = new Date();
+        let order = [];
+        for (let i = 0; i < date; i++) {
+            const startDate = new Date(currentDate);
+            startDate.setDate(currentDate.getDate() - i);
+            startDate.setHours(0, 0, 0, 0);
+            const endDate = new Date(currentDate);
+            endDate.setDate(currentDate.getDate() - i);
+            endDate.setHours(23, 59, 59, 999);  
+        
+            const dailyOrders = await orderModel.find({
+              status: "Delivered",
+              orderDate: {
+                $gte: startDate,
+                $lt: endDate,
+              },
+            }).populate('user');
+            
+        
+            order= [...order, ...dailyOrders];
+          }
+    // console.log(orders)
+    // res.render('salesdetails',{order});
+        res.json({ success: true, message: 'Filter data received successfully',order:order });
+    }
+    catch(error){
+        console.log('filter data',error.message);
+
+    }
+}
+
 module.exports = {
     adminLogin,
     adminPost,
@@ -445,5 +628,9 @@ module.exports = {
     couponCreate,
     listunlist
 
-    ,salesdetails
+    ,salesdetails,
+    filterData,
+
+    pdf,
+    generateExcel
 };

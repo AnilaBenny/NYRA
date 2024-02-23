@@ -52,6 +52,7 @@ const addTocart = async (req, res) => {
         }
 
         userCart.billTotal = userCart.items.reduce((total, item) => total + item.price, 0);
+
         await userCart.save();
         return res.redirect('/cart');
     } catch (err) {

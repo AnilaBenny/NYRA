@@ -31,7 +31,11 @@ const Couponcart = async (req, res) => {
         }
 
         cart.billTotal *= (1 - coupon.discountPercentage / 100);
+        const discountAmount = (coupon.discountPercentage / 100) * cart.billTotal;
+
         cart.isApplied=true;
+        cart.discountPrice=discountAmount;
+        cart.coupon=code;
         await cart.save();
 
         
@@ -57,6 +61,8 @@ const removeCoupon=async(req,res)=>{
 
         cart.billTotal =cart.items.reduce((total, item) => total + item.price, 0);
         cart.isApplied=false;
+        cart.coupon='nil';
+        cart.discountPrice=0;
         await cart.save();
         console.log(coupon);
         const userIdIndex = coupon.usersUsed.indexOf(user._id);
@@ -64,6 +70,7 @@ const removeCoupon=async(req,res)=>{
             coupon.usersUsed.splice(userIdIndex, 1);
         }
         coupon.maxUsers++;
+        
         await coupon.save();
         res.status(200).send('Coupon updated successfully');
 

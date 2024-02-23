@@ -81,7 +81,13 @@ admin_route.post('/coupon',AdminLogSession,adminController.couponCreate);
 
 admin_route.post('/coupon/list',AdminLogSession,adminController.listunlist);
 
-admin_route.get('/salesdetails',AdminLogSession,adminController.salesdetails)
+admin_route.get('/salesdetails',AdminLogSession,adminController.salesdetails);
+
+admin_route.post('/filterData',AdminLogSession,adminController.filterData);
+
+admin_route.get('/pdf',adminController.pdf);
+admin_route.get('/excel',adminController.generateExcel)
+
 
 
 module.exports=admin_route;

@@ -1,11 +1,6 @@
 const mongoose = require('mongoose')
 
 const productSchema = new mongoose.Schema({
-   // owner: {
-   //    type: objectID,
-   //    required: true,
-   //    ref: 'Admin'
-   // },
 
    name: {
       type: String,
@@ -64,11 +59,11 @@ const productSchema = new mongoose.Schema({
       type: Boolean,
       default: true
    }
-
-//    discountPrice:{
-//       type: Number,
-//       default: 0,
-//    },
+,
+   discountPrice:{
+      type: Number,
+      default: 0,
+   },
 //    afterDiscount:Number,
 
    

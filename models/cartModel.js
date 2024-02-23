@@ -53,7 +53,15 @@ billTotal: {
   isApplied:{
     type: Boolean, 
     default: false,
-  }
+  },
+  coupon:{
+    type:String,
+    default:'nil'
+  },
+  discountPrice:{
+    type: Number,
+    default: 0,
+ }
 }, {
 timestamps: true
 })

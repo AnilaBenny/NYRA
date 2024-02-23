@@ -99,7 +99,13 @@ const orderSchema = new Schema({
         reason: String,
         // Add other fields as needed for your specific use case
       }, ],
-
+    coupon:{
+        type:String
+    },
+    discountPrice:{
+      type: Number,
+      default: 0,
+   }
 
     },
   {
