@@ -42,7 +42,7 @@
 
                             <li><a href="#downloads" data-bs-toggle="tab"
                                     class="nav-link btn btn-block btn-md btn-black-default-hover">My Wallet</a></li>
-                                    <li><a href="#" data-bs-toggle="tab"
+                                    <li><a href="/wishlist" data-bs-toggle="tab"
                                         class="nav-link btn btn-block btn-md btn-black-default-hover">my wishlist</a></li>
                             <li><a href="/myorder" 
                                     class="nav-link btn btn-block btn-md btn-black-default-hover">Orders</a></li>
@@ -110,34 +110,42 @@
                         </div>
                         <%}%>
                         <div class="tab-pane fade" id="downloads">
-                            <h4>Downloads</h4>
-                            <div class="table_page table-responsive">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Product</th>
-                                            <th>Downloads</th>
-                                            <th>Expires</th>
-                                            <th>Download</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Shopnovilla - Free Real Estate PSD Template</td>
-                                            <td>May 10, 2018</td>
-                                            <td><span class="danger">Expired</span></td>
-                                            <td><a href="#" class="view">Click Here To Download Your File</a></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Organic - ecommerce html template</td>
-                                            <td>Sep 11, 2018</td>
-                                            <td>Never</td>
-                                            <td><a href="#" class="view">Click Here To Download Your File</a></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="mb-0">My Wallet</h4>
+                                </div>
+                                <div class="card-body">
+                                    
+                                    <h5>Wallet Balance:</h5>
+                                    <h5 class="lead">
+                                        INR <%= wallet.balance%>
+                                    </h5>
+                                    
+                                    <div class="wallet-transactions">
+                                        <h5>Recent Transactions:</h5>
+                                        <% if (wallet.transactions && wallet.transactions.length > 0) { %>
+                                            <ul class="list-group">
+                                                <% wallet.transactions.slice(-5).forEach(function(transaction) { %>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span class="<%= transaction.type === 'credit' ? 'text-success' : 'text-danger' %>">credited</span>
+                                                        <span class="<%= transaction.type === 'credit' ? 'text-success' : 'text-danger' %>">
+                                                            <%= transaction.type === 'credit' ? '+' : '-' %>
+                                                            INR <%= transaction.amount %>
+                                                        </span>
+                                                    </li>
+                                                <% }); %>
+                                            </ul>
+                                        <% } else { %>
+                                            <p>No transactions found.</p>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <!-- <div class="card-footer text-muted">
+                                    <button type="button" class="btn btn-primary" onclick="window.location.href='/walletPage'">View All Transactions</button>
+                                </div> -->
                             </div>
                         </div>
+                        
                         <div class="tab-pane" id="address">
                             <p>The following addresses will be used on the checkout page .</p>
                             <h5 class="billing-address">Address</h5>

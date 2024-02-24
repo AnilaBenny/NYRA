@@ -3,7 +3,7 @@ const admin_route=express();
 const product = require('../controllers/productController');
 const multer=require('multer');
 const {AdminLogSession,adminisLogout}=require('../middlewares/auth')
-
+const wallet=require('../controllers/walletController');
 
 
 //controller connection
@@ -86,7 +86,9 @@ admin_route.get('/salesdetails',AdminLogSession,adminController.salesdetails);
 admin_route.post('/filterData',AdminLogSession,adminController.filterData);
 
 admin_route.get('/pdf',adminController.pdf);
-admin_route.get('/excel',adminController.generateExcel)
+admin_route.get('/excel',adminController.generateExcel);
+
+admin_route.post('/refund',wallet.addtoWallet)
 
 
 

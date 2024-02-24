@@ -424,12 +424,14 @@
                                     <option value="Pending" selected>Pending</option>
                                     <option value="Processing">Processing</option>
                                     <option value="Shipped">Shipped</option>
+                                    <option value="Delivered">Delivered</option>
                                     <option value="Canceled">Canceled</option>
                                     <% break;
                                         case 'Processing': %>
                                     <option value="Pending">Pending</option>
                                     <option value="Processing" selected>Processing</option>
                                     <option value="Shipped">Shipped</option>
+                                    <option value="Delivered">Delivered</option>
                                     <option value="Canceled">Canceled</option>
                                     <% break;
                                         case 'Shipped': %>
@@ -477,7 +479,7 @@
 
 
 
-                            <% if (orders && orders.requests &&orders.requests.status ) { 
+                            <% if (orders && orders.requests.length>0) { 
     if (orders.requests[0].status === 'Pending') { %>
         <h6>Request for :<%= orders.requests[0].type %></h6>
         <label for="reason">Reason:</label>
@@ -623,61 +625,11 @@
         }
 
 
-        function refundAmount(orderId, userId) {
-            // Prepare the data to be sent
-            const requestData = {
-                orderId: orderId,
-                userId: userId,
-            };
-            alert(orderId)
-            alert(userId)
-
-            // Make a POST request to the backend endpoint
-            fetch('/admin/refund-amount', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(requestData),
-                })
-                .then(response => {
-                    //     if (!response.ok) {
-                    //         throw new Error('Network response was not ok');
-                    //     }
-                    //     return response.json();
-                    // })
-                    console.log("Response status:", response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    // Handle successful response
-                    console.log(data); // You can replace this with your desired logic
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Amount refunded to user successfully',
-                        text: 'The order status has been updated successfully.',
-                    })
-                    // Show a success message using SweetAlert
-                    setTimeout(() => {
-                        window.location.reload()
-                    }, 1000)
-                })
-                .catch(error => {
-                    // Handle errors
-                    console.error('Error:', error);
-
-                    Swal.fire({
-                        icon: 'Error!',
-                        title: 'Failed to refund amount',
-                        text: error,
-                    });
-
-                }) // Show an error message using SweetAlert
-        }
+    
+    
 
         function acceptCancel(orderId) {
-    // Validate orderId (if needed)
+   
 
     fetch('/admin/acceptCancel', {
         method: 'POST',
@@ -696,14 +648,14 @@
     })
     .then((data) => {
         if (data.success) {
-            // Handle success
+            
             Swal.fire({
                 icon: 'success',
                 title: 'request accepted',
                 text: 'User request accepted.',
             });
         } else {
-            // Handle error
+          
             Swal.fire({
                 icon: 'error',
                 title: 'Error Updating Request',
@@ -712,7 +664,7 @@
         }
     })
     .catch((error) => {
-        // Handle fetch error
+       
         console.error('Fetch Error:', error);
         Swal.fire({
             icon: 'error',
@@ -723,16 +675,13 @@
 }
 
 function refundAmount(orderId, userId) {
-            // Prepare the data to be sent
+           
             const requestData = {
                 orderId: orderId,
                 userId: userId,
             };
-            alert(orderId)
-            alert(userId)
-
-            // Make a POST request to the backend endpoint
-            fetch('/admin/refund-amount', {
+            
+            fetch('/admin/refund', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -749,21 +698,21 @@ function refundAmount(orderId, userId) {
                     return response.json();
                 })
                 .then(data => {
-                    // Handle successful response
-                    console.log(data); // You can replace this with your desired logic
+                   
+                    console.log(data); 
 
                     Swal.fire({
                         icon: 'success',
                         title: 'Amount refunded to user successfully',
                         text: 'The order status has been updated successfully.',
                     })
-                    // Show a success message using SweetAlert
+                   
                     setTimeout(() => {
                         window.location.reload()
                     }, 1000)
                 })
                 .catch(error => {
-                    // Handle errors
+                   
                     console.error('Error:', error);
 
                     Swal.fire({
@@ -772,7 +721,7 @@ function refundAmount(orderId, userId) {
                         text: error,
                     });
 
-                }) // Show an error message using SweetAlert
+                }) 
         }
 
         function rejectCancel(orderId) {
@@ -802,7 +751,7 @@ function refundAmount(orderId, userId) {
                 text: 'User request Rejected.',
             });
         } else {
-            // Handle error
+            
             Swal.fire({
                 icon: 'error',
                 title: 'Error Updating Request',
@@ -811,7 +760,7 @@ function refundAmount(orderId, userId) {
         }
     })
     .catch((error) => {
-        // Handle fetch error
+        
         console.error('Fetch Error:', error);
         Swal.fire({
             icon: 'error',

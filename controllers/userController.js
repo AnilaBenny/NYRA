@@ -10,6 +10,7 @@ const otpModel = require('../models/otpModel');
 const addressModel=require('../models/addressModel');
 const orderModel = require('../models/orderModel');
 const wishlistModel=require('../models/wishlistModel');
+const walletModel=require('../models/walletModel');
 
 // const Email = process.env.Email;
 // const Pass = process.env.Pass;
@@ -514,8 +515,11 @@ const loaduserAc=async(req,res)=>{
       const order=await orderModel.findOne({
         user: user._id
       });
+      const wallet=await walletModel.findOne({
+        user: user._id
+      });
       
-    res.render('user-detail',{user,address});
+    res.render('user-detail',{user,address,wallet});
     }
     
   }

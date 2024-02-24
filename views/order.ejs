@@ -145,12 +145,26 @@
                                             <br>
                                             <a class="btn btn-outline-danger mb-1" onclick="cancelOrder('<%= order[j].oId %>')" data-order-id="<%= order[j].oId %>" style="width: 190px;">Cancel Order</a>
                                         </form>
+                                        
                                     <% } else if(order[j].status === 'Delivered') { %>
                                         <a href="/orderDetails?oId=<%= order[j].oId %>" class="btn btn-outline-primary mb-1" style="width: 190px;">View order details</a>
+                                        <%if(order[j].requests.length>0 && order[j].requests[0].type==='Return'){%>
+                                            <a class="btn btn-outline-danger mb-1" style="width: 190px;" onclick="statusReturn('<%= order[j].requests[0].status %>')" >click here to see the status</a>
+                                       <% }else{%>
                                         <a class="btn btn-outline-danger mb-1" onclick="requestReturn('<%= order[j].oId %>')"  style="width: 190px;">Request return</a>
-                                    <% } else { %>
+                                    <%} } else { %>
                                         <a href="/orderDetails?oId=<%= order[j].oId %>" class="btn btn-outline-primary" style="width: 190px;">View order details</a>
-                                    <% } %>
+                                    <% } if(order[j].requests.length>0){if(order[j].requests[0].type==='Cancel'){
+                                        if( order[j].requests[0].status==='Pending'){%>
+                                        <p>cancel Requested</p><% }
+                                    else if(order[j].requests[0].status==='Accepted'){%>
+                                        <p>Cancel Request accepted </p>
+                                        <p>Refund initiated! check your wallet</p>
+                                    <%}
+                                else{%>
+                                    <p> Cancel request Rejected</p>
+                                <%}}} %>
+                                    
                                 </td>
                             </tr>
                         <% } %>
@@ -624,7 +638,9 @@ function requestReturn(oId){
                         title: 'Return Requested',
                         text: 'Your Return request has been submitted successfully!'
                     });
+                    location.reload()
                     return response.json();
+                   ;
                 } else {
                     throw new Error('Network response was not ok.');
                 }
@@ -636,6 +652,34 @@ function requestReturn(oId){
     });
 
 }
+
+function statusReturn(status) {
+    
+    if (status === 'Pending') {
+        swal.fire({
+            icon: 'info',
+            title: 'Return Request pending'
+        });
+    } else if (status === 'Rejected') {
+        swal.fire({
+            icon: 'error',
+            title: 'Return Request Rejected'
+        });
+    } else if (status === 'Accepted') {
+        swal.fire({
+            icon: 'success',
+            title: 'Return Request Accepted!!! Refund initiated,chech your wallet',
+            showCancelButton: true,
+            confirmButtonText: 'OK'
+        })
+    } else {
+        swal.fire({
+            icon: 'warning',
+            title: 'Unknown status: ' + request.status
+        });
+    }
+}
+
 
        </script>
     
