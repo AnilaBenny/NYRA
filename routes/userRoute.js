@@ -53,7 +53,7 @@ userRoute.get('/shop',logSession,product.showproduct);
 userRoute.get('/checkout',logSession,checkout.loadcheckout);
 userRoute.post('/checkout',logSession,checkout.Postcheckout);
 
-userRoute.post('/orderOnlinePayment',logSession,checkout.razorpay);
+userRoute.post('/orderOnlinePayment',logSession,checkout.razorpayVerify);
 
 userRoute.get('/orderConfirmation',logSession,checkout.orderConfirmation);
 userRoute.get('/myorder',logSession,userController.loadorderpage);
@@ -71,6 +71,7 @@ userRoute.get('/addToWishlist',wishlist.addToWishlist);
 userRoute.get('/removeWishlist',wishlist.removeWishlist);
 userRoute.get('/wishlist',wishlist.loadWishlist);
 
+userRoute.get('/search',product.showsearch)
 
 
 

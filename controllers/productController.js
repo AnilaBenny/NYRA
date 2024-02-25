@@ -17,6 +17,30 @@ const loadproduct = async (req, res) => {
 
 };
 
+const showsearch = async (req, res) => {
+    try {
+        const search = req.query.text;
+        const cat = req.query.category;
+
+        const category = await categoryModel.findOne({ name: cat });
+
+        const products = await productModel
+            .find({
+                category: category._id,
+                $or: [
+                    { name: { $regex: search, $options: 'i' } },
+                    { brand: { $regex: search, $options: 'i' } }
+                ]
+            })
+            .populate('category');
+            // console.log(products);
+        res.status(200).json({ product: products });
+    } catch (error) {
+        console.error('Error searching for products:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 //insert product
 
 const insertproduct = async (req, res) => {
@@ -177,7 +201,7 @@ const showproduct = async (req, res) => {
                 res.render('shop-product');
             }
     
-            const searchQuery = req.query.search || '';
+            const search = req.query.search || '';
             
             let sortQuery = {};
     
@@ -200,13 +224,13 @@ const showproduct = async (req, res) => {
             } else if (sort === 'Newarrivals') {
                 sortQuery = { createdAt: -1 };
             }
-            if (searchQuery !== '') {
+            if (search !== '') {
                 product = await productModel
                     .find({
                         category: category._id,
                         $or: [
-                            { name: { $regex: searchQuery, $options: 'i' } },
-                            { brand: { $regex: searchQuery, $options: 'i' } }
+                            { name: { $regex: search, $options: 'i' } },
+                            { brand: { $regex: search, $options: 'i' } }
                         ]
                     })
                     .populate('category')
@@ -237,7 +261,8 @@ module.exports = {
     updatepro,
     deletepro,
     loaduserprodetails,
-    showproduct
+    showproduct,
+    showsearch
 
 
 }

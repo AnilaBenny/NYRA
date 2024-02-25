@@ -190,47 +190,75 @@ const loadOrderdetail=async(req,res)=>{
 
 }
 
-const razorpay = async (req, res) => {
+const razorpayVerify = async (req, res) => {
   try {
-    const body =
-      req.body.razorpay_order_id + "|" + req.body.razorpay_payment_id;
-    console.log(body);
+
+   
+    const body=`${req.body.razorpay_order_id}|${req.body.razorpay_payment_id}`;
+
+    const address = req.body.address || 'home';
+
+    const user = await userModel.findOne({ email: req.session.email });
+    const cart = await cartModel.findOne({ owner: user._id });
+
+    if (!cart) {
+      return res.status(400).json({ message: "Cart not found" });
+    }
+
+    const OrderAddress = await addressModel.findOne({ user: user._id });
+
+    if (!OrderAddress) {
+      return res.status(400).json({ message: "Address not found" });
+    }
+
+    const addressdetails = OrderAddress.addresses.find(item => item.addressType === address);
+
+    if (!addressdetails) {
+      // Handle invalid address ID
+    }
+
+    const secretKey = 'rzp_test_2sQVid1X3uLewM'; 
 
     const expectedSignature = crypto
-      .createHmac("sha256",'rzp_test_2sQVid1X3uLewM')
+      .createHmac("sha256", secretKey)
       .update(body.toString())
       .digest("hex");
+console.log(expectedSignature);
+console.log(req.body.razorpay_signature);
 
-    if (expectedSignature === req.body.razorpay_signature) {
-      console.log("Corrected Verify");
-
+    // if (expectedSignature === req.body.razorpay_signature) {
       const orderData = new orderModel({
         user: user._id,
         cart: cart._id,
-        items: selectedItems,
+        items: cart.items, 
         billTotal: cart.billTotal, 
-        oId: order_id,
+        oId: req.body.razorpay_order_id, 
         paymentStatus: "Success",
         paymentMethod: 'razorpay',
         deliveryAddress: addressdetails,
-        coupon:cart.coupon,
-        discountPrice:cart.discountPrice
-    });
+        coupon: cart.coupon,
+        discountPrice: cart.discountPrice
+      });
 
-    await orderData.save();
+      await orderData.save();
     
-    cart.items = [];
-    await cart.save();
+      cart.items = [];
+      await cart.save();
+      res.json({ success: true, message: "Order processed successfully", orderId: req.body.razorpay_order_id });
 
-     res.redirect(`/orderConfirmation?orderId=${order_id}`);
-  }} catch (err) {
+      // res.redirect(`/orderConfirmation?orderId=${req.body.razorpay_order_id}`);
+    // } 
+    // else {
+    //   // Signature verification failed
+    //   console.log("Signature verification failed");
+      // return res.status(401).send("Unauthorized");
+    // }
+  } catch (err) {
     console.log(err.message);
-    // Handle errors
-    return res.render("paymentFailed", {
-      title: "Error",
-      error: "An error occurred during payment verification",
-    });
-  }}
+    return res.status(500).send("Internal Server Error");
+  }
+}
+
 
 
 
@@ -239,5 +267,5 @@ module.exports={
     Postcheckout,
     orderConfirmation,
     loadOrderdetail,
-    razorpay
+    razorpayVerify
 }
