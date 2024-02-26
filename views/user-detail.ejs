@@ -115,7 +115,7 @@
                                     <h4 class="mb-0">My Wallet</h4>
                                 </div>
                                 <div class="card-body">
-                                    
+                                    <%if(wallet !== null){%>
                                     <h5>Wallet Balance:</h5>
                                     <h5 class="lead">
                                         INR <%= wallet.balance%>
@@ -135,7 +135,7 @@
                                                     </li>
                                                 <% }); %>
                                             </ul>
-                                        <% } else { %>
+                                        <% }} else { %>
                                             <p>No transactions found.</p>
                                         <% } %>
                                     </div>
@@ -150,7 +150,7 @@
                             <p>The following addresses will be used on the checkout page .</p>
                             <h5 class="billing-address">Address</h5>
                                
-                            <%if(address){
+                            <%if(address!== null){
                                 for (let i = 0; i < address.addresses.length; i++) {
                                     
                                     

@@ -96,7 +96,7 @@
                                     <div class="tab-pane" id="address">
                                         <p>The following addresses will be used on the checkout page otherwise it take home as default address.</p>
                                         <h5 class="billing-address">Address</h5>
-                                        <%if(typeof address!=='undefined'){
+                                        <%if(address!==null){if(typeof address!=='undefined'){
                                             for (let i = 0; i < address.addresses.length; i++) {
                                                 
                                                 
@@ -115,7 +115,7 @@
                                             </div> 
                                             </div>
                                           </div>
-                                          <%}}else{%>
+                                          <%}}}else{%>
                                             <p>Please Add address</p>
                                             <%}%>
                                           
@@ -648,9 +648,9 @@ proceedButton.addEventListener("click", async () => {
     'Content-Type': 'application/json',
   },
   body: JSON.stringify(paymentData),
-})
-.then(response => response.json()) 
-.then(data => {
+    })
+    .then(response => response.json()) 
+    .then(data => {
   if (data.success) {
     console.log("Order created successfully:", data.message);
 
@@ -660,11 +660,11 @@ proceedButton.addEventListener("click", async () => {
     console.error("Error in order creation:", data.error || "Unknown error");
 
   }
-})
-.catch(error => {
+    })
+    .catch(error => {
   console.error('Error processing payment:', error);
 
-});
+    });
 
     },
                     prefill: {
@@ -689,6 +689,29 @@ proceedButton.addEventListener("click", async () => {
         console.error("Error during checkout:", error);
         alert("An error occurred during checkout. Please try again later.");
     }}
+    else {
+    const response = await fetch('/checkout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (response.ok) {
+        const responseData = await response.json();
+        if (responseData.success) {
+            window.location.href = "/orderConfirmation?orderId=" + responseData.orderId;
+        } else {
+            // Handle unsuccessful checkout
+            console.log("Checkout failed:", responseData.error);
+        }
+    } else {
+        // Handle HTTP error
+        console.error("HTTP error:", response.status);
+    }
+}
+
 });
 
                       

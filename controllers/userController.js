@@ -510,16 +510,21 @@ const loaduserAc=async(req,res)=>{
   try{
     if (req.session.email) {
       const user = await userModel.findOne({ email: req.session.email });
-      const address = await addressModel.findOne({
+      let address = await addressModel.findOne({
         user: user._id
       });
       const order=await orderModel.findOne({
         user: user._id
       });
-      const wallet=await walletModel.findOne({
+      let wallet=await walletModel.findOne({
         user: user._id
       });
-      
+      if(!address){
+        address=null;
+      }
+      if(!wallet){
+        wallet=null;
+      }
     res.render('user-detail',{user,address,wallet});
     }
     

@@ -65,7 +65,9 @@ const loadWishlist=async(req,res)=>{
     try{
         const user = await userModels.findOne({ email: req.session.email });
         let wishlist = await wishlistModel.findOne({ user: user._id }).populate('product', null, null, { strictPopulate: false });
-
+        if(!wishlist){
+            wishlist=null
+        }
       
         console.log(wishlist);
         res.render('wishlist',{wishlist})

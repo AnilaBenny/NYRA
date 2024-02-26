@@ -34,9 +34,11 @@ const loadcheckout=async(req,res)=>{
     try{
         const user=await userModel.findOne({email:req.session.email});
         const cart=await cartModel.findOne({owner:user._id});
-        const address=await addressModel.findOne({user:user._id});
+        let address=await addressModel.findOne({user:user._id});
         //console.log(cart);
-
+        if(!address){
+          address=null;
+        }
         res.render('checkout',{address:address,cart:cart});
     }
     catch(error){
@@ -114,7 +116,11 @@ const Postcheckout = async (req,res) => {
         cart.items = [];
         await cart.save();
 
-         res.redirect(`/orderConfirmation?orderId=${order_id}`);
+         res.status(200).json({
+          success: true,
+          message: "Order placed successfully.",
+          orderId:order_id ,
+      });
 
         }else if(paymentOption==='razorpay'){
          
