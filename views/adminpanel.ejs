@@ -63,7 +63,7 @@
                             class="text-primary material-icons md-monetization_on"></i></span>
                     <div class="text">
                         <h6 class="mb-1 card-title">Revenue</h6>
-                        <span>INR <%= daily.totalRevenue.toFixed(2) %></span>
+                        <span>INR <%= yearly.totalRevenue.toFixed(2) %></span>
                         <!-- <span class="text-sm">
                             Shipping fees are not included
                         </span> -->
@@ -77,7 +77,7 @@
                     <span class="icon icon-sm rounded-circle bg-success-light"><i
                             class="text-success material-icons md-local_shipping"></i></span>
                     <div class="text">
-                        <h6 class="mb-1 card-title">Orders</h6> <span><%= daily.totalOrders %></span>
+                        <h6 class="mb-1 card-title">Orders</h6> <span><%=orders.length %></span>
                         <!-- <span class="text-sm">
                             Excluding orders in transit
                         </span> -->

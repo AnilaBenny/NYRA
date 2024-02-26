@@ -297,6 +297,7 @@ const loadPanel = async (req, res) => {
         let yearly = await salesReport(365);
         let allProductsCount = await productModel.countDocuments();
         let orders=await orderModel.find().populate('user');
+    
         
         //pie chart
         let orderChart=await orderPieChart();
