@@ -229,13 +229,13 @@
                                 <li>
                                     <a href="/wishlist">
                                         <i class="icon-heart"></i>
-                                        <span class="item-count">3</span>
+                                        <!-- <span class="item-count"></span> -->
                                     </a>
                                 </li>
                                 <li>
                                     <a href="/cart" >
                                         <i class="icon-bag"></i>
-                                        <span class="item-count">3</span>
+                                        <!-- <span class="item-count"></span> -->
                                     </a>
                                 </li>
                                 <li>
@@ -898,6 +898,10 @@
                                             </a>
                                             <div class="action-link">
                                                 <div class="action-link-left">
+                                                    <%if(pro[i].countInStock===0){%>
+                                                                        <a class="text-danger">Out Of Stock</a>
+                                                                        
+                                                                    <%}else{%>
                                                     <a href='#' onclick="addProductCart('<%=pro[i]._id%>')">Add to Cart</a>
                                                 </div>
                                                 <div class="action-link-right">
@@ -905,14 +909,15 @@
                                                         data-bs-target="#modalQuickview"><i
                                                             class="icon-magnifier"></i></a>
                                                             <% if (wish && wish.length > 0 && wish.some(wishItem => wishItem.product.includes(pro[i]._id))) { %>
-    <a href="#" onclick="removewishlist('<%= pro[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
-<% } else { %>
-    <a href="#" onclick="addtowishlist('<%= pro[i]._id %>')"><i class="fa-solid fa-heart " id="heart"></i></a>
-<% } %>
+                                                            <a href="#" onclick="removewishlist('<%= pro[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
+                                                        <% } else { %>
+                                                            <a href="#" onclick="addtowishlist('<%= pro[i]._id %>')"><i class="fa-solid fa-heart " id="heart"></i></a>
+                                                        <% } %>
 
 
 
                                                     <a href="#"><i class="icon-shuffle"></i></a>
+                                                                    <%}%>
                                                 </div>
                                             </div>
                                         </div>

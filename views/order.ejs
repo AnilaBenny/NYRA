@@ -171,6 +171,22 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Start Pagination -->
+                    <% if (totalPage && page) { %>
+                    <div class="page-pagination text-center" data-aos="fade-up" data-aos-delay="0">
+                        <ul>
+                            <% if (page > 1) { %>
+                                <li><a href="/myorder?page=<%=page-1%>"><i class="ion-ios-skipforward"></i></a></li>
+                            <% } %>
+                            <% for (let i = Math.max(1, page - 2); i <= Math.min(page + 2, totalPage); i++) { %>
+                                <li><a href="/myorder?page=<%=i%>"><%=i%></a></li>
+                            <% } %>
+                            <% if (page < totalPage) { %>
+                                <li><a href="/myorder?page=<%=page+1%>"><i class="ion-ios-skipforward"></i></a></li>
+                            <% } %>
+                        </ul>
+                    </div> <!-- End Pagination -->
+                <% } %>
         </div>
     <% } %>
     

@@ -14,7 +14,7 @@
                             <nav aria-label="breadcrumb">
                                 <ul>
                                     <li><a href="index.html">Home</a></li>
-                                    <li><a href="shop-grid-sidebar-left.html">Shop</a></li>
+                                    <li><a href="shop-grid-sidebar-left.html">wishlist</a></li>
                                 </ul>
                             </nav>
                         </div>
@@ -95,7 +95,7 @@
                                                                         data-bs-target="#modalQuickview"><i
                                                                             class="icon-magnifier"></i></a>
                                                                            
-    <a href="#" onclick="removewishlist('<%= wishlist.product[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
+                                                        <a href="#" onclick="removewishlist('<%= wishlist.product[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
 
                                                                     <a href="#"><i
                                                                             class="icon-shuffle"></i></a>
@@ -120,7 +120,7 @@
                                                                 </ul>
                                                             </div>
                                                             <div class="content-right">
-                                                                <span class="price">$<%=wishlist.product[i].price%></span>
+                                                                <span class="price">Rs.<%=wishlist.product[i].price%></span>
                                                             </div>
 
                                                         </div>

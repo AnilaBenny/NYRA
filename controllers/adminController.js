@@ -611,6 +611,11 @@ const filterData=async(req,res)=>{
     }
 }
 
+let logout = (req, res) => {
+    req.session.admin = false;
+    res.redirect("/admin");
+  };
+
 module.exports = {
     adminLogin,
     adminPost,
@@ -632,5 +637,6 @@ module.exports = {
     filterData,
 
     pdf,
-    generateExcel
+    generateExcel,
+    logout
 };

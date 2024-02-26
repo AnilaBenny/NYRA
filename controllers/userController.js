@@ -54,9 +54,10 @@ let enterHome = async (req, res) => {
                 const categories = await categoryModel.find({});
                 const wish=await wishlistModel.find({user:userData._id});
                 // console.log(wish);
-
+                const wishCount=await wishlistModel.countDocuments({user:userData._id});
+                
                 // Render home page
-                return res.render("home", { pro: products, category: categories,wish });
+                return res.render("home", { pro: products, category: categories,wish,wishCount});
             } else {
                 
                 req.session.destroy((err) => {
@@ -801,12 +802,18 @@ const editAddress = async (req, res) => {
 const loadorderpage = async (req, res) => {
   try {
    
-    const user = await userModel.findOne({email:req.session.email});
+  const user = await userModel.findOne({email:req.session.email});
+  const perPage=5;
+  const page=req.query.page || 1;
+  const orderLength=await orderModel.countDocuments({ user: user._id });
+  const totalPage=Math.ceil(orderLength / perPage);
+
+
    
-   
-    const order= await orderModel.find({ user: user._id });
+    const order= await orderModel.find({ user: user._id }).skip(perPage * (page - 1))
+    .limit(perPage);
     //console.log(order);
-    res.render('order', { order });
+    res.render('order', { order,page,totalPage});
   } catch (error) {
    
     console.error('Error loading order page:', error.message);

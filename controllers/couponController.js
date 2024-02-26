@@ -31,8 +31,10 @@ const Couponcart = async (req, res) => {
         }
 
         cart.billTotal *= (1 - coupon.discountPercentage / 100);
-        const discountAmount = (coupon.discountPercentage / 100) * cart.billTotal;
-
+        cart.billTotal = Number(cart.billTotal.toFixed()); 
+        let discountAmount = (coupon.discountPercentage / 100) * cart.billTotal;
+        discountAmount = Number(discountAmount.toFixed()); 
+console.log(cart.billTotal,discountAmount);
         cart.isApplied=true;
         cart.discountPrice=discountAmount;
         cart.coupon=code;

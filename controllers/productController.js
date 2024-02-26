@@ -102,7 +102,23 @@ const productlist = async (req, res) => {
 const loadpro = async (req, res) => {
     try {
         const id = req.query.id;
+        const image=req.query.delete;
         const productdetails = await productModel.findById({ _id: id }).populate('category');
+        const index = productdetails.images.indexOf(image);
+        if(image){
+            // console.log('enter');
+        if (index > -1) {
+
+            await productModel.findByIdAndUpdate(id, { $unset: { [`images.${index}`]: 1 } });
+
+            await productModel.findByIdAndUpdate(id, { $pull: { images: null } });
+        } else {
+            console.log("Image not found in the array");
+        }
+                }
+  
+
+        
         const categorydetails = await categoryModel.find();
         if (productdetails) {
             // console.log(productdetails);
@@ -124,8 +140,9 @@ const updatepro = async (req, res) => {
 
         let existingImages = [];
         const existingProduct = await productModel.findById(req.query.id);
+        const categorydetails = await categoryModel.find();
 
-        if (existingProduct && existingProduct.images && Array.isArray(existingProduct.images)) {
+        if (existingProduct && existingProduct.images && Array.isArray(existingProduct.images) ) {
             existingImages = existingProduct.images;
         }
 
@@ -134,10 +151,11 @@ const updatepro = async (req, res) => {
             newImages = req.files.map(file => file.filename);
         }
 
+
         const allImages = existingImages.concat(newImages);
-
-
-
+        if(allImages.length>3){
+            res.render('admin-product-edit', { cate: categorydetails, pro: existingProduct, message: 'maximum 3 images per product' });
+        }else{
         const Data = await productModel.findByIdAndUpdate(req.query.id, {
             $set: {
                 name: req.body.name,
@@ -149,7 +167,7 @@ const updatepro = async (req, res) => {
                 countInStock:req.body.stock,
 
             }
-        });
+        });}
         // console.log(Data);
         if (Data) {
             res.redirect('/admin/productlist');
@@ -164,7 +182,12 @@ const updatepro = async (req, res) => {
 const deletepro = async (req, res) => {
     try {
         const id = req.query.id;
-        await productModel.deleteOne({ _id: id });
+        const action=req.query.action;
+        if(action==='InActive'){
+        await productModel.findByIdAndUpdate({ _id: id },{list:false});
+        }else{
+            await productModel.findByIdAndUpdate({ _id: id },{list:true});
+        }
         res.redirect('/admin/productlist');
     } catch (error) {
         console.log(error.message);
@@ -179,7 +202,7 @@ const loaduserprodetails = async (req, res) => {
         const cartqty=await cartModel.find({'items.productId':id})
 
         if (productdetails) {
-            console.log(productdetails);
+            // console.log(productdetails);
 
             res.render('user-product-details', { pro: productdetails,cart:cartqty.quantity });
         }
@@ -196,7 +219,10 @@ const showproduct = async (req, res) => {
         try {
             const cat = req.query.category;
             const category = await categoryModel.findOne({ name: cat });
-    
+            const perPage=8;
+            const page = parseInt(req.query.page) || 1;
+            const totalproducts= await productModel.countDocuments({});
+            const totalPage=Math.ceil(totalproducts / perPage)
             if (!category) {
                 res.render('shop-product');
             }
@@ -234,15 +260,18 @@ const showproduct = async (req, res) => {
                         ]
                     })
                     .populate('category')
-                    .sort(sortQuery);
+                    .sort(sortQuery).skip(perPage * (page - 1))
+                    .limit(perPage);
             }else if(sort){
-                product = await productModel.find({ category: category._id }).populate('category').sort(sortQuery);
+                product = await productModel.find({ category: category._id }).populate('category').sort(sortQuery).skip(perPage * (page - 1))
+                .limit(perPage);
         }else{
-            product = await productModel.find({ category: category._id }).populate('category');
+            product = await productModel.find({ category: category._id }).populate('category').skip(perPage * (page - 1))
+            .limit(perPage);
         }
         const userData = await userModels.findOne({ email: req.session.email });
              const wish=await wishlistModel.find({user:userData._id});
-            res.render('shop-product', { product, cat,wish});
+            res.render('shop-product', { product, cat,wish,totalPage,page});
         } catch (error) {
             console.error('Error in showproduct:', error.message);
             res.redirect('/home');

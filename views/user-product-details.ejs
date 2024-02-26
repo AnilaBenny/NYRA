@@ -88,23 +88,20 @@
                         <div class="product-details-variable">
                             <h4 class="title">Available Options</h4>
                             <!-- Product Variable Single Item -->
+                            <%if(pro.countInStock===0){%>
+                                <h5 class="text-danger">Out Of Stock</h5>
+                            <%}else{%>
                             <div class="variable-single-item">
                                 <div class="product-stock"> <span class="product-stock-in"><i
                                             class="ion-checkmark-circled"></i></span> <%=pro.countInStock%> IN STOCK</div>
                             </div>
                             <!-- Product Variable Single Item -->
                             <div class="d-flex align-items-center ">
-                                 <div class="detail-qty  radius  m-auto">
-                                            <a href="#" class="qty-down "
-                                                onclick="updateQty('<%=pro._id %>','<%= pro.countInStock %>','<%= cart %>','sub')"><i class="fa-solid fa-angle-down"></i>
-                                                    </a>
-                                            <span class="qty-val me-3"
-                                                id="qty-<%=pro._id %>">1</span>
-                                            <a href="#" class="qty-up"
-                                                onclick="updateQty('<%=pro._id %>','<%=pro.countInStock %>','<%=cart%>','sum')"><i class="fa-solid fa-angle-up"></i>
-                                                    </i></a>
+                                 <div class="detail-qty radius">
+                                    
+                                            <input type="number" id="quantity" value="1" min="1" max="5" >
                                         </div>
-
+                                        
                                 <div class="product-add-to-cart-btn">
                                     <a href="#" onclick="addProductCart('<%=pro._id%>')" class="btn btn-block btn-lg btn-black-default-hover"
                                         >Add To Cart</a>
@@ -112,6 +109,7 @@
                                         data-bs-toggle="modal" data-bs-target="#modalAddcart">Buy Now</a> -->
                                 </div>
                             </div>
+                            
                             <!-- Start  Product Details Meta Area-->
                             <div class="product-details-meta mb-20">
                                 <a href="wishlist.html" class="icon-space-right"><i class="icon-heart"></i>Add to
@@ -119,7 +117,7 @@
                                 <!-- <a href="compare.html" class="icon-space-right"><i class="icon-refresh"></i>Compare</a> -->
                             </div> <!-- End  Product Details Meta Area-->
                         </div> <!-- End Product Variable Area -->
-
+                    <%}%>
                         <!-- Start  Product Details Catagories Area-->
                         <div class="product-details-catagory mb-2">
                             <span class="title">CATEGORY:</span>
@@ -1128,16 +1126,20 @@
 
     <!-- Main JS -->
     <script src="/public/assets/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         async function addProductCart(productId) {
+            var quantity = document.getElementById("quantity").value;
+            // alert(quantity)
+            if(quantity<=5){
     try {
-        let res = await fetch('/add-to-cart', {
+        let res = await fetch('/addtocartIn', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                productId
+                productId,quantity
             })
         });
 
@@ -1151,11 +1153,24 @@
             
         }
         else if (res.status === 200) { 
-            window.location.href = '/cart'; 
+            await Swal.fire({
+                title: 'success',
+                text: 'Product add to cart sucessfully',
+                icon: 'success',
+                showConfirmButton: true
+            }); 
         }
     } catch (error) {
         console.error('Error adding product to cart:', error);
        
+    }
+    }else{
+        Swal.fire({
+                title: 'error',
+                text: 'Maximum quantity per person for this product has been reached',
+                icon: 'error',
+                showConfirmButton: true
+            }); 
     }
 }
      

@@ -30,6 +30,8 @@ admin_route.get('/',adminisLogout,adminController.adminLogin);
 
 admin_route.post('/',adminisLogout,adminController.adminPost);
 
+admin_route.get('/logout',adminController.logout);
+
 //adminpanel
 admin_route.get('/adminpanel',AdminLogSession,adminController.loadPanel);
 

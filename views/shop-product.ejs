@@ -871,7 +871,12 @@ crossorigin="anonymous">
                                             </a>
                                                             <div class="action-link">
                                                                 <div class="action-link-left">
+                                                                    <%if(product[i].countInStock===0){%>
+                                                                        <a class="text-danger">Out Of Stock</a>
+                                                                        
+                                                                    <%}else{%>
                                                                     <a href='#' onclick="addProductCart('<%=product[i]._id%>')">Add to Cart</a>
+                                                                    
                                                                 </div>
                                                                 <div class="action-link-right">
                                                                     <a href="#" data-bs-toggle="modal"
@@ -884,6 +889,7 @@ crossorigin="anonymous">
 <% } %>
                                                                     <a href="#"><i
                                                                             class="icon-shuffle"></i></a>
+                                                                            <%}%>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -924,14 +930,22 @@ crossorigin="anonymous">
                     </div> <!-- End Tab Wrapper -->
 
                     <!-- Start Pagination -->
+                    <% if (totalPage && page) { %>
                     <div class="page-pagination text-center" data-aos="fade-up" data-aos-delay="0">
                         <ul>
-                            <li><a class="active" href="#">1</a></li>
-                            <li><a href="#">2</a></li>
-                            <li><a href="#">3</a></li>
-                            <li><a href="#"><i class="ion-ios-skipforward"></i></a></li>
+                            <% if (page > 1) { %>
+                                <li><a href="/shop?category=<%=cat%>&page=<%=page-1%>"><i class="ion-ios-skipforward"></i></a></li>
+                            <% } %>
+                            <% for (let i = Math.max(1, page - 2); i <= Math.min(page + 2, totalPage); i++) { %>
+                                <li><a href="/shop?category=<%=cat%>&page=<%=i%>"><%=i%></a></li>
+                            <% } %>
+                            <% if (page < totalPage) { %>
+                                <li><a href="/shop?category=<%=cat%>&page=<%=page+1%>"><i class="ion-ios-skipforward"></i></a></li>
+                            <% } %>
                         </ul>
                     </div> <!-- End Pagination -->
+                <% } %>
+
                 </div> <!-- End Shop Product Sorting Section  -->
             </div>
         </div>

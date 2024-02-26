@@ -222,7 +222,12 @@ const upcateedit=async(req,res)=>{
 const deletecate=async(req,res)=>{
   try {
       const id=req.query.id;
-      await categoryModel.deleteOne({_id:id});
+      const action=req.query.action;
+      if(action==='Active'){
+      await categoryModel.findByIdAndUpdate({_id:id},{is_active:false});
+      }else{
+        await categoryModel.findByIdAndUpdate({_id:id},{is_active:true});
+      }
      res.redirect('/admin/adminCategory'); 
   } catch (error) {
       console.log(error.message);

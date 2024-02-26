@@ -64,20 +64,16 @@ userRoute.post('/return',logSession,userController.reqreturn);
 
 userRoute.get('/orderDetails',logSession,checkout.loadOrderdetail);
 
-userRoute.get('/applycoupon',coupon.Couponcart);
-userRoute.get('/removecoupon',coupon.removeCoupon);
+userRoute.get('/applycoupon',logSession,coupon.Couponcart);
+userRoute.get('/removecoupon',logSession,coupon.removeCoupon);
 
-userRoute.get('/addToWishlist',wishlist.addToWishlist);
-userRoute.get('/removeWishlist',wishlist.removeWishlist);
-userRoute.get('/wishlist',wishlist.loadWishlist);
+userRoute.get('/addToWishlist',logSession,wishlist.addToWishlist);
+userRoute.get('/removeWishlist',logSession,wishlist.removeWishlist);
+userRoute.get('/wishlist',logSession,wishlist.loadWishlist);
 
-userRoute.get('/search',product.showsearch)
+userRoute.get('/search',logSession,product.showsearch);
 
-
-
-
-
-
+userRoute.post('/addtocartIn',cart.addToCartIn)
 
 
 
