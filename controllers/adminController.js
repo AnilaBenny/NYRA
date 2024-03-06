@@ -7,6 +7,8 @@ const {couponModel}=require('../models/couponModel');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
+const cartModel = require('../models/cartModel');
+const WalletModel=require('../models/walletModel');
 
 
 async function salesReport(date){
@@ -353,15 +355,36 @@ let userblock = async (req, res) => {
         }
     };
 
-    const orderAccept = async (req, res) => {
+    const requestAccept = async (req, res) => {
         try {
-            const { orderId } = req.body;
+            const { orderId,userId } = req.body;
     
             const canceledOrder = await orderModel.findOne({ oId: orderId });
-    
+            const user = await userModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
             if (!canceledOrder) {
                 return res.status(404).json({ success: false, message: 'Order not found' });
             }
+            let wallet = await WalletModel.findOne({ user: userId });
+            if (!wallet) {
+              
+                wallet = new WalletModel({
+                    user: userId,
+                    balance: 0, 
+                    transactions: [] 
+                });
+            }
+            wallet.balance += canceledOrder.billTotal;
+            wallet.transactions.push({
+                amount: canceledOrder.billTotal,
+                type: 'credit',
+                description: 'Refund for order ' + orderId
+            });
+    
+            await wallet.save();
+    
     
             // Restore stock count for products associated with the canceled order
             for (const orderItem of canceledOrder.items) {
@@ -372,9 +395,9 @@ let userblock = async (req, res) => {
                     await product.save();
                 }
             }
-    
-            if(canceledOrder.requests[0].type==='Cancel'){
-            const updatedOrder = await orderModel.findOneAndUpdate(
+    for(let i=0;i<requests.length;i++){
+            if(canceledOrder.requests[i].type==='Cancel'){
+            await orderModel.findOneAndUpdate(
                 { oId: orderId },
                 { $set: { status: 'Canceled', 'requests.$[elem].status': 'Accepted' } },
                 { new: true, arrayFilters: [{ 'elem.status': 'Pending' }] }
@@ -384,14 +407,8 @@ let userblock = async (req, res) => {
                     { $set: { status: 'Returned', 'requests.$[elem].status': 'Accepted' } },
                     { new: true, arrayFilters: [{ 'elem.status': 'Pending' }] }
                 );
-            }
-            
-    
-            if (!updatedOrder) {
-                return res.status(404).json({ success: false, message: 'Order not found' });
-            }
-    
-            return res.status(200).json({ success: true, message: 'Order status updated successfully', updatedOrder });
+            }}
+            return res.status(200).json({ success: true, message: 'Order status updated successfully'});
         } catch (error) {
             console.error(error);
             return res.status(500).json({ success: false, message: 'Internal server error' });
@@ -399,7 +416,7 @@ let userblock = async (req, res) => {
     };
     
 
-const orderCancel=async(req,res)=>{
+const requestCancel=async(req,res)=>{
     try {
         const { orderId} = req.body;
         //console.log(id);
@@ -456,7 +473,20 @@ const loadorderdetail=async(req,res)=>{
 const uporder=async(req,res)=>{
     try{
         const {newStatus,orderId}=req.body;
-        console.log(newStatus,orderId);
+        // console.log(newStatus,orderId);
+        const order=await orderModel.findOne({oId:orderId});
+        if(newStatus==='Canceled'){
+            for (const orderItem of order.items) {
+                let product = await productModel.findById(orderItem.productId);
+    
+
+                if (product) {
+                    product.countInStock += orderItem.quantity;
+                    await product.save();
+                }
+            }
+
+        }
         const updatedOrder = await orderModel.findOneAndUpdate(
             { oId: orderId },
             {$set:{ status: newStatus } },
@@ -625,8 +655,8 @@ module.exports = {
     loadusermanagement,
     userblock,
     loadordermanagement,
-    orderCancel,
-    orderAccept,
+    requestCancel,
+    requestAccept,
     loadorderdetail,
     uporder,
 

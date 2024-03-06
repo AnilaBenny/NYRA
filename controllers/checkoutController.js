@@ -39,6 +39,7 @@ const loadcheckout=async(req,res)=>{
         if(!address){
           address=null;
         }
+        
         res.render('checkout',{address:address,cart:cart});
     }
     catch(error){
@@ -51,7 +52,7 @@ const loadcheckout=async(req,res)=>{
 const Postcheckout = async (req,res) => {
     try {
         const paymentOption=req.body.paymentOption ;
-        const address= req.body.address || 'home';
+        const address= req.body.addressType || 'home';
 
         // console.log(paymentOption, address);
         // if(!address || !paymentOption){
@@ -74,7 +75,7 @@ const Postcheckout = async (req,res) => {
             (item) => item.addressType === address
         );
         if (!addressdetails) {
-            //return res.status(400).json({ message: "Invalid address ID" });
+            return res.status(400).json({ message: "Invalid address ID" });
         }
 
         //console.log(addressdetails);
@@ -84,12 +85,16 @@ const Postcheckout = async (req,res) => {
         for (const item of selectedItems) {
             const product = await productModel.findOne({ _id: item.productId });
             // console.log(product);
+            if(product.countInStock===0){
+              return res.status(400).json({ message: "product Out of stock" });
+            }
             if (product) {
                 if (product.countInStock >= item.quantity) {
                     product.countInStock -= item.quantity;
                     //console.log(product.countInStock);
                     await product.save();
                 } 
+                
             } else {
                 console.log('Product not found');
             }

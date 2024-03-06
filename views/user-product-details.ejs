@@ -1130,7 +1130,16 @@
     <script>
         async function addProductCart(productId) {
             var quantity = document.getElementById("quantity").value;
-            // alert(quantity)
+            // alert(productId)
+            if(quantity<0){
+                Swal.fire({
+                title: 'error',
+                text: 'Minimum quantity per person for this product has been reached',
+                icon: 'error',
+                showConfirmButton: true
+            }); 
+
+            }
             if(quantity<=5){
     try {
         let res = await fetch('/addtocartIn', {

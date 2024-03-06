@@ -3,6 +3,7 @@ const userModel = require("../models/userModels");
 const cartModel = require("../models/cartModel");
 const {couponModel}=require('../models/couponModel');
 
+
 const addToCartIn = async (req, res) => {
     try {
         const user = await userModel.findOne({ email: req.session.email });
@@ -12,7 +13,9 @@ const addToCartIn = async (req, res) => {
         }
         
         const userId = user._id;
-        const { productId, quantity } = req.body;
+        const productId = req.body.productId;
+        const quantity=parseInt(req.body.quantity);
+
         // console.log(productId, quantity);
 
         const product = await productModel.findById(productId);
@@ -44,6 +47,7 @@ const addToCartIn = async (req, res) => {
             }
         } else {
             // If the item doesn't exist in the cart, add it
+            // if(userCart.items.productId.countInStock==)
             userCart.items.push({
                 productId: productId,
                 name: product.name,
@@ -53,15 +57,17 @@ const addToCartIn = async (req, res) => {
                 countInStock: product.countInStock,
                 price: product.price * quantity,
             });
+          
         }
+          // Update the total bill
+          userCart.billTotal = userCart.items.reduce((total, item) => total + item.price, 0);
 
-        // Update the total bill
-        userCart.billTotal = userCart.items.reduce((total, item) => total + item.price, 0);
+          // Save the cart to the database
+          await userCart.save();
+          
+          return res.status(200).json({ message: 'Item added to cart successfully' });
 
-        // Save the cart to the database
-        await userCart.save();
         
-        return res.status(200).json({ message: 'Item added to cart successfully' });
     } catch (err) {
         console.log('Error adding to cart:', err.message);
         return res.status(500).json({ message: 'Internal server error' });
@@ -105,6 +111,7 @@ const addTocart = async (req, res) => {
                 return res.status(400).json({ message: 'Maximum quantity per person reached' });
             }
         } else {
+            
             userCart.items.push({
                 productId: productId,
                 name: product.name,
@@ -134,15 +141,29 @@ const showcart=async(req,res)=>{
         //console.log(user);
         const userId=user._id;
         
-        let userCart=await cartModel.findOne({owner:userId});
+        let userCart = await cartModel.findOne({ owner: userId }).populate({path:'items.productId',model:'Products'});
+        console.log(userCart);
         const coupon=await couponModel.find();
         const eligibleCoupons = coupon.filter(coupon => {
             return userCart.billTotal >= coupon.minimumAmount && userCart.billTotal <= coupon.maximumAmount && coupon.isActive
 
         });
         
+       
+        let wish=await wishlistModel.find({user:userData._id});
+           
+        if(!wish){
+          wish=null;
+        }
+        let cart=await cartModel.findOne({owner:userData._id})
+        if(!cart)
+        {
+        cart=null;
+        }
+        // console.log(userCart);
+     
         if(userCart.items.length>0){
-            res.render('cart',{cart:userCart,coupon:eligibleCoupons})
+            res.render('cart',{cart:userCart,coupon:eligibleCoupons,wish,cart})
         }
         else{
             res.render('empty-cart');
@@ -190,7 +211,6 @@ const deleteCart = async (req, res) => {
                 }
 
                 await userCart.save();
-                await userCart.updateOne()
                 return res.status(200).json({ success: true, message: 'Item removed from cart' });
             } else {
                 console.log('Quantity cannot be less than 0');
@@ -232,13 +252,13 @@ const updateCart = async (req, res) => {
             return res.status(400).json({ success: false, message: "Maximum quantity per person for this product has been reached" })
         }
         else{
-        cartItem.quantity = (need === "sub") ? Math.max(0, cartItem.quantity - 1) : cartItem.quantity + 1;
+        cartItem.quantity = (need === "sub") ? Math.max(1, cartItem.quantity - 1) : cartItem.quantity + 1;
         cartItem.price = cartItem.quantity * cartItem.productPrice;
-        cart.billTotal = (need === "sub") ? Math.max(0, cart.billTotal - product.price) : cart.billTotal + product.price;
+        cart.billTotal = (need === "sub") ? Math.max(product.price, cart.billTotal - product.price) : cart.billTotal + product.price;
         
         await cart.save();
 
-        return res.status(200).json({ success: true });
+        return res.status(200).json({ success: true,cart});
         }
     } catch (err) {
         console.error(err);

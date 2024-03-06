@@ -104,7 +104,7 @@
                                         <div class="card">
                                            
                                             <div class="card-body d-flex justify-content-start">
-                                                <div><input type="checkbox" value="<%=address.addresses[i].addressType %>" name="address" id="address" style="width: 20px;" required></div>
+                                                <div><input type="radio" value="<%=address.addresses[i].addressType %>" name="address" id="address" style="width: 20px;" required></div>
                                                 <div>   
                                                 <p class="text-success"><%=address.addresses[i].addressType %></p>
                                               
@@ -115,9 +115,19 @@
                                             </div> 
                                             </div>
                                           </div>
+                                        <%}%>
+                            
+                                          <%if(address.addresses.length<3){%>
+                               <div class="card">
+                                <a href="#" id="editAddressLink" data-bs-toggle="tab" class="nav-link btn btn-block btn-md btn-black-default-hover">
+                                    Add Address
+                                </a>
+                            
+                             </div>
                                           <%}}}else{%>
                                             <p>Please Add address</p>
                                             <%}%>
+                                            
                                           
                                     </div>
                     </div>
@@ -684,6 +694,13 @@ proceedButton.addEventListener("click", async () => {
         alert("Payment Failed");
     });
                 rzp.open();
+            }else{
+                Swal.fire({
+            title: 'Out of Stock!',
+            text: 'This product is currently out of stock.',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+        });
             }})
     } catch (error) {
         console.error("Error during checkout:", error);
@@ -708,7 +725,12 @@ proceedButton.addEventListener("click", async () => {
         }
     } else {
         // Handle HTTP error
-        console.error("HTTP error:", response.status);
+        Swal.fire({
+            title: 'Out of Stock!',
+            text: 'This product is currently out of stock.',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+        });
     }
 }
 
@@ -716,8 +738,7 @@ proceedButton.addEventListener("click", async () => {
 
                       
              
-             
-             
+      
              
              </script>
 

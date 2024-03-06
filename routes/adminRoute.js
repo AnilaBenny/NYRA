@@ -70,9 +70,9 @@ admin_route.get('/order-list',AdminLogSession,adminController.loadordermanagemen
 
 admin_route.get('/orderdetails',AdminLogSession,adminController.loadorderdetail);
 
-admin_route.post('/acceptcancel',AdminLogSession,adminController.orderAccept);
+admin_route.post('/acceptcancel',AdminLogSession,adminController.requestAccept);
 
-admin_route.post('/rejectcancel',AdminLogSession,adminController.orderCancel);
+admin_route.post('/rejectcancel',AdminLogSession,adminController.requestCancel);
 
 admin_route.post('/uporderstatus',AdminLogSession,adminController.uporder);
 

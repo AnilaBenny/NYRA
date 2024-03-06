@@ -11,6 +11,7 @@ const addressModel=require('../models/addressModel');
 const orderModel = require('../models/orderModel');
 const wishlistModel=require('../models/wishlistModel');
 const walletModel=require('../models/walletModel');
+const cartModel=require('../models/cartModel') ;
 
 // const Email = process.env.Email;
 // const Pass = process.env.Pass;
@@ -52,12 +53,19 @@ let enterHome = async (req, res) => {
                 // Find products and categories
                 const products = await ProductModel.find({});
                 const categories = await categoryModel.find({});
-                const wish=await wishlistModel.find({user:userData._id});
-                // console.log(wish);
-                const wishCount=await wishlistModel.countDocuments({user:userData._id});
+                let wish=await wishlistModel.findOne({user:userData._id});
+                if(!wish){
+                  wish=null;
+                }
+                let cart=await cartModel.findOne({owner:userData._id})
+                if(!cart)
+                {
+                cart=null;
+                }
+              
                 
                 // Render home page
-                return res.render("home", { pro: products, category: categories,wish,wishCount});
+                return res.render("home", { pro: products, category: categories,wish,cart});
             } else {
                 
                 req.session.destroy((err) => {
@@ -525,7 +533,17 @@ const loaduserAc=async(req,res)=>{
       if(!wallet){
         wallet=null;
       }
-    res.render('user-detail',{user,address,wallet});
+      let wish=await wishlistModel.findOne({user:user._id});
+                if(!wish){
+                  wish=null;
+                }
+                let cart=await cartModel.findOne({owner:user._id})
+                if(!cart)
+                {
+                cart=null;
+                }
+              
+    res.render('user-detail',{user,address,wallet,wish,cart});
     }
     
   }
@@ -541,20 +559,30 @@ const editprofile = async (req, res) => {
 
     const existemail = await userModel.findOne({ email: email});
     const user = await userModel.findOne({ email: req.session.email });
+    let wish=await wishlistModel.findOne({user:user._id});
+    if(!wish){
+      wish=null;
+    }
+    let cart=await cartModel.findOne({owner:user._id})
+    if(!cart)
+    {
+    cart=null;
+    }
+  
     if (!existemail) {
       
-      return res.render('user-detail', { error: 'You cannot change email.' ,user});
+      return res.render('user-detail', { error: 'You cannot change email.' ,user,wish,cart});
     }
 
     if (existemail.email !== req.session.email) {
       const user = await userModel.findOne({ email: req.session.email });
-      return res.render('user-detail', { error: 'You cannot change email.', user });
+      return res.render('user-detail', { error: 'You cannot change email.', user ,wish,cart});
     }
 
     // Check if the mobile already exists for another user
     const existingUserWithMobile = await userModel.findOne({ mobile: mobile });
     if (existingUserWithMobile && existingUserWithMobile.email !== req.session.email) {
-      return res.render('user-detail', { error: 'There is a user with this mobile number.', user });
+      return res.render('user-detail', { error: 'There is a user with this mobile number.', user,wish,cart });
     }
 
     // Update user details
@@ -570,9 +598,9 @@ const editprofile = async (req, res) => {
     );
 
     if (updatedUser) {
-      return res.render('user-detail', { message: 'Updated successfully!', user: updatedUser });
+      return res.render('user-detail', { message: 'Updated successfully!', user: updatedUser ,wish,cart});
     } else {
-      return res.render('user-detail', { error: 'Failed to update user details.', user });
+      return res.render('user-detail', { error: 'Failed to update user details.', user,wish,cart });
     }
   } catch (error) {
     console.log('editprofile', error.message);
@@ -583,7 +611,16 @@ const editprofile = async (req, res) => {
 //address
 const loadAddadd=async(req,res)=>{
   try{
-res.render('add-address');
+    let wish=await wishlistModel.findOne({user:user._id});
+    if(!wish){
+      wish=null;
+    }
+    let cart=await cartModel.findOne({owner:user._id})
+    if(!cart)
+    {
+    cart=null;
+    }
+res.render('add-address',{wish,cart});
   }
   catch(error){
     console.log('loadAddadd:',error.message);
@@ -627,6 +664,15 @@ const userAddAddress = async (req, res) => {
         addresses: []
       });
     }
+    let wish=await wishlistModel.findOne({user:user._id});
+    if(!wish){
+      wish=null;
+    }
+    let cart=await cartModel.findOne({owner:user._id})
+    if(!cart)
+    {
+    cart=null;
+    }
 
     // Check if the address already exists for the user
     const existingAddress = useraddresses.addresses.find((address) =>
@@ -643,17 +689,17 @@ const userAddAddress = async (req, res) => {
     const existtype=useraddresses.addresses.find((address) =>address.addressType === addressType);
     if (existingAddress) {
      
-      res.render('add-address',{error:'Address already exists for this user'});
+      res.render('add-address',{error:'Address already exists for this user',wish,cart});
     }
     
     else if(existtype) {
      
-      res.render('add-address',{error:`${existtype.addressType} is alredy registered`});
+      res.render('add-address',{error:`${existtype.addressType} is alredy registered`,wish,cart});
     }
   
     else if (useraddresses.addresses.length >= 3) {
       
-      res.render('add-address',{error:'User cannot have more than 3 addresses'});
+      res.render('add-address',{error:'User cannot have more than 3 addresses',cart,wish});
     }
 else{
     // Create a new address object
@@ -733,11 +779,19 @@ const loadeditAddress=async(req,res)=>{
     
     const address = useraddresses.addresses.find(address => address.addressType === addressType);
  // console.log(address);
-
+ let wish=await wishlistModel.findOne({user:user._id});
+ if(!wish){
+   wish=null;
+ }
+ let cart=await cartModel.findOne({owner:user._id})
+ if(!cart)
+ {
+ cart=null;
+ }
 
 if (address) {
    
-    res.render('edit-address', { address: address });
+    res.render('edit-address', { address: address,wish,cart });
 } else {
     
     console.log('Address or HouseNo not found');
@@ -778,7 +832,15 @@ const editAddress = async (req, res) => {
     if (!addresses) {
       console.log('address is not found');
     }
-
+    let wish=await wishlistModel.findOne({user:user._id});
+    if(!wish){
+      wish=null;
+    }
+    let cart=await cartModel.findOne({owner:user._id})
+    if(!cart)
+    {
+    cart=null;
+    }
     const addressToEdit = addresses.addresses.find(addr => addr.addressType === addressType);
 
     if (!addressToEdit) {
@@ -796,7 +858,7 @@ const editAddress = async (req, res) => {
     addressToEdit.Country = country;
 
     await addresses.save();
-    res.render('edit-address', { addresses,message:'Updated sucessfully!'});
+    res.render('edit-address', { addresses,message:'Updated sucessfully!',wish,cart});
 
   } catch (err) {
     console.error(err);
@@ -818,7 +880,16 @@ const loadorderpage = async (req, res) => {
     const order= await orderModel.find({ user: user._id }).skip(perPage * (page - 1))
     .limit(perPage);
     //console.log(order);
-    res.render('order', { order,page,totalPage});
+    let wish=await wishlistModel.findOne({user:user._id});
+    if(!wish){
+      wish=null;
+    }
+    let cart=await cartModel.findOne({owner:user._id})
+    if(!cart)
+    {
+    cart=null;
+    }
+    res.render('order', { order,page,totalPage,wish,cart});
   } catch (error) {
    
     console.error('Error loading order page:', error.message);
@@ -889,6 +960,77 @@ res.json({ success: true, message: "return requested successfully" });
 
 }
 
+const newArrivals=async(req,res)=>{
+try{
+const perPage=8;
+const page = parseInt(req.query.page) || 1;
+const totalproducts= await ProductModel.countDocuments({});
+const totalPage=Math.ceil(totalproducts / perPage);
+const userData = await userModel.findOne({ email: req.session.email });
+
+let wish=await wishlistModel.findOne({user:userData._id});
+
+if(!wish){
+  wish=null;
+}
+let cart=await cartModel.findOne({owner:userData._id});
+
+if(!cart)
+{
+  cart=null
+}
+const search = req.query.search || '';
+            
+let sortQuery = {};
+
+const sort = req.query.sort || '';
+
+if (sort === 'lowtohigh') {
+    sortQuery = { price: 1 };
+} else if (sort === 'hightolow') {
+    sortQuery = { price: -1 };
+} else if (sort === 'a-z') {
+    sortQuery = { name: 1 };
+} else if (sort === 'z-a') {
+    sortQuery = { name: -1 };
+} else if (sort === 'featured') {
+    sortQuery = { isFeatured: true };
+} else if (sort === 'popularity') {
+    sortQuery = { popularity: -1 };
+} else if (sort === 'averagerating') {
+    sortQuery = { rating: -1 };
+} else if (sort === 'Newarrivals') {
+    sortQuery = { createdAt: -1 };
+}
+if (search !== '') {
+    product = await ProductModel
+        .find({
+            
+            $or: [
+                { name: { $regex: search, $options: 'i' } },
+                { brand: { $regex: search, $options: 'i' } }
+            ]
+        })
+        .populate('category')
+        .sort(sortQuery).skip(perPage * (page - 1))
+        .limit(perPage).limit(5) ;
+}else if(sort){
+    product = await ProductModel.find({}).populate('category').sort(sortQuery).skip(perPage * (page - 1))
+    .limit(perPage).limit(5) ;
+}else{
+product = await ProductModel.find({}).populate('category').skip(perPage * (page - 1))
+.limit(perPage) .sort({ createdAt: -1 })
+.limit(5) ;
+}
+res.render('newArrivals', { product, wish, totalPage, page, wish, cart });
+
+}
+catch(error){
+  console.log('new Arrivals',error.message);
+
+}
+}
+
 
 
 module.exports = {
@@ -918,6 +1060,8 @@ module.exports = {
     loadorderpage,
     deleteorder,
     reqreturn,
+
+    newArrivals
 
     
 };

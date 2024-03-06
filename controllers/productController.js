@@ -20,21 +20,31 @@ const loadproduct = async (req, res) => {
 const showsearch = async (req, res) => {
     try {
         const search = req.query.text;
-        const cat = req.query.category;
-
+        let products=[];
+        if(req.query.category){
+            const cat = req.query.category;
         const category = await categoryModel.findOne({ name: cat });
-
-        const products = await productModel
-            .find({
-                category: category._id,
-                $or: [
-                    { name: { $regex: search, $options: 'i' } },
-                    { brand: { $regex: search, $options: 'i' } }
-                ]
-            })
-            .populate('category');
-            // console.log(products);
-        res.status(200).json({ product: products });
+        products = await productModel
+        .find({
+            category: category._id,
+            $or: [
+                { name: { $regex: search, $options: 'i' } },
+                { brand: { $regex: search, $options: 'i' } }
+            ]
+        })
+        .populate('category');
+}else{
+     products = await productModel
+    .find({
+       
+        $or: [
+            { name: { $regex: search, $options: 'i' } },
+            { brand: { $regex: search, $options: 'i' } }
+        ]
+    })
+    .populate('category');
+}
+ res.status(200).json({ product: products });
     } catch (error) {
         console.error('Error searching for products:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -203,8 +213,16 @@ const loaduserprodetails = async (req, res) => {
 
         if (productdetails) {
             // console.log(productdetails);
-
-            res.render('user-product-details', { pro: productdetails,cart:cartqty.quantity });
+            let wish=await wishlistModel.findOne({user:user._id});
+            if(!wish){
+              wish=null;
+            }
+            let cart=await cartModel.findOne({owner:user._id})
+            if(!cart)
+            {
+            cart=null;
+            }
+            res.render('user-product-details', { pro: productdetails,cart:cartqty.quantity ,wish,cart});
         }
         else {
             res.redirect('/home');
@@ -218,13 +236,15 @@ const loaduserprodetails = async (req, res) => {
 const showproduct = async (req, res) => {
         try {
             const cat = req.query.category;
+            
             const category = await categoryModel.findOne({ name: cat });
             const perPage=8;
             const page = parseInt(req.query.page) || 1;
             const totalproducts= await productModel.countDocuments({});
             const totalPage=Math.ceil(totalproducts / perPage)
             if (!category) {
-                res.render('shop-product');
+                product = await productModel.find()
+             
             }
     
             const search = req.query.search || '';
@@ -270,8 +290,17 @@ const showproduct = async (req, res) => {
             .limit(perPage);
         }
         const userData = await userModels.findOne({ email: req.session.email });
-             const wish=await wishlistModel.find({user:userData._id});
-            res.render('shop-product', { product, cat,wish,totalPage,page});
+             let wish=await wishlistModel.findOne({user:userData._id});
+           
+    if(!wish){
+      wish=null;
+    }
+    let cart=await cartModel.findOne({owner:userData._id})
+    if(!cart)
+    {
+    cart=null;
+    }
+            res.render('shop-product', { product, cat,totalPage,page,wish,cart});
         } catch (error) {
             console.error('Error in showproduct:', error.message);
             res.redirect('/home');
@@ -279,7 +308,74 @@ const showproduct = async (req, res) => {
         }
     }
     
+const allProduct=async(req,res)=>{
+    try{
+        let product=await productModel.find({})
+        const perPage=8;
+            const page = parseInt(req.query.page) || 1;
+            const totalproducts= await productModel.countDocuments({});
+            const totalPage=Math.ceil(totalproducts / perPage);
+            const userData = await userModels.findOne({ email: req.session.email });
+            const wish=await wishlistModel.findOne({user:userData._id});
+            
+            const search = req.query.search || '';
+            
+            let sortQuery = {};
+    
+            const sort = req.query.sort || '';
 
+            if (sort === 'lowtohigh') {
+                sortQuery = { price: 1 };
+            } else if (sort === 'hightolow') {
+                sortQuery = { price: -1 };
+            } else if (sort === 'a-z') {
+                sortQuery = { name: 1 };
+            } else if (sort === 'z-a') {
+                sortQuery = { name: -1 };
+            } else if (sort === 'featured') {
+                sortQuery = { isFeatured: true };
+            } else if (sort === 'popularity') {
+                sortQuery = { popularity: -1 };
+            } else if (sort === 'averagerating') {
+                sortQuery = { rating: -1 };
+            } else if (sort === 'Newarrivals') {
+                sortQuery = { createdAt: -1 };
+            }
+            if (search !== '') {
+                product = await productModel
+                    .find({
+                        
+                        $or: [
+                            { name: { $regex: search, $options: 'i' } },
+                            { brand: { $regex: search, $options: 'i' } }
+                        ]
+                    })
+                    .populate('category')
+                    .sort(sortQuery).skip(perPage * (page - 1))
+                    .limit(perPage);
+            }else if(sort){
+                product = await productModel.find({}).populate('category').sort(sortQuery).skip(perPage * (page - 1))
+                .limit(perPage);
+        }else{
+            product = await productModel.find({}).populate('category').skip(perPage * (page - 1))
+            .limit(perPage);
+        }
+        
+    if(!wish){
+      wish=null;
+    }
+    let cart=await cartModel.findOne({owner:userData._id})
+    if(!cart)
+    {
+    cart=null;
+    }
+        res.render('shopAll',{product,totalPage,page,wish,cart});
+    }
+    catch(error)
+    {
+    console.log('allProduct',error.message);
+    }
+}
 
 
 module.exports = {
@@ -291,7 +387,8 @@ module.exports = {
     deletepro,
     loaduserprodetails,
     showproduct,
-    showsearch
+    showsearch,
+    allProduct
 
 
 }

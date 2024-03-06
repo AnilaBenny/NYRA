@@ -73,8 +73,8 @@
                                         <!-- Start Grid View Product -->
                                         <div class="tab-pane active show sort-layout-single" id="layout-4-grid">
                                             <div class="row">
-                                                <%  if(wishlist!==null){if( wishlist !=='undefined' && wishlist.product.length > 0) {
-                                                    for(let i=0; i<wishlist.product.length; i++) { %>
+                                                <%  if(wish!==null){if( wish !=='undefined' && wish.product.length > 0) {
+                                                    for(let i=0; i<wish.product.length; i++) { %>
                                                 <div class="col-xl-3 col-lg-4 col-sm-6 col-12">
                                                     <!-- Start Product Default Single Item -->
                                                     
@@ -82,20 +82,20 @@
                                                     <div class="product-default-single-item product-color--golden"
                                                         data-aos="fade-up" data-aos-delay="0">
                                                         <div class="image-box">
-                                                            <a href="/productdetails?id=<%=wishlist.product[i]._id %>" class="image-link">
-                                                <img src="/uploads/productImages/<%=wishlist.product[i].images[0]%>" alt="" style="width: 270px; margin-right: 30px;">
-                                                <img src="/uploads/productImages/<%=wishlist.product[i].images[1]%>" alt="" style="width: 270px; margin-right: 30px;">
+                                                            <a href="/productdetails?id=<%=wish.product[i]._id %>" class="image-link">
+                                                <img src="/uploads/productImages/<%=wish.product[i].images[0]%>" alt="" style="width: 270px; margin-right: 30px;">
+                                                <img src="/uploads/productImages/<%=wish.product[i].images[1]%>" alt="" style="width: 270px; margin-right: 30px;">
                                             </a>
                                                             <div class="action-link">
                                                                 <div class="action-link-left">
-                                                                    <a href='#' onclick="addProductCart('<%=wishlist.product[i]._id%>')">Add to Cart</a>
+                                                                    <a href='#' onclick="addProductCart('<%=wish.product[i]._id%>')">Add to Cart</a>
                                                                 </div>
                                                                 <div class="action-link-right">
                                                                     <a href="#" data-bs-toggle="modal"
                                                                         data-bs-target="#modalQuickview"><i
                                                                             class="icon-magnifier"></i></a>
                                                                            
-                                                        <a href="#" onclick="removewishlist('<%= wishlist.product[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
+                                                        <a href="#" onclick="removewishlist('<%= wish.product[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
 
                                                                     <a href="#"><i
                                                                             class="icon-shuffle"></i></a>
@@ -105,7 +105,7 @@
                                                         <div class="content">
                                                             <div class="content-left">
                                                                 <h6 class="title"><a
-                                                                        href="#"><%=wishlist.product[i].name%></a></h6>
+                                                                        href="#"><%=wish.product[i].name%></a></h6>
                                                                 <ul class="review-star">
                                                                     <li class="fill"><i class="ion-android-star"></i>
                                                                     </li>
@@ -120,7 +120,7 @@
                                                                 </ul>
                                                             </div>
                                                             <div class="content-right">
-                                                                <span class="price">Rs.<%=wishlist.product[i].price%></span>
+                                                                <span class="price">Rs.<%=wish.product[i].price%></span>
                                                             </div>
 
                                                         </div>

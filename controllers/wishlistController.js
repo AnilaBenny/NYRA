@@ -1,7 +1,7 @@
 const productModel=require('../models/productModel');
 const userModels = require('../models/userModels');
 const wishlistModel=require('../models/wishlistModel');
-const userModel=require('../models/userModels');
+const cartModel=require('../models/cartModel')
 const addToWishlist = async (req, res) => {
     try {
         const id = req.query.id;
@@ -68,9 +68,15 @@ const loadWishlist=async(req,res)=>{
         if(!wishlist){
             wishlist=null
         }
+           
+        let cart=await cartModel.findOne({owner:user._id})
+        if(!cart)
+        {
+        cart=null;
+        }
       
         console.log(wishlist);
-        res.render('wishlist',{wishlist})
+        res.render('wishlist',{wish:wishlist,cart})
     }
     catch(error){
         console.log(error.message);

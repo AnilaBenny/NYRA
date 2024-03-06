@@ -44,14 +44,15 @@ userRoute.post('/address-edit',logSession,userController.editAddress);
 
 userRoute.post('/add-to-cart',logSession,cart.addTocart);
 userRoute.get('/cart',logSession,cart.showcart);
-userRoute.post('/cart',logSession,coupon.Couponcart);
-userRoute.post('/cart-delete',logSession,cart.deleteCart);
-userRoute.post('/update-cart-quantity',logSession,cart.updateCart);
+userRoute.post('/cart',coupon.Couponcart);
+userRoute.post('/cart-delete',cart.deleteCart);
+userRoute.post('/update-cart-quantity',cart.updateCart);
 
 userRoute.get('/shop',logSession,product.showproduct);
+userRoute.get('/allProduct',logSession,product.allProduct);
 
 userRoute.get('/checkout',logSession,checkout.loadcheckout);
-userRoute.post('/checkout',logSession,checkout.Postcheckout);
+userRoute.post('/checkout',checkout.Postcheckout);
 
 userRoute.post('/orderOnlinePayment',logSession,checkout.razorpayVerify);
 
@@ -73,7 +74,9 @@ userRoute.get('/wishlist',logSession,wishlist.loadWishlist);
 
 userRoute.get('/search',logSession,product.showsearch);
 
-userRoute.post('/addtocartIn',cart.addToCartIn)
+userRoute.post('/addtocartIn',cart.addToCartIn);
+userRoute.get('/newArrivals',userController.newArrivals)
+
 
 
 

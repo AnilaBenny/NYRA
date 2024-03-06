@@ -189,7 +189,7 @@ crossorigin="anonymous">
                                     </a>
                                 </li>
                                 <li>
-                                    <input class="form-control mr-sm-2" type="search" placeholder="Search" id="search" oninput="searchproduct('<%=cat%>')" aria-label="Search">
+                                    <input class="form-control mr-sm-2" type="search" placeholder="Search" id="search" oninput="searchproduct()" aria-label="Search">
                                     
                                     <!-- Search Results -->
                                     <div class="collapse" id="searchResultsCollapse">
@@ -457,7 +457,7 @@ crossorigin="anonymous">
             <ul class="user-link">
                 <li><a href="/wishlist">Wishlist</a></li>
                 <li><a href="cart.html">Cart</a></li>
-                <li><a href="checkout.html">Checkout</a></li>
+               
             </ul>
         </div>
         <!-- End Mobile contact Info -->
@@ -627,12 +627,12 @@ crossorigin="anonymous">
                 <div class="row">
                     <div class="col-12">
                         
-                        <h3 class="breadcrumb-title">Shop - <%=cat%></h3>
+                        <h3 class="breadcrumb-title">Shop</h3>
                         <div class="breadcrumb-nav breadcrumb-nav-color--black breadcrumb-nav-hover-color--golden">
                             <nav aria-label="breadcrumb">
                                 <ul>
-                                    <li><a href="index.html">Home</a></li>
-                                    <li><a href="shop-grid-sidebar-left.html">Shop</a></li>
+                                    <li><a href="/home">Home</a></li>
+                                    <li><a href="/allProduct">Shop</a></li>
                                 </ul>
                             </nav>
                         </div>
@@ -676,42 +676,42 @@ crossorigin="anonymous">
     <form action="#" method="get">
         <ul class=" d-flex  action-hover-color--golden">
             <li>
-                <a href="/shop?category=<%=cat%>&sort=featured" class="p-3">
+                <a href="/shop?sort=featured" class="p-3">
                     Featured
                 </a>
             </li>
             <li>
-                <a href="/shop?category=<%=cat%>&sort=averagerating" class="p-3">
+                <a href="/shop?sort=averagerating" class="p-3">
                     average rating
                 </a>
             </li>
             <li>
-                <a href="/shop?category=<%=cat%>&sort=popularity" class="p-3">
+                <a href="/shop?sort=popularity" class="p-3">
                     popularity
                 </a>
             </li>
             <li>
-                <a href="/shop?category=<%=cat%>&sort=Newarrivals" class="p-3">
+                <a href="/shop?sort=Newarrivals" class="p-3">
                     New arrivals 
                 </a>
             </li>
             <li>
-                <a href="/shop?category=<%=cat%>&sort=lowtohigh" class="p-3">
+                <a href="/shop?sort=lowtohigh" class="p-3">
                     price: low to high
                 </a>
             </li>
             <li>
-                <a href="/shop?category=<%=cat%>&sort=hightolow" class="p-3">
+                <a href="/shop?sort=hightolow" class="p-3">
                     price: high to low
                 </a>
             </li>
             <li>
-                <a href="/shop?category=<%=cat%>&sort=a-z" class="p-3">
+                <a href="/shop?sort=a-z" class="p-3">
                     aA - zZ 
                 </a>
             </li>
             <li>
-                <a href="/shop?category=<%=cat%>&sort=z-a " class="p-3">
+                <a href="/shop?sort=z-a " class="p-3">
                     zZ - aA 
                 </a>
             </li>
@@ -888,13 +888,13 @@ crossorigin="anonymous">
                     <div class="page-pagination text-center" data-aos="fade-up" data-aos-delay="0">
                         <ul>
                             <% if (page > 1) { %>
-                                <li><a href="/shop?category=<%=cat%>&page=<%=page-1%>"><i class="ion-ios-skipforward"></i></a></li>
+                                <li><a href="/shop?page=<%=page-1%>"><i class="ion-ios-skipforward"></i></a></li>
                             <% } %>
                             <% for (let i = Math.max(1, page - 2); i <= Math.min(page + 2, totalPage); i++) { %>
-                                <li><a href="/shop?category=<%=cat%>&page=<%=i%>"><%=i%></a></li>
+                                <li><a href="/shop?page=<%=i%>"><%=i%></a></li>
                             <% } %>
                             <% if (page < totalPage) { %>
-                                <li><a href="/shop?category=<%=cat%>&page=<%=page+1%>"><i class="ion-ios-skipforward"></i></a></li>
+                                <li><a href="/shop?page=<%=page+1%>"><i class="ion-ios-skipforward"></i></a></li>
                             <% } %>
                         </ul>
                     </div> <!-- End Pagination -->
@@ -1194,12 +1194,12 @@ Toast.fire({
     
 
 
-function searchproduct(category) {
+function searchproduct() {
     let text = document.getElementById("search").value;
     const searchInput = document.getElementById('search');
     searchInput.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
-            location.href=`/shop?category=${category}&search=${text}`
+            location.href=`/newArrivals?search=${text}`
         }
     });
     document.querySelector('#searchResultsCollapse').classList.add('show');
@@ -1210,7 +1210,7 @@ function searchproduct(category) {
         }, 200);
     });
     // alert(text)
-    fetch(`/search?text=${text}&category=${category}`)
+    fetch(`/search?text=${text}`)
     
         .then(response => response.json())
         .then(data => {

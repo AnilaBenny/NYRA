@@ -328,7 +328,7 @@
                                     <option value="Canceled">Canceled</option>
                                     <% break;
                                         case 'Processing': %>
-                                    <option value="Pending">Pending</option>
+                                    
                                     <option value="Processing" selected>Processing</option>
                                     <option value="Shipped">Shipped</option>
                                     <option value="Delivered">Delivered</option>
@@ -336,8 +336,8 @@
                                     <% break;
                                         case 'Shipped': %>
                                     <option value="Shipped" selected>Shipped</option>
-                                    <option value="Canceled">Canceled</option>
                                     <option value="Delivered">Delivered</option>
+                                    <option value="Canceled">Canceled</option>
                                     <% break;
                                        case 'Canceled': %>
                                     <option value="Canceled">Canceled</option>
@@ -387,15 +387,13 @@
         <br><br>
         <p>request status :<%= orders.requests[0].status %></p>
 
-        <button class="btn btn-success" onclick="acceptCancel('<%=orders.oId %>')">Accept</button>
+        <button class="btn btn-success" onclick="acceptCancel('<%=orders.oId %>','<%=orders.user._id%>')">Accept</button>
         <button class="btn btn-danger" onclick="rejectCancel('<%=orders.oId %>')">Reject</button>
        
-        
-        <button class="btn btn-primary" onclick="refundAmount('<%= orders._id %>','<%= orders.user._id %>')">Refund Amount</button>
 <% } else if (orders.status === 'Delivered' && orders.requests[0].status === 'Pending') { %>
         <strong class="text-brand mb-3 mt-2 text-center">Order Returned <span style="font-size: 14px; color: black;">(Reason)</span></strong>
         <input type="text" value="<%= orders.requests[0].reason %>" readonly class="mb-3 text-center border-0">
-        <button class="btn btn-success w-50 mb-3 text-center ms-5" onclick="refundAmount('<%= orders._id %>','<%= orders.user._id %>')">Accept Return Order</button>
+        <button class="btn btn-success w-50 mb-3 text-center ms-5 refund"  onclick="refundAmount('<%= orders._id %>','<%= orders.user._id %>')" >Accept Return Order</button>
 <% } else { %>
         <!-- Display other request details as needed -->
         <% orders.requests.forEach(request => { %>
@@ -526,53 +524,59 @@
 
 
     
-    
-
-        function acceptCancel(orderId) {
-   
-
-    fetch('/admin/acceptCancel', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            orderId
-        }),
-    })
-    .then((response) => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok.');
-        }
-        return response.json();
-    })
-    .then((data) => {
-        if (data.success) {
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'request accepted',
-                text: 'User request accepted.',
+        function acceptCancel(orderId, userId) {
+    // Show a confirmation dialog to the user
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You are about to accept the  request.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, accept it!'
+    }).then((result) => {
+        // If user confirmed
+        if (result.isConfirmed) {
+            // Proceed with the fetch request
+            fetch('/admin/acceptCancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderId,
+                    userId
+                }),
+            })
+            .then((response) => {
+                if (response.ok) { // Assuming the response includes a success flag
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Request Accepted',
+                        text: 'The user request has been accepted.',
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Updating Request',
+                        text: data.message || 'An error occurred while updating the user request.',
+                    });
+                }
+        })
+            .catch((error) => {
+                console.error('Fetch Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Fetch Error',
+                    text: 'An error occurred while making the request.',
+                });
             });
-        } else {
-          
-            Swal.fire({
-                icon: 'error',
-                title: 'Error Updating Request',
-                text: data.message || 'An error occurred while updating the user request.',
-            });
         }
-    })
-    .catch((error) => {
-       
-        console.error('Fetch Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Fetch Error',
-            text: 'An error occurred while making the request.',
-        });
     });
 }
+
+
+
 
 function refundAmount(orderId, userId) {
            
@@ -610,6 +614,7 @@ function refundAmount(orderId, userId) {
                     setTimeout(() => {
                         window.location.reload()
                     }, 1000)
+                    
                 })
                 .catch(error => {
                    
@@ -625,16 +630,29 @@ function refundAmount(orderId, userId) {
         }
 
         function rejectCancel(orderId) {
-   
-
-    fetch('/admin/rejectCancel', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            orderId
-        }),
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You are about to reject the request.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, reject it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            return fetch('/admin/rejectCancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderId
+                }),
+            });
+        } else {
+            
+            throw new Error('Cancel rejection aborted by the user.');
+        }
     })
     .then((response) => {
         if (!response.ok) {
@@ -644,14 +662,12 @@ function refundAmount(orderId, userId) {
     })
     .then((data) => {
         if (data.success) {
-            // Handle success
             Swal.fire({
-                icon: 'error',
-                title: 'request rejected',
-                text: 'User request Rejected.',
+                icon: 'success',
+                title: 'Request Rejected',
+                text: 'User request has been rejected.',
             });
         } else {
-            
             Swal.fire({
                 icon: 'error',
                 title: 'Error Updating Request',
@@ -660,15 +676,18 @@ function refundAmount(orderId, userId) {
         }
     })
     .catch((error) => {
-        
-        console.error('Fetch Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Fetch Error',
-            text: 'An error occurred while making the request.',
-        });
+        // We check the error message to avoid showing an error alert when the user cancels the operation.
+        if (error.message !== 'Cancel rejection aborted by the user.') {
+            console.error('Fetch Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while processing your request.',
+            });
+        }
     });
 }
+
 
     </script>
 

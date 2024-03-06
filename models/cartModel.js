@@ -40,7 +40,7 @@ const cartSchema = new mongoose.Schema({
       type: Number
    },
     selected: {
-      type: Boolean, // Add a selected field to mark whether the item is selected
+      type: Boolean, 
       default: false, 
   },
    }],
@@ -65,6 +65,8 @@ billTotal: {
 }, {
 timestamps: true
 })
+
+
 
 const cartModel = mongoose.model('Cart',cartSchema);
 
