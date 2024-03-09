@@ -2,6 +2,7 @@ const productModel = require("../models/productModel");
 const userModel = require("../models/userModels");
 const cartModel = require("../models/cartModel");
 const {couponModel}=require('../models/couponModel');
+const wishlistModel=require('../models/wishlistModel');
 
 
 const addToCartIn = async (req, res) => {
@@ -150,23 +151,23 @@ const showcart=async(req,res)=>{
         });
         
        
-        let wish=await wishlistModel.find({user:userData._id});
+        let wish=await wishlistModel.findOne({user:userId});
            
         if(!wish){
           wish=null;
         }
-        let cart=await cartModel.findOne({owner:userData._id})
-        if(!cart)
+        
+        if(!userCart)
         {
         cart=null;
         }
         // console.log(userCart);
      
         if(userCart.items.length>0){
-            res.render('cart',{cart:userCart,coupon:eligibleCoupons,wish,cart})
+            res.render('cart',{cart:userCart,coupon:eligibleCoupons,wish})
         }
         else{
-            res.render('empty-cart');
+            res.render('empty-cart',{wish,cart:userCart});
         }
     }
     catch(err){

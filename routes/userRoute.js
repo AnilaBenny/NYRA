@@ -75,8 +75,10 @@ userRoute.get('/wishlist',logSession,wishlist.loadWishlist);
 userRoute.get('/search',logSession,product.showsearch);
 
 userRoute.post('/addtocartIn',cart.addToCartIn);
-userRoute.get('/newArrivals',userController.newArrivals)
+userRoute.get('/newArrivals',userController.newArrivals);
 
+userRoute.post('/addToWallet',userController.addToWallet);
+userRoute.post('/reviewUpdate',product.reviewUpdate)
 
 
 

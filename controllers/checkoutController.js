@@ -5,6 +5,8 @@ const productModel = require("../models/productModel");
 const orderModel = require("../models/orderModel");
 const randomstring = require('randomstring');
 const crypto = require("crypto");
+const wishlistModel=require('../models/wishlistModel')
+const walletModel = require('../models/walletModel');
 
 const {generateRazorpay,instance}=require('../config/razorpay');
 const Razorpay = require('razorpay');
@@ -33,14 +35,15 @@ async function generateUniqueOrderID() {
 const loadcheckout=async(req,res)=>{
     try{
         const user=await userModel.findOne({email:req.session.email});
-        const cart=await cartModel.findOne({owner:user._id});
+        const cart=await cartModel.findOne({owner:user._id}) || null;
         let address=await addressModel.findOne({user:user._id});
+        let wish=await wishlistModel.findOne({user:user._id}) || null;
         //console.log(cart);
         if(!address){
           address=null;
         }
         
-        res.render('checkout',{address:address,cart:cart});
+        res.render('checkout',{address:address,cart:cart,wish});
     }
     catch(error){
         console.log('load check out',error.message);
@@ -161,7 +164,46 @@ const Postcheckout = async (req,res) => {
 
 
         }else{
-
+         
+        let wallet = await walletModel.findOne({ user: user._id });
+            if (!wallet || wallet.balance<cart.billTotal) {
+              
+              return res.status(400).json({
+                success: false,
+                message: "Insufficient wallet balance",
+            });
+            }
+            wallet.balance -= cart.billTotal;
+            wallet.transactions.push({
+                amount: -cart.billTotal,
+                type: 'debit',
+                description: 'purchase with wallet'
+            });
+    
+            await wallet.save();
+            
+            const orderData = new orderModel({
+              user: user._id,
+              cart: cart._id,
+              items: selectedItems,
+              billTotal: cart.billTotal, 
+              oId: order_id,
+              paymentStatus: "Success",
+              paymentMethod: paymentOption,
+              deliveryAddress: addressdetails,
+              coupon:cart.coupon,
+              discountPrice:cart.discountPrice
+          });
+  
+          await orderData.save();
+          
+          cart.items = [];
+          await cart.save();
+         res.status(200).json({
+          success: true,
+          message: "Order placed successfully.",
+          orderId:order_id ,
+      });
         }
         
     } catch (error) {
@@ -175,6 +217,8 @@ const orderConfirmation=async(req,res)=>{
     try{
         
         const user=await userModel.findOne({email:req.session.email});
+        const cart=await cartModel.findOne({owner:user._id}) || null;
+        let wish=await wishlistModel.findOne({user:user._id}) || null;
         await cartModel.findOneAndUpdate({owner:user._id},{
         $set:{
           items:[]
@@ -182,7 +226,7 @@ const orderConfirmation=async(req,res)=>{
       })
         const order=await orderModel.findOne({oId:req.query.orderId})
         //console.log(order);
-        res.render('orderconfirmation',{order:order});
+        res.render('orderconfirmation',{order:order,wish,cart});
     }
     catch(error){
         console.log('order confirmation:',error.message);
@@ -193,8 +237,10 @@ const orderConfirmation=async(req,res)=>{
 const loadOrderdetail=async(req,res)=>{
     try{
         const order=await orderModel.findOne({oId:req.query.oId});
-        console.log(order);
-        res.render('order-detail',{order});
+        const user=await userModel.findOne({email:req.session.email});
+        const cart=await cartModel.findOne({owner:user._id}) || null;
+        let wish=await wishlistModel.findOne({user:user._id}) || null;
+        res.render('order-detail',{order,wish,cart});
     }catch(error){
         console.log('loadOrderdetail',error.message);
     }
@@ -269,9 +315,6 @@ console.log(req.body.razorpay_signature);
     return res.status(500).send("Internal Server Error");
   }
 }
-
-
-
 
 module.exports={
     loadcheckout,

@@ -12,7 +12,7 @@ const orderModel = require('../models/orderModel');
 const wishlistModel=require('../models/wishlistModel');
 const walletModel=require('../models/walletModel');
 const cartModel=require('../models/cartModel') ;
-
+const Razorpay = require('razorpay');
 // const Email = process.env.Email;
 // const Pass = process.env.Pass;
 
@@ -514,52 +514,67 @@ const postreset = async (req, res) => {
   }
 };
 
-const loaduserAc=async(req,res)=>{
-  try{
-    if (req.session.email) {
-      const user = await userModel.findOne({ email: req.session.email });
-      let address = await addressModel.findOne({
-        user: user._id
-      });
-      const order=await orderModel.findOne({
-        user: user._id
-      });
-      let wallet=await walletModel.findOne({
-        user: user._id
-      });
-      if(!address){
-        address=null;
-      }
-      if(!wallet){
-        wallet=null;
-      }
-      let wish=await wishlistModel.findOne({user:user._id});
-                if(!wish){
-                  wish=null;
-                }
-                let cart=await cartModel.findOne({owner:user._id})
-                if(!cart)
-                {
-                cart=null;
-                }
-              
-    res.render('user-detail',{user,address,wallet,wish,cart});
-    }
-    
-  }
-  catch(error){
-    console.log('loaduserAc',error.message);
-  }
 
-};
+const loaduserAc = async (req, res) => {
+      try {
+        if (req.session.email) {
+          const user = await userModel.findOne({ email: req.session.email });
+          if (!user) {
+            // Handle case where user is not found
+            return res.status(404).send('User not found');
+          }
+    
+          let address = await addressModel.findOne({ user: user._id }) || null;
+          let wish = await wishlistModel.findOne({ user: user._id }) || null;
+          let cart = await cartModel.findOne({ owner: user._id }) || null;
+          let wallet = await walletModel.findOne({ user: user._id }) || null;
+    
+          if (req.query.wallet) {
+            const amount = Number(req.query.wallet) / 100; // Assuming amount is in smallest currency unit (e.g., cents)
+            if (!wallet) {
+              wallet = new walletModel({
+                user: user._id,
+                balance: 0,
+                transactions: []
+              });
+            }
+            wallet.balance += amount;
+            wallet.transactions.push({
+              amount: amount,
+              type: 'credit',
+              description: 'Add to wallet'
+            });
+            await wallet.save();
+          }
+    
+          // If no wallet was found or created, set to null for the response
+          if (!wallet) {
+            wallet = null;
+          }
+
+            wallet.transactions.sort((a, b) => b.updatedAt - a.updatedAt);
+
+    
+          res.render('user-detail', { user, address, wallet, wish, cart });
+        } else {
+          // Handle case where user is not logged in or session is not established
+          res.status(401).send('User not logged in');
+        }
+      } catch (error) {
+        console.error('loaduserAc', error.message);
+        res.status(500).send('An error occurred');
+      }
+    };
+    
+
 
 const editprofile = async (req, res) => {
   try {
-    const { name, mobile, email } = req.body;
-
-    const existemail = await userModel.findOne({ email: email});
+    const { name, mobile } = req.body;
     const user = await userModel.findOne({ email: req.session.email });
     let wish=await wishlistModel.findOne({user:user._id});
+    let wallet=await walletModel.findOne({user:user._id});
+    let address=await addressModel.findOne({user:user._id})
     if(!wish){
       wish=null;
     }
@@ -569,20 +584,9 @@ const editprofile = async (req, res) => {
     cart=null;
     }
   
-    if (!existemail) {
-      
-      return res.render('user-detail', { error: 'You cannot change email.' ,user,wish,cart});
-    }
-
-    if (existemail.email !== req.session.email) {
-      const user = await userModel.findOne({ email: req.session.email });
-      return res.render('user-detail', { error: 'You cannot change email.', user ,wish,cart});
-    }
-
-    // Check if the mobile already exists for another user
     const existingUserWithMobile = await userModel.findOne({ mobile: mobile });
     if (existingUserWithMobile && existingUserWithMobile.email !== req.session.email) {
-      return res.render('user-detail', { error: 'There is a user with this mobile number.', user,wish,cart });
+      return res.render('user-detail', { error: 'There is a user with this mobile number.', user,wish,cart,wallet,address });
     }
 
     // Update user details
@@ -598,9 +602,9 @@ const editprofile = async (req, res) => {
     );
 
     if (updatedUser) {
-      return res.render('user-detail', { message: 'Updated successfully!', user: updatedUser ,wish,cart});
+     res.redirect('/userAc');
     } else {
-      return res.render('user-detail', { error: 'Failed to update user details.', user,wish,cart });
+      return res.render('user-detail', { error: 'Failed to update user details.', user,wish,cart,wallet,address});
     }
   } catch (error) {
     console.log('editprofile', error.message);
@@ -611,15 +615,11 @@ const editprofile = async (req, res) => {
 //address
 const loadAddadd=async(req,res)=>{
   try{
-    let wish=await wishlistModel.findOne({user:user._id});
-    if(!wish){
-      wish=null;
-    }
-    let cart=await cartModel.findOne({owner:user._id})
-    if(!cart)
-    {
-    cart=null;
-    }
+    const user=await userModel.findOne({email:req.session.email});
+    let wish=await wishlistModel.findOne({user:user._id}) || null;
+  
+    let cart=await cartModel.findOne({owner:user._id}) || null;
+  
 res.render('add-address',{wish,cart});
   }
   catch(error){
@@ -1032,6 +1032,46 @@ catch(error){
 }
 
 
+const addToWallet=async(req,res)=>{
+  var instance = new Razorpay({
+    key_id: 'rzp_test_2sQVid1X3uLewM',
+    key_secret: '9O1FvD9eQj4ZmHMAP4ygy0fO',
+  });
+
+ 
+  const amount = Number(req.body.amount);
+  if (!amount) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid amount provided.",
+    });
+  }
+
+  var options = {
+    amount: amount * 100,  
+    currency: "INR",
+  };
+
+
+  try {
+    const razorpayOrder = await instance.orders.create(options);
+    console.log(razorpayOrder);
+    res.status(201).json({
+      success: true,
+      message: "Wallet updated successfully.",
+      order: razorpayOrder,
+    });
+  } catch (orderError) {
+    // Handle errors from Razorpay order creation
+    console.error('Razorpay Order Creation Error:', orderError);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create order with Razorpay.",
+    });
+  }
+
+
+}
 
 module.exports = {
     enterHome,
@@ -1061,7 +1101,8 @@ module.exports = {
     deleteorder,
     reqreturn,
 
-    newArrivals
+    newArrivals,
+    addToWallet
 
     
 };

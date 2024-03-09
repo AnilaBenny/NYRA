@@ -111,40 +111,54 @@
                         <%}%>
                         <div class="tab-pane fade" id="downloads">
                             <div class="card">
-                                <div class="card-header">
+                                <div class="card-header d-flex justify-content-between">
                                     <h4 class="mb-0">My Wallet</h4>
+                                    <a href="#walletModal" data-bs-toggle="modal" class="btn btn-black-default-hover">Add to Wallet</a>
                                 </div>
                                 <div class="card-body">
-                                    <%if(wallet !== null){%>
+                                    <% if(wallet !== null) { %>
+                                        
                                     <h5>Wallet Balance:</h5>
                                     <h5 class="lead">
-                                        INR <%= wallet.balance%>
+                                        INR <%= wallet.balance %>
                                     </h5>
                                     
-                                    <div class="wallet-transactions">
+                                    
+                                    <div class="wallet-transactions" style="max-height: 200px; overflow-y: auto;">
                                         <h5>Recent Transactions:</h5>
                                         <% if (wallet.transactions && wallet.transactions.length > 0) { %>
-                                            <ul class="list-group">
-                                                <% wallet.transactions.slice(-5).forEach(function(transaction) { %>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                        <span class="<%= transaction.type === 'credit' ? 'text-success' : 'text-danger' %>">credited</span>
-                                                        <span class="<%= transaction.type === 'credit' ? 'text-success' : 'text-danger' %>">
-                                                            <%= transaction.type === 'credit' ? '+' : '-' %>
-                                                            INR <%= transaction.amount %>
-                                                        </span>
-                                                    </li>
-                                                <% }); %>
-                                            </ul>
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Type</th>
+                                                        <th>Date</th>
+                                                        <th>Time</th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% wallet.transactions.slice(-5).forEach(function(transaction) { %>
+                                                    <tr>
+                                                        <td class="<%= transaction.type === 'credit' ? 'text-success' : 'text-danger' %>">
+                                                            <%= transaction.type === 'credit' ? 'Credit' : 'Debit' %>
+                                                        </td>
+                                                        <td><%= new Date(transaction.updatedAt).toLocaleDateString("en-US") %></td>
+                                                        <td><%= new Date(transaction.updatedAt).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', second: '2-digit' }) %></td>
+                                                        <td>
+                                                            <%= transaction.type === 'credit' ? '+' : '-' %>INR <%= transaction.amount %>
+                                                        </td>
+                                                    </tr>
+                                                    <% }); %>
+                                                </tbody>
+                                            </table>
                                         <% }} else { %>
                                             <p>No transactions found.</p>
                                         <% } %>
                                     </div>
                                 </div>
-                                <!-- <div class="card-footer text-muted">
-                                    <button type="button" class="btn btn-primary" onclick="window.location.href='/walletPage'">View All Transactions</button>
-                                </div> -->
                             </div>
                         </div>
+                        
                         
                         <div class="tab-pane" id="address">
                             <p>The following addresses will be used on the checkout page .</p>
@@ -191,7 +205,7 @@
                                 <div class="login_form_container">
                                     <div class="account_login_form">
                                         <form action="#" method="post">
-                                            <p>Already have an account? <a href="/">Log in instead!</a></p>
+                                           
                                              <br>
                                              
                                             <div class="default-form-box mb-20">
@@ -237,6 +251,37 @@
             </div>
         </div>
     </div> <!-- ...:::: End Account Dashboard Section:::... -->
+    <!-- The Modal -->
+<div class="modal fade" id="walletModal" tabindex="-1" aria-labelledby="walletModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="walletModalLabel">Add to Wallet</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <form id="addWalletForm">
+          <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <input type="number" min="100" class="form-control" id="amount" name="amount" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Payment</button>
+        </form>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 
     <!-- Start Footer Section -->
     <footer class="footer-section footer-bg section-top-gap-100">
@@ -614,12 +659,96 @@
 
     <!-- Main JS -->
     <script src="/public/assets/js/main.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <script>
 
 document.getElementById('editAddressLink').addEventListener('click', function(event) {
     event.preventDefault(); 
     window.location.href = '/editAddress'; 
 });
+
+
+document.getElementById('addWalletForm').addEventListener('submit', async function(event) {
+    event.preventDefault(); 
+    const amountValue = document.getElementById('amount').value;
+    
+    const requestData = {
+        amount: amountValue, 
+    };
+
+    try {
+        const response = await fetch('/addToWallet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            
+            const options = {
+                key: "rzp_test_2sQVid1X3uLewM",
+                amount: data.order.amount,
+                currency: "INR",
+                name: "NYRA",
+                description: "Payment for Your Wallet",
+                transaction_id: data.order.id,
+                handler: async function (response) {
+                    const paymentData = {
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_signature: response.razorpay_signature,
+                        
+                    };
+
+                    try {
+                        const paymentResponse = await fetch(`/userAc?wallet=${data.order.amount}`, {
+                            method: 'GET',
+                          
+                        });
+
+                    } catch (error) {
+                        console.error('Error processing payment:', error);
+                    }
+                },
+                prefill: {
+                    name: "NYRA",
+                    email: "nyra@gmail.com",
+                    contact: "9078654312"
+                },
+                notes: {
+                    address: "Razorpay Corporate Office"
+                },
+                theme: {
+                    color: "#3399cc"
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response){
+                alert("Payment Failed");
+            });
+            rzp.open();
+        } else {
+            // Handle the case where the data.success is false
+            Swal.fire({
+                title: 'Error!',
+                text: 'An error occurred. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    } catch (error) {
+        console.error("Error during checkout:", error);
+        alert("An error occurred during checkout. Please try again later.");
+    }
+});
+
+
 </script>
 
       

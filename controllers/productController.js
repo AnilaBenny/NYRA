@@ -2,7 +2,8 @@ const productModel = require('../models/productModel');
 const categoryModel = require('../models/categoryModel');
 const userModels = require('../models/userModels');
 const cartModel = require('../models/cartModel');
-const wishlistModel=require('../models/wishlistModel')
+const wishlistModel=require('../models/wishlistModel');
+const orderModel = require('../models/orderModel');
 
 const loadproduct = async (req, res) => {
     try {
@@ -208,11 +209,14 @@ const deletepro = async (req, res) => {
 const loaduserprodetails = async (req, res) => {
     try {
         const id = req.query.id;
-        const productdetails = await productModel.findById({ _id: id }).populate('category');
+        const productdetails = await productModel.findById({ _id: id }).populate('category').populate({
+            path: 'review.user',
+            model: 'user'
+        });
         const cartqty=await cartModel.find({'items.productId':id})
 
         if (productdetails) {
-            // console.log(productdetails);
+            const user=await userModels.findOne({email:req.session.email});
             let wish=await wishlistModel.findOne({user:user._id});
             if(!wish){
               wish=null;
@@ -222,7 +226,16 @@ const loaduserprodetails = async (req, res) => {
             {
             cart=null;
             }
-            res.render('user-product-details', { pro: productdetails,cart:cartqty.quantity ,wish,cart});
+            if(productdetails.review && productdetails.review.length > 0){
+               const totalRating = productdetails.review.reduce((acc, review) => acc + review.rating, 0);
+                rating = totalRating / productdetails.review.length;
+            }
+            else{
+                productdetails.review=null;
+                rating=0
+            }
+          
+            res.render('user-product-details', { pro: productdetails,cart:cartqty.quantity ,wish,cart,rating});
         }
         else {
             res.redirect('/home');
@@ -377,6 +390,45 @@ const allProduct=async(req,res)=>{
     }
 }
 
+const reviewUpdate = async (req, res) => {
+    try {
+        const { id, review, userRating,oId } = req.body;
+        const user = await userModels.findOne({ email: req.session.email });
+        await orderModel.findOneAndUpdate(
+            {'items.productId': id},
+            {reviewed: true},
+            {new: true,upsert:true}
+        );
+        
+       
+        
+        let product = await productModel.findById(id);
+
+        if (!product.review) {
+            product.review = [];
+        }
+
+        const existingReviewIndex = product.review.findIndex(reviewObj => String(reviewObj.user) === String(user._id));
+
+        if (existingReviewIndex !== -1) {
+            product.review[existingReviewIndex].reviewdescription = review;
+            product.review[existingReviewIndex].rating = userRating;
+        } else {
+            
+            product.review.push({ user: user._id, reviewdescription: review, rating: userRating });
+        }
+
+        
+        await product.save();
+
+        
+        res.status(200).send("Product review updated successfully.");
+    } catch (error) {
+        console.error('reviewUpdate', error.message);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
 
 module.exports = {
     loadproduct,
@@ -388,7 +440,8 @@ module.exports = {
     loaduserprodetails,
     showproduct,
     showsearch,
-    allProduct
+    allProduct,
+    reviewUpdate
 
 
 }

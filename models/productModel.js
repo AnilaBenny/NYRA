@@ -28,10 +28,21 @@ const productSchema = new mongoose.Schema({
       max: 300
    },
 
-   rating: {
-      type: Number,
-      default: 0,
-   },
+   review: [
+      {
+          user: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: 'user'
+          },
+          rating: {
+              type: Number,
+              default: 0
+          },
+          reviewdescription: {
+              type: String
+          }
+      },
+  ],
 
    isFeatured: {
       type: Boolean,
@@ -64,15 +75,7 @@ const productSchema = new mongoose.Schema({
       type: Number,
       default: 0,
    },
-//    afterDiscount:Number,
-
-   
-   
-   // subcategory: [{
-   //    type: mongoose.Schema.Types.ObjectId,
-   //    ref: 'Subcategory',
-   //    // required: true
-   // }],
+//    afterDiscount:Number
    
 }, {
    timestamps: true

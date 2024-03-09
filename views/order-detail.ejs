@@ -1,14 +1,68 @@
 <%- include('header')-%>
-
 <style>
- @import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
  
- .container{margin-top:50px;margin-bottom: 50px}
- .card{position: relative;display: -webkit-box;display: -ms-flexbox;display: flex;-webkit-box-orient: vertical;-webkit-box-direction: normal;-ms-flex-direction: column;flex-direction: column;min-width: 0;word-wrap: break-word;background-color: #fff;background-clip: border-box;border: 1px solid rgba(0, 0, 0, 0.1);border-radius: 0.10rem}.card-header:first-child{border-radius: calc(0.37rem - 1px) calc(0.37rem - 1px) 0 0}.card-header{padding: 0.75rem 1.25rem;margin-bottom: 0;background-color: #fff;border-bottom: 1px solid rgba(0, 0, 0, 0.1)}.track{position: relative;background-color: #ddd;height: 7px;display: -webkit-box;display: -ms-flexbox;display: flex;margin-bottom: 60px;margin-top: 50px}.track .step{-webkit-box-flex: 1;-ms-flex-positive: 1;flex-grow: 1;width: 25%;margin-top: -18px;text-align: center;position: relative}.track .step.active:before{background: #FF5722}.track .step::before{height: 7px;position: absolute;content: "";width: 100%;left: 0;top: 18px}.track .step.active .icon{background: #ee5435;color: #fff}.track .icon{display: inline-block;width: 40px;height: 40px;line-height: 40px;position: relative;border-radius: 100%;background: #ddd}.track .step.active .text{font-weight: 400;color: #000}.track .text{display: block;margin-top: 7px}.itemside{position: relative;display: -webkit-box;display: -ms-flexbox;display: flex;width: 100%}.itemside .aside{position: relative;-ms-flex-negative: 0;flex-shrink: 0}.img-sm{width: 80px;height: 80px;padding: 7px}ul.row, ul.row-sm{list-style: none;padding: 0}.itemside .info{padding-left: 15px;padding-right: 7px}.itemside .title{display: block;margin-bottom: 5px;color: #212529}p{margin-top: 0;margin-bottom: 1rem}.btn-warning{color: #ffffff;background-color: #ee5435;border-color: #ee5435;border-radius: 1px}.btn-warning:hover{color: #ffffff;background-color: #ff2b00;border-color: #ff2b00;border-radius: 1px}
+.one {
+    color: rgb(255, 0, 0);
+}
+ 
+.two {
+    color: rgb(255, 106, 0);
+}
+ 
+.three {
+    color: rgb(251, 255, 120);
+}
+ 
+.four {
+    color: rgb(255, 255, 0);
+}
+ 
+.five {
+    color: rgb(24, 159, 14);
+}
+ 
+textarea {
+    width: 80%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+ 
+button {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+ 
+button:hover {
+    background-color: #0056b3;
+}
+ 
+.reviews {
+    margin-top: 20px;
+    text-align: left;
+}
+ 
+.review {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 10px 0;
+}
+ 
+.review p {
+    margin: 0;
+}
+
+.card{position: relative;display: -webkit-box;display: -ms-flexbox;display: flex;-webkit-box-orient: vertical;-webkit-box-direction: normal;-ms-flex-direction: column;flex-direction: column;min-width: 0;word-wrap: break-word;background-color: #fff;background-clip: border-box;border: 1px solid rgba(0, 0, 0, 0.1);border-radius: 0.10rem}.card-header:first-child{border-radius: calc(0.37rem - 1px) calc(0.37rem - 1px) 0 0}.card-header{padding: 0.75rem 1.25rem;margin-bottom: 0;background-color: #fff;border-bottom: 1px solid rgba(0, 0, 0, 0.1)}.track{position: relative;background-color: #ddd;height: 7px;display: -webkit-box;display: -ms-flexbox;display: flex;margin-bottom: 60px;margin-top: 50px}.track .step{-webkit-box-flex: 1;-ms-flex-positive: 1;flex-grow: 1;width: 25%;margin-top: -18px;text-align: center;position: relative}.track .step.active:before{background: #FF5722}.track .step::before{height: 7px;position: absolute;content: "";width: 100%;left: 0;top: 18px}.track .step.active .icon{background: #ee5435;color: #fff}.track .icon{display: inline-block;width: 40px;height: 40px;line-height: 40px;position: relative;border-radius: 100%;background: #ddd}.track .step.active .text{font-weight: 400;color: #000}.track .text{display: block;margin-top: 7px}.itemside{position: relative;display: -webkit-box;display: -ms-flexbox;display: flex;width: 100%}.itemside .aside{position: relative;-ms-flex-negative: 0;flex-shrink: 0}.img-sm{width: 80px;height: 80px;padding: 7px}ul.row, ul.row-sm{list-style: none;padding: 0}.itemside .info{padding-left: 15px;padding-right: 7px}.itemside .title{display: block;margin-bottom: 5px;color: #212529}p{margin-top: 0;margin-bottom: 1rem}.btn-warning{color: #ffffff;background-color: #ee5435;border-color: #ee5435;border-radius: 1px}.btn-warning:hover{color: #ffffff;background-color: #ff2b00;border-color: #ff2b00;border-radius: 1px}
 </style>
-</head>
-<body>
-    <div class="container">
+
+
+    <div class="container" style="margin-top:50px;margin-bottom: 50px">
         <article class="card">
             <header class="card-header">Order details </header>
             <div class="card-body">
@@ -66,11 +120,49 @@
                             <div class="aside"><img src="/uploads/productImages/<%=item.image%>" class="img-sm border"></div>
                             <figcaption class="info align-self-center">
                                 <p class="title"><%=item.name %> <br> Qty:<%=item.quantity %></p> <span class="text-muted">Rs.<%=item.price %>.00 </span>
+                                <%if(order.status === 'Delivered' && order.items.reviewed ){%>
+                                    <div class="container" id="reviewrating" style=" background-color: white;
+                                    padding: 20px;
+                                    border-radius: 8px;
+                                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+                                    text-align: center;
+                                    width: 400px;">
+                                        <h5 class="bold">Rate and support us</h5>
+                                        <div class="rating">
+                                            <span id="rating">0</span>/5
+                                        </div>
+                                        <div class="stars" style="font-size: 30px;
+                                        margin: 10px 0;" id="stars">
+                                            <span class="star" style="cursor: pointer;
+                                            margin: 0 5px;" data-value="1">★</span>
+                                            <span class="star" style="cursor: pointer;
+                                            margin: 0 5px;" data-value="2">★</span>
+                                            <span class="star" style="cursor: pointer;
+                                            margin: 0 5px;" data-value="3">★</span>
+                                            <span class="star" style="cursor: pointer;
+                                            margin: 0 5px;" data-value="4">★</span>
+                                            <span class="star" style="cursor: pointer;
+                                            margin: 0 5px;" data-value="5">★</span>
+                                        </div>
+                                        <p>Share your review:</p>
+                                        <input id="review" class="form-control"
+                                                  placeholder="Write your review here">
+                                    </input>
+                                    <br>
+                                        <button id="submitreview" onclick="reviewUpdate('<%=item.productId %>','<%=order._id%>')">Submit</button>
+                                        <div class="reviews" id="reviews">
+                                        </div>
+                                    </div>
+                                    <%}else{%>
+                                        <p style="font-family: Arial, sans-serif; font-size: 16px; color: #1fae09; font-weight: bold; text-align: center;">Review updated successfully</p>
+
+                                   <% }%>
                             </figcaption>
                         </figure>
                     </li>
                <%})%>
                 </ul>
+                
                 <hr>
                 <a href="/myorder" class="btn btn-warning" data-abc="true"> <i class="fa fa-chevron-left"></i> Back to orders</a>
             </div>
@@ -521,6 +613,106 @@
         }
     });
 }
+const stars = document.querySelectorAll(".star");
+const rating = document.getElementById("rating");
+const reviewText = document.getElementById("review");
+const submitBtn = document.getElementById("submitreview");
+const reviewsContainer = document.getElementById("reviews");
+ 
+stars.forEach((star) => {
+    star.addEventListener("click", () => {
+        const value = parseInt(star.getAttribute("data-value"));
+        rating.innerText = value;
+ 
+        // Remove all existing classes from stars
+        stars.forEach((s) => s.classList.remove("one", 
+                                                "two", 
+                                                "three", 
+                                                "four", 
+                                                "five"));
+ 
+        // Add the appropriate class to 
+        // each star based on the selected star's value
+        stars.forEach((s, index) => {
+            if (index < value) {
+                s.classList.add(getStarColorClass(value));
+            }
+        });
+ 
+        // Remove "selected" class from all stars
+        stars.forEach((s) => s.classList.remove("selected"));
+        // Add "selected" class to the clicked star
+        star.classList.add("selected");
+    });
+});
+ 
+
+ 
+function getStarColorClass(value) {
+    switch (value) {
+        case 1:
+            return "one";
+        case 2:
+            return "two";
+        case 3:
+            return "three";
+        case 4:
+            return "four";
+        case 5:
+            return "five";
+        default:
+            return "";
+    }
+}
+
+function reviewUpdate(id,oId) {
+    const review = reviewText.value; 
+    const userRating = parseInt(rating.innerText); 
+   
+
+
+    if (!userRating || !review) {
+        alert(
+"Please select a rating and provide a review before submitting."
+             );
+        return;
+    }
+ 
+   
+
+    fetch('/reviewUpdate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id, review, userRating,oId }) 
+    })
+    .then(response => {
+        if (response.ok) {
+        const container = document.getElementById('reviewrating');
+        container.innerHTML = `<p><strong>Rating: ${userRating}/5</strong></p><p>${review}</p>`;
+        
+      
+        const reviewElement = document.createElement('div');
+        reviewElement.innerHTML = `<p><strong>Rating: ${userRating}/5</strong></p><p>${review}</p>`;
+        
+      
+        const reviewsContainer = document.getElementById('reviewsContainer');
+        reviewsContainer.appendChild(reviewElement);
+
+        reviewText.value = "";
+        rating.innerText = "0";
+        stars.forEach((s) => s.classList.remove("one", "two", "three", "four", "five", "selected"));
+    } else {
+        console.error('Error updating review:', response.statusText);
+    }
+    })
+    .catch(error => {
+        console.error('Error updating review:', error);
+  
+    });
+}
+
 
        </script>
     

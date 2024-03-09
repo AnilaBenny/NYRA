@@ -395,7 +395,7 @@ let userblock = async (req, res) => {
                     await product.save();
                 }
             }
-    for(let i=0;i<requests.length;i++){
+    for(let i=0;i<canceledOrder.requests.length;i++){
             if(canceledOrder.requests[i].type==='Cancel'){
             await orderModel.findOneAndUpdate(
                 { oId: orderId },

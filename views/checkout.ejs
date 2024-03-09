@@ -13,8 +13,8 @@
                         <div class="breadcrumb-nav breadcrumb-nav-color--black breadcrumb-nav-hover-color--golden">
                             <nav aria-label="breadcrumb">
                                 <ul>
-                                    <li><a href="index.html">Home</a></li>
-                                    <li><a href="shop-grid-sidebar-left.html">Shop</a></li>
+                                    <li><a href="/home">Home</a></li>
+                            
                                     <li class="active" aria-current="page">Checkout</li>
                                 </ul>
                             </nav>
@@ -181,6 +181,10 @@
                                 <label class="radio-default d-flex">
                                 <input type="radio" name="paymentOption" style="width: 15px;" id="razorpay" value="razorpay" required>
                                     <span>Online Payment</span>
+                                    </label>
+                                    <label class="radio-default d-flex">
+                                <input type="radio" name="paymentOption" style="width: 15px;" id="wallet" value="wallet" required>
+                                    <span>wallet</span>
                                     </label>
 
 
@@ -610,16 +614,23 @@ proceedButton.addEventListener("click", async () => {
     const selectedPaymentOption = document.querySelector('input[name="paymentOption"]:checked');
 
     if (!selectedAddressType || !selectedPaymentOption) {
-        alert("Please select both an address type and a payment option.");
-        return;
+        Swal.fire({
+  title: 'Attention!',
+  text: 'Please select both an address type and a payment option.',
+  icon: 'warning',
+  confirmButtonText: 'OK'
+    });
+ return;
     }
 
     const addressType = selectedAddressType.value;
     const paymentOption = selectedPaymentOption.value;
+  
 
     const data = {
         addressType: addressType,
         paymentOption: paymentOption,
+        
     };
     if(paymentOption==='razorpay')
 {
@@ -653,18 +664,18 @@ proceedButton.addEventListener("click", async () => {
             address:addressType
           };
           fetch('/orderOnlinePayment', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify(paymentData),
-    })
-    .then(response => response.json()) 
-    .then(data => {
-  if (data.success) {
-    console.log("Order created successfully:", data.message);
+        method: 'POST',
+         headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(paymentData),
+                })
+            .then(response => response.json()) 
+            .then(data => {
+            if (data.success) {
+            console.log("Order created successfully:", data.message);
 
-    window.location.href = "/orderConfirmation?orderId=" + data.orderId;
+            window.location.href = "/orderConfirmation?orderId=" + data.orderId;
   } else {
  
     console.error("Error in order creation:", data.error || "Unknown error");
@@ -705,8 +716,11 @@ proceedButton.addEventListener("click", async () => {
     } catch (error) {
         console.error("Error during checkout:", error);
         alert("An error occurred during checkout. Please try again later.");
-    }}
-    else {
+    }
+}
+
+    else if(paymentOption==='COD') 
+    {
     const response = await fetch('/checkout', {
         method: 'POST',
         headers: {
@@ -732,15 +746,45 @@ proceedButton.addEventListener("click", async () => {
             confirmButtonText: 'OK'
         });
     }
+    }
+    else{
+    const response = await fetch('/checkout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (response.ok) {
+        const responseData = await response.json();
+        if (responseData.success) {
+            window.location.href = "/orderConfirmation?orderId=" + responseData.orderId;
+        } else {
+      
+        }
+    }
+    else if(response.status===400){
+        Swal.fire({
+  title: 'Attention!',
+  text: 'Insufficient wallet balance',
+  icon: 'warning',
+  confirmButtonText: 'OK'
+    });
+    } else {
+        // Handle HTTP error
+        Swal.fire({
+            title: 'Out of Stock!',
+            text: 'This product is currently out of stock.',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+        });
+    }
 }
 
 });
 
-                      
-             
-      
-             
-             </script>
+ </script>
 
 
 <%-include('footer')%>

@@ -73,13 +73,25 @@
                             <h4 class="title"><%=pro.name%></h4>
                             <div class="d-flex align-items-center">
                                 <ul class="review-star">
-                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                    <li class="fill"><i class="ion-android-star"></i></li>
-                                    <li class="empty"><i class="ion-android-star"></i></li>
+                                    <% if (rating <= 5) { %>
+                                        <% for (let i = 1; i <= 5; i++) { %>
+                                            <% if (i <= rating) { %>
+                                                <% if (rating === 1) { %>
+                                                    <li class="fill" style="color: red;"><i class="ion-android-star"></i></li>
+                                                <% } else if (rating === 2) { %>
+                                                    <li class="fill" style="color: orange;"><i class="ion-android-star"></i></li>
+                                                <% } else if (rating === 3) { %>
+                                                    <li class="fill" style="color: yellow;"><i class="ion-android-star"></i></li>
+                                                <% } else { %>
+                                                    <li class="fill" style="color: rgb(23, 122, 10);"><i class="ion-android-star"></i></li>
+                                                <% } %>
+                                            <% } else { %>
+                                                <li class="fill" style="color: gray;"><i class="ion-android-star"></i></li>
+                                            <% } %>
+                                        <% } %>
+                                    <% } %>
                                 </ul>
-                                <a href="#" class="customer-review ml-2">(customer review )</a>
+                                <a href="#description" class="customer-review ml-2">(customer review )</a>
                             </div>
                             <div class="price">Rs.<%=pro.price%></div>
                             <p><%=pro.description%></p>
@@ -112,29 +124,20 @@
                             
                             <!-- Start  Product Details Meta Area-->
                             <div class="product-details-meta mb-20">
-                                <a href="wishlist.html" class="icon-space-right"><i class="icon-heart"></i>Add to
+                                <br>
+                                <a href="#" class="icon-space-right"><i class="icon-heart"></i>Add to
                                     wishlist</a>
-                                <!-- <a href="compare.html" class="icon-space-right"><i class="icon-refresh"></i>Compare</a> -->
+                               
                             </div> <!-- End  Product Details Meta Area-->
                         </div> <!-- End Product Variable Area -->
                     <%}%>
                         <!-- Start  Product Details Catagories Area-->
                         <div class="product-details-catagory mb-2">
                             <span class="title">CATEGORY:</span>
+                            <span class="title"><%=pro.category.name%></span>
                         
-                                <p><%=pro.category.name%></p>
                         </div> <!-- End  Product Details Catagories Area-->
-                        <!-- Start  Product Details Social Area-->
-                        <div class="product-details-social">
-                            <span class="title">SHARE THIS PRODUCT:</span>
-                            <ul>
-                                <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                                <li><a href="#"><i class="fa fa-pinterest"></i></a></li>
-                                <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
-                                <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-                            </ul>
-                        </div> <!-- End  Product Details Social Area-->
+                       
                     </div>
                 </div>
             </div>
@@ -151,13 +154,12 @@
                         <!-- Start Product Details Tab Button -->
                         <ul class="nav tablist product-details-content-tab-btn d-flex justify-content-center">
                             <li><a class="nav-link active" data-bs-toggle="tab" href="#description">
-                                    <%=pro.description %>
+                                   description
                                 </a></li>
-                            <li><a class="nav-link" data-bs-toggle="tab" href="#specification">
-                                    Specification
-                                </a></li>
+                           
+                                <%if(pro.review!==null){%>
                             <li><a class="nav-link" data-bs-toggle="tab" href="#review">
-                                    Reviews (1)
+                                    Reviews (<%=pro.review.length%>)
                                 </a></li>
                         </ul> <!-- End Product Details Tab Button -->
 
@@ -167,209 +169,65 @@
                                 <!-- Start Product Details Tab Content Singel -->
                                 <div class="tab-pane active show" id="description">
                                     <div class="single-tab-content-item">
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam fringilla augue
-                                            nec est tristique auctor. Donec non est at libero vulputate rutrum. Morbi
-                                            ornare lectus quis justo gravida semper. Nulla tellus mi, vulputate
-                                            adipiscing cursus eu, suscipit id nulla. </p>
-                                        <p>Pellentesque aliquet, sem eget laoreet ultrices, ipsum metus feugiat sem,
-                                            quis fermentum turpis eros eget velit. Donec ac tempus ante. Fusce ultricies
-                                            massa massa. Fusce aliquam, purus eget sagittis vulputate, sapien libero
-                                            hendrerit est, sed commodo augue nisi non neque. Lorem ipsum dolor sit amet,
-                                            consectetur adipiscing elit. Sed tempor, lorem et placerat vestibulum, metus
-                                            nisi posuere nisl, in accumsan elit odio quis mi. Cras neque metus,
-                                            consequat et blandit et, luctus a nunc. Etiam gravida vehicula tellus, in
-                                            imperdiet ligula euismod eget</p>
+                                        <p><%=pro.description%></p>
                                     </div>
                                 </div> <!-- End Product Details Tab Content Singel -->
-                                <!-- Start Product Details Tab Content Singel -->
-                                <div class="tab-pane" id="specification">
-                                    <div class="single-tab-content-item">
-                                        <table class="table table-bordered mb-20">
-                                            <tbody>
-                                                <tr>
-                                                    <th scope="row">Compositions</th>
-                                                    <td>Polyester</td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">Styles</th>
-                                                    <td>Girly</td>
-                                                <tr>
-                                                    <th scope="row">Properties</th>
-                                                    <td>Short Dress</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        <p>Fashion has been creating well-designed collections since 2010. The brand
-                                            offers feminine designs delivering stylish separates and statement dresses
-                                            which have since evolved into a full ready-to-wear collection in which every
-                                            item is a vital part of a woman's wardrobe. The result? Cool, easy, chic
-                                            looks with youthful elegance and unmistakable signature style. All the
-                                            beautiful pieces are made in Italy and manufactured with the greatest
-                                            attention. Now Fashion extends to a range of accessories including shoes,
-                                            hats, belts and more!</p>
-                                    </div>
-                                </div> <!-- End Product Details Tab Content Singel -->
+                            
+                            
                                 <!-- Start Product Details Tab Content Singel -->
                                 <div class="tab-pane" id="review">
                                     <div class="single-tab-content-item">
                                         <!-- Start - Review Comment -->
                                         <ul class="comment">
                                             <!-- Start - Review Comment list-->
-                                            <li class="comment-list">
+                                            
+                                                <%if(pro.review.length>0){pro.review.forEach((review)=>{%>
+                                                    <li class="comment-list"></li>
                                                 <div class="comment-wrapper">
-                                                    <div class="comment-img">
-                                                        <img src="assets/images/user/image-1.png" alt="">
-                                                    </div>
+                                                   
                                                     <div class="comment-content">
-                                                        <div class="comment-content-top">
+                                                        <div class="comment-content-top ">
                                                             <div class="comment-content-left">
-                                                                <h6 class="comment-name">Kaedyn Fraser</h6>
+                                                                <h6 class="comment-name"><%=review.user.name%></h6>
                                                                 <ul class="review-star">
-                                                                    <li class="fill"><i class="ion-android-star"></i>
-                                                                    </li>
-                                                                    <li class="fill"><i class="ion-android-star"></i>
-                                                                    </li>
-                                                                    <li class="fill"><i class="ion-android-star"></i>
-                                                                    </li>
-                                                                    <li class="fill"><i class="ion-android-star"></i>
-                                                                    </li>
-                                                                    <li class="empty"><i class="ion-android-star"></i>
-                                                                    </li>
+                                                                    <% if (review.rating <= 5) { %>
+                                                                        <% for (let i = 1; i <= 5; i++) { %>
+                                                                            <% if (i <= review.rating) { %>
+                                                                                <% if (review.rating === 1) { %>
+                                                                                    <li class="fill" style="color: red;"><i class="ion-android-star"></i></li>
+                                                                                <% } else if (review.rating === 2) { %>
+                                                                                    <li class="fill" style="color: orange;"><i class="ion-android-star"></i></li>
+                                                                                <% } else if (review.rating === 3) { %>
+                                                                                    <li class="fill" style="color: yellow;"><i class="ion-android-star"></i></li>
+                                                                                <% } else { %>
+                                                                                    <li class="fill" style="color: rgb(23, 122, 10);"><i class="ion-android-star"></i></li>
+                                                                                <% } %>
+                                                                            <% } else { %>
+                                                                                <li class="fill" style="color: gray;"><i class="ion-android-star"></i></li>
+                                                                            <% } %>
+                                                                        <% } %>
+                                                                    <% } %>
+                                                                    
                                                                 </ul>
                                                             </div>
-                                                            <div class="comment-content-right">
-                                                                <a href="#"><i class="fa fa-reply"></i>Reply</a>
-                                                            </div>
+                                                            
                                                         </div>
 
                                                         <div class="para-content">
-                                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                                                                Tempora inventore dolorem a unde modi iste odio amet,
-                                                                fugit fuga aliquam, voluptatem maiores animi dolor nulla
-                                                                magnam ea! Dignissimos aspernatur cumque nam quod sint
-                                                                provident modi alias culpa, inventore deserunt
-                                                                accusantium amet earum soluta consequatur quasi eum eius
-                                                                laboriosam, maiores praesentium explicabo enim dolores
-                                                                quaerat! Voluptas ad ullam quia odio sint sunt. Ipsam
-                                                                officia, saepe repellat. </p>
+                                                            <p><%=review.reviewdescription%> </p>
                                                         </div>
+                                                        <!-- <div class="comment-content-right">
+                                                            <a href="#"><i class="fa fa-reply"></i>Reply</a>
+                                                        </div> -->
                                                     </div>
                                                 </div>
-                                                <!-- Start - Review Comment Reply-->
-                                                <ul class="comment-reply">
-                                                    <li class="comment-reply-list">
-                                                        <div class="comment-wrapper">
-                                                            <div class="comment-img">
-                                                                <img src="assets/images/user/image-2.png" alt="">
-                                                            </div>
-                                                            <div class="comment-content">
-                                                                <div class="comment-content-top">
-                                                                    <div class="comment-content-left">
-                                                                        <h6 class="comment-name">Oaklee Odom</h6>
-                                                                    </div>
-                                                                    <div class="comment-content-right">
-                                                                        <a href="#"><i class="fa fa-reply"></i>Reply</a>
-                                                                    </div>
-                                                                </div>
+                                            </li>
+                                                <%})}}%>
+                                                
 
-                                                                <div class="para-content">
-                                                                    <p>Lorem ipsum dolor sit amet, consectetur
-                                                                        adipisicing elit. Tempora inventore dolorem a
-                                                                        unde modi iste odio amet, fugit fuga aliquam,
-                                                                        voluptatem maiores animi dolor nulla magnam ea!
-                                                                        Dignissimos aspernatur cumque nam quod sint
-                                                                        provident modi alias culpa, inventore deserunt
-                                                                        accusantium amet earum soluta consequatur quasi
-                                                                        eum eius laboriosam, maiores praesentium
-                                                                        explicabo enim dolores quaerat! Voluptas ad
-                                                                        ullam quia odio sint sunt. Ipsam officia, saepe
-                                                                        repellat. </p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                </ul> <!-- End - Review Comment Reply-->
-                                            </li> <!-- End - Review Comment list-->
-                                            <!-- Start - Review Comment list-->
-                                            <li class="comment-list">
-                                                <div class="comment-wrapper">
-                                                    <div class="comment-img">
-                                                        <img src="assets/images/user/image-3.png" alt="">
-                                                    </div>
-                                                    <div class="comment-content">
-                                                        <div class="comment-content-top">
-                                                            <div class="comment-content-left">
-                                                                <h6 class="comment-name">Jaydin Jones</h6>
-                                                                <ul class="review-star">
-                                                                    <li class="fill"><i class="ion-android-star"></i>
-                                                                    </li>
-                                                                    <li class="fill"><i class="ion-android-star"></i>
-                                                                    </li>
-                                                                    <li class="fill"><i class="ion-android-star"></i>
-                                                                    </li>
-                                                                    <li class="fill"><i class="ion-android-star"></i>
-                                                                    </li>
-                                                                    <li class="empty"><i class="ion-android-star"></i>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                            <div class="comment-content-right">
-                                                                <a href="#"><i class="fa fa-reply"></i>Reply</a>
-                                                            </div>
-                                                        </div>
+                                        </ul>
 
-                                                        <div class="para-content">
-                                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                                                                Tempora inventore dolorem a unde modi iste odio amet,
-                                                                fugit fuga aliquam, voluptatem maiores animi dolor nulla
-                                                                magnam ea! Dignissimos aspernatur cumque nam quod sint
-                                                                provident modi alias culpa, inventore deserunt
-                                                                accusantium amet earum soluta consequatur quasi eum eius
-                                                                laboriosam, maiores praesentium explicabo enim dolores
-                                                                quaerat! Voluptas ad ullam quia odio sint sunt. Ipsam
-                                                                officia, saepe repellat. </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </li> <!-- End - Review Comment list-->
-                                        </ul> <!-- End - Review Comment -->
-                                        <div class="review-form">
-                                            <div class="review-form-text-top">
-                                                <h5>ADD A REVIEW</h5>
-                                                <p>Your email address will not be published. Required fields are marked
-                                                    *</p>
-                                            </div>
-
-                                            <form action="#" method="post">
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="default-form-box">
-                                                            <label for="comment-name">Your name <span>*</span></label>
-                                                            <input id="comment-name" type="text"
-                                                                placeholder="Enter your name" required>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="default-form-box">
-                                                            <label for="comment-email">Your Email <span>*</span></label>
-                                                            <input id="comment-email" type="email"
-                                                                placeholder="Enter your email" required>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <div class="default-form-box">
-                                                            <label for="comment-review-text">Your review
-                                                                <span>*</span></label>
-                                                            <textarea id="comment-review-text"
-                                                                placeholder="Write a review" required></textarea>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <button class="btn btn-md btn-black-default-hover"
-                                                            type="submit">Submit</button>
-                                                    </div>
-                                                </div>
-                                            </form>
+                                            
                                         </div>
                                     </div>
                                 </div> <!-- End Product Details Tab Content Singel -->

@@ -63,8 +63,14 @@ const removeWishlist = async (req, res) => {
 
 const loadWishlist=async(req,res)=>{
     try{
+        const perPage=5;
+        const page=req.query.page || 1;
         const user = await userModels.findOne({ email: req.session.email });
-        let wishlist = await wishlistModel.findOne({ user: user._id }).populate('product', null, null, { strictPopulate: false });
+        const wishLength=await wishlistModel.countDocuments({ user: user._id });
+        const totalPage=Math.ceil(wishLength / perPage);
+      
+        let wishlist = await wishlistModel.findOne({ user: user._id }).populate('product', null, null, { strictPopulate: false }).skip(perPage * (page - 1))
+        .limit(perPage);;
         if(!wishlist){
             wishlist=null
         }
@@ -75,8 +81,8 @@ const loadWishlist=async(req,res)=>{
         cart=null;
         }
       
-        console.log(wishlist);
-        res.render('wishlist',{wish:wishlist,cart})
+        
+        res.render('wishlist',{wish:wishlist,cart,totalPage,page})
     }
     catch(error){
         console.log(error.message);

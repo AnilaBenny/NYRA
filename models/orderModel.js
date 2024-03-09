@@ -45,6 +45,9 @@ const orderSchema = new Schema({
           type: Number,
           required: true,
         },
+        reviewed:{
+          type:Boolean
+        }
       }, ],
       billTotal: {
         type: Number,
