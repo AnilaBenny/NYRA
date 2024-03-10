@@ -807,11 +807,7 @@
                                                     <a href="#" data-bs-toggle="modal"
                                                         data-bs-target="#modalQuickview"><i
                                                             class="icon-magnifier"></i></a>
-                                                            <% if (wish && wish.length > 0 && wish.some(wishItem => wishItem.product.includes(pro[i]._id))) { %>
-                                                            <a href="#" onclick="removewishlist('<%= pro[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
-                                                        <% } else { %>
-                                                            <a href="#" onclick="addtowishlist('<%= pro[i]._id %>')"><i class="fa-solid fa-heart " id="heart"></i></a>
-                                                        <% } %>
+                                                            <a href="#" id="add-to-wishlist-<%= pro[i]._id %>" onclick="addtowishlist('<%= pro[i]._id %>')"><i class="fa-solid fa-heart" style="color: #cac2c2;" id="heart-<%= pro[i]._id %>"></i></a>
 
 
 
@@ -1663,23 +1659,34 @@ Toast.fire({
     
 }
      
-   async function addtowishlist(productid) {
+async function addtowishlist(productid) {
     try {
         const response = await fetch(`/addToWishlist?id=${productid}`);
-       
         if (response.ok) {
-            
-            
-            await Swal.fire({
-                title: 'Success',
-                text: 'Added to wishlist',
-                icon: 'success',
-                showConfirmButton: true
-            });
-            location.reload();
+            const Toast = Swal.mixin({
+  toast: true,
+  position: "bottom", 
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  background:"black",
+  color:"white",
+  didOpen: (toast) => {
+    toast.addEventListener('mouseenter', Swal.stopTimer); 
+    toast.addEventListener('mouseleave', Swal.resumeTimer); 
+  }
+});
+
+Toast.fire({
+  icon: "success",
+  title: "Added to cart"
+});
+            // Directly update the icon and link in the DOM
+            const wishlistLink = document.getElementById(`add-to-wishlist-${productid}`);
+            wishlistLink.setAttribute('onclick', `removewishlist('${productid}')`);
+            wishlistLink.innerHTML = `<i class="fa-solid fa-heart text-danger" id="heart-${productid}"></i>`;
             
         } else {
-            
             throw new Error('Failed to add to wishlist');
         }
     } catch (error) {

@@ -863,11 +863,7 @@ crossorigin="anonymous">
                                                 class="btn btn-lg btn-black-default-hover"><i
                                                     class="icon-magnifier"></i></a>
                                                     
-                                                    <% if (wish && wish.length > 0 && wish.some(wishItem => wishItem.product.includes(product[i]._id))) { %>
-                                                                 <a href="#" onclick="removewishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
-                                                                    <% } else { %>
-                                                                  <a href="#" onclick="addtowishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart " style="color: #cac2c2;" id="heart"></i></a>
-                                                                <% }} %>
+                                                    <a href="#" id="add-to-wishlist-<%= product[i]._id %>" onclick="addtowishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart" style="color: #cac2c2;" id="heart-<%= product[i]._id %>"></i></a>
                                                                             
                                            
                                         </div>
@@ -1080,20 +1076,31 @@ crossorigin="anonymous">
         async function addtowishlist(productid) {
     try {
         const response = await fetch(`/addToWishlist?id=${productid}`);
-       
         if (response.ok) {
-            
-            
-            await Swal.fire({
-                title: 'Success',
-                text: 'Added to wishlist',
-                icon: 'success',
-                showConfirmButton: true
-            });
-            location.reload();
+            const Toast = Swal.mixin({
+  toast: true,
+  position: "bottom", 
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  background:"black",
+  color:"white",
+  didOpen: (toast) => {
+    toast.addEventListener('mouseenter', Swal.stopTimer); 
+    toast.addEventListener('mouseleave', Swal.resumeTimer); 
+  }
+});
+
+Toast.fire({
+  icon: "success",
+  title: "Added to cart"
+});
+            // Directly update the icon and link in the DOM
+            const wishlistLink = document.getElementById(`add-to-wishlist-${productid}`);
+            wishlistLink.setAttribute('onclick', `removewishlist('${productid}')`);
+            wishlistLink.innerHTML = `<i class="fa-solid fa-heart text-danger" id="heart-${productid}"></i>`;
             
         } else {
-            
             throw new Error('Failed to add to wishlist');
         }
     } catch (error) {

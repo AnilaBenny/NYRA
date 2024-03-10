@@ -103,7 +103,7 @@ crossorigin="anonymous">
                                 class="header-top-user-link header-top-user-link-color--white header-top-user-link-hover-color--green">
                                 <a href="/wishlist">Wishlist</a>
                                 <a href="/cart">Cart</a>
-                                <a href="#">Checkout</a>
+                                
                             </div>
                         </div>
                     </div>
@@ -771,24 +771,33 @@ crossorigin="anonymous">
                                                 <img src="/uploads/productImages/<%=product[i].images[1]%>" alt="" style="width: 270px; margin-right: 30px;">
                                             </a>
                                                             <div class="action-link">
+                                                                
+                                                                <% if (product[i].countInStock === 0) { %>
                                                                 <div class="action-link-left">
-                                                                    <%if(product[i].countInStock===0){%>
-                                                                        <a class="text-danger">Out Of Stock</a>
-                                                                        
-                                                                    <%}else{%>
-                                                                    <a href='#' onclick="addProductCart('<%=product[i]._id%>')">Add to Cart</a>
-                                                                    
+                                                                    <a class="text-danger">Out Of Stock</a>
+                                                                </div>
+                                                            <% } else { %>
+                                                                <div class="action-link-left">
+                                                                    <a href="#" onclick="addProductCart('<%= product[i]._id %>')">Add to Cart</a>
                                                                 </div>
                                                                 <div class="action-link-right">
-                                                                    <a href="/productdetails?id=<%=product[i]._id %>" ><i
-                                                                            class="icon-magnifier"></i></a>
-                                                                            <% if (wish && wish.length > 0 && wish.some(wishItem => wishItem.product.includes(product[i]._id))) { %>
-                                                                 <a href="#" onclick="removewishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
-                                                                    <% } else { %>
-                                                                  <a href="#" onclick="addtowishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart " id="heart"></i></a>
-                                                                <% } %>
-                                                                            <%}%>
+                                                                    <a href="/productdetails?id=<%= product[i]._id %>"><i class="icon-magnifier"></i></a>
+                                                                    <% 
+                                                                    if (wish != null && wish.product != null ) { 
+                                                                        if (wish.product.length > 0 && wish.product.some(wishItem => wishItem.toString() === product[i]._id.toString())) { 
+                                                                    %>
+                                                                            <a href="#" onclick="removewishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
+                                                                    <% 
+                                                                        } 
+                                                                     else { 
+                                                                    %>
+                                                                        <a href="#" onclick="addtowishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart" id="heart"></i></a>
+                                                                    <% 
+                                                                    } }
+                                                                    %>
                                                                 </div>
+                                                            <% } %>
+
                                                             </div>
                                                         </div>
                                                         <div class="content">

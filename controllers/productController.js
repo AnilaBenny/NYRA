@@ -305,14 +305,17 @@ const showproduct = async (req, res) => {
         const userData = await userModels.findOne({ email: req.session.email });
              let wish=await wishlistModel.findOne({user:userData._id});
            
-    if(!wish){
-      wish=null;
-    }
+   
     let cart=await cartModel.findOne({owner:userData._id})
     if(!cart)
     {
     cart=null;
     }
+    if (!wish) {
+        wish = null;
+    }
+console.log(wish);
+console.log(product);
             res.render('shop-product', { product, cat,totalPage,page,wish,cart});
         } catch (error) {
             console.error('Error in showproduct:', error.message);
