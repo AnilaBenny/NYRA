@@ -63,6 +63,7 @@
                         <th>Category</th>
                         <th>Price</th>
                         <th>Stock</th>
+                        <th>offer</th>
                         <th>status</th>
                         <th>Actions</th>
                      
@@ -86,7 +87,20 @@
                                 <td><%= pro[i].brand %></td>
                                 <td><%= pro[i].category.name %></td>
                                 <td><%= pro[i].price %></td>    
-                                <td><%= pro[i].countInStock %></td>   
+                                <td><%= pro[i].countInStock %></td> 
+                                                                <% 
+                                    var offerDate = new Date(pro[i].offerTime);
+                                    var day = offerDate.getDate();
+                                    var month = offerDate.getMonth() + 1; // Months are zero-indexed
+                                    var year = offerDate.getFullYear();
+                                    var formattedDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day; 
+                                %>
+
+                                <%if(pro[i].discountPrice>0){%>
+                                <td>discount Price :<%= pro[i].discountPrice %><br>offer ends in:<%= formattedDate %> </td>  
+                                <%}else{%>
+                                    <td>No offer</td>
+                                <%}%>
                                 <td><%= pro[i].list ? 'Active' : 'InActive' %>
                                     </td> 
                             <td>

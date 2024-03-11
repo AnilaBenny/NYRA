@@ -167,7 +167,7 @@ const updatepro = async (req, res) => {
         if(allImages.length>3){
             res.render('admin-product-edit', { cate: categorydetails, pro: existingProduct, message: 'maximum 3 images per product' });
         }else{
-        const Data = await productModel.findByIdAndUpdate(req.query.id, {
+        await productModel.findByIdAndUpdate(req.query.id, {
             $set: {
                 name: req.body.name,
                 description: req.body.description,
@@ -179,10 +179,9 @@ const updatepro = async (req, res) => {
 
             }
         });}
-        // console.log(Data);
-        if (Data) {
+        
             res.redirect('/admin/productlist');
-        }
+        
 
     }
     catch (error) {
@@ -432,6 +431,63 @@ const reviewUpdate = async (req, res) => {
     }
 };
 
+const postOffer = async (req, res) => {
+    try {
+        const { date, discount, id } = req.body;
+        let product=await productModel.findById(id);
+       product.discountPrice=(product.price*discount/100).toFixed();
+        product.offerTime=date;
+
+        await product.save();
+        res.redirect('/admin/offer')
+
+    } catch (error) {
+        console.log('product offer', error.message);
+    }
+};
+
+const postOffer2 = async (req, res) => {
+    try {
+        const { date, discount, id } = req.body;
+
+   
+
+        let category = await categoryModel.findById(id);
+        if (!category) {
+            console.log('Category not found');
+            return res.status(404).send('Category not found');
+        }
+
+        let products = await productModel.find({ category: id });
+
+        const newDiscountPrices = products.map(product => {
+            const newDiscountPrice = (product.price * discount / 100).toFixed(); 
+            return {
+                ...product._doc, 
+                newDiscountPrice: +newDiscountPrice 
+            };
+        });
+
+        for (const product of newDiscountPrices) {
+            if (product.newDiscountPrice > product.discountPrice) {
+                await productModel.findByIdAndUpdate(product._id, { discountPrice: product.newDiscountPrice, offerTime: date });
+            }
+        }
+
+        category.offerTime = date;
+        await category.save();
+
+        res.redirect('/admin/offer');
+
+    } catch (error) {
+        console.log('Error in postOffer2:', error.message);
+
+        return res.status(500);
+    }
+};
+
+
+
 
 module.exports = {
     loadproduct,
@@ -444,7 +500,10 @@ module.exports = {
     showproduct,
     showsearch,
     allProduct,
-    reviewUpdate
+    reviewUpdate,
+
+    postOffer,
+    postOffer2
 
 
 }

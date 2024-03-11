@@ -130,7 +130,12 @@
                                 </div>
                                 <div class="cart_subtotal ">
                                     <p>Shipping</p>
+                                    <%if(cart.shipping>0){%>
+                                    <p class="cart_amount" id="shipping">Rs.<%=cart.shipping%>.00</p>
+                                  
+                                    <%}else{%>
                                     <p class="cart_amount">Free Shipping</p>
+                                    <%}%>
                                 </div>
                                 <!--<a href="#">Calculate shipping</a>-->
 
@@ -720,6 +725,7 @@
             document.getElementById(`carttotal`).innerHTML = `Rs.${data.cart.billTotal}.00`;
             document.getElementById(`carttotal2`).innerHTML = `Rs.${data.cart.billTotal}.00`;
             document.getElementById(`carttotal3`).innerHTML = `Rs.${data.cart.billTotal}.00`;
+            document.getElementById(`shipping`).innerHTML = `Rs.${data.cart.shipping}.00`;
             
 
         } else {

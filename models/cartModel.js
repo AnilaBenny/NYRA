@@ -50,6 +50,10 @@ billTotal: {
     required: true,
    default: 0
   },
+  shipping:{
+    type:Number,
+    default: 0
+  },
   isApplied:{
     type: Boolean, 
     default: false,
@@ -66,6 +70,16 @@ billTotal: {
 timestamps: true
 })
 
+cartSchema.pre('save', function(next) {
+
+  const shippingCharge = this.billTotal > 499 ? 0 : 50; 
+
+  this.shipping = shippingCharge;
+
+  this.billTotal += this.shipping;
+
+  next();
+});
 
 
 const cartModel = mongoose.model('Cart',cartSchema);

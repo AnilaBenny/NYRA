@@ -53,17 +53,14 @@ admin_route.post('/productmanagement',AdminLogSession,upload,product.insertprodu
 //load productlist
 admin_route.get('/productlist',AdminLogSession,product.productlist);
 
-//edit product
 admin_route.get('/edit-pro',AdminLogSession,product.loadpro);
+
 admin_route.post('/edit-pro',AdminLogSession,upload,product.updatepro);
 
-//delete product
 admin_route.get('/delete-pro',AdminLogSession,product.deletepro);
 
-//userManagement
 admin_route.get('/userManage',AdminLogSession,adminController.loadusermanagement);
 
-// blocking/unblocking user
 admin_route.post('/blockUser',AdminLogSession,adminController.userblock);
 
 admin_route.get('/order-list',AdminLogSession,adminController.loadordermanagement);
@@ -76,7 +73,6 @@ admin_route.post('/rejectcancel',AdminLogSession,adminController.requestCancel);
 
 admin_route.post('/uporderstatus',AdminLogSession,adminController.uporder);
 
-//coupon
 admin_route.get('/coupon',AdminLogSession,adminController.couponManager);
 
 admin_route.post('/coupon',AdminLogSession,adminController.couponCreate);
@@ -85,12 +81,20 @@ admin_route.post('/coupon/list',AdminLogSession,adminController.listunlist);
 
 admin_route.get('/salesdetails',AdminLogSession,adminController.salesdetails);
 
-admin_route.post('/filterData',AdminLogSession,adminController.filterData);
+admin_route.post('/filterData',adminController.filterData);
 
-admin_route.get('/pdf',adminController.pdf);
-admin_route.get('/excel',adminController.generateExcel);
+admin_route.get('/pdf',AdminLogSession,adminController.pdf);
 
-admin_route.post('/refund',wallet.addtoWallet)
+admin_route.get('/excel',AdminLogSession,adminController.generateExcel);
+
+admin_route.post('/refund',wallet.addtoWallet);
+
+admin_route.get('/bestSelling',AdminLogSession,adminController.bestSelling);
+
+admin_route.get('/offer',AdminLogSession,adminController.offer);
+
+admin_route.post('/productoffer',product.postOffer);
+admin_route.post('/offer',product.postOffer2);
 
 
 

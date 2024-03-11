@@ -782,12 +782,17 @@ crossorigin="anonymous">
                                                                 <div class="action-link-right">
                                                                     <a href="/productdetails?id=<%=product[i]._id %>" ><i
                                                                             class="icon-magnifier"></i></a>
-                                                                            <% if (wish && wish.length > 0 && wish.some(wishItem => wishItem.product.includes(product[i]._id))) { %>
-                                                                 <a href="#" onclick="removewishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
-                                                                    <% } else { %>
-                                                                  <a href="#" onclick="addtowishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart " id="heart"></i></a>
-                                                                <% } %>
-                                                                            <%}%>
+                                                                            <%if (wish != null && wish.product != null ) { 
+                                                                        if (wish.product.length > 0 && wish.product.some(wishItem => wishItem.toString() === product[i]._id.toString())) { 
+                                                                    %>
+                                                                            <a href="#" onclick="removewishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
+                                                                    <% 
+                                                                        } 
+                                                                     else { 
+                                                                    %>
+                                                                        <a href="#" onclick="addtowishlist('<%= product[i]._id %>')" id="add-to-wishlist-<%=product[i]._id%>"><i class="fa-solid fa-heart" id="wishlist-<%=product[i]._id%>"></i></a>
+                                                                    <% 
+                                                                    } }}%>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -862,8 +867,19 @@ crossorigin="anonymous">
                                             <a href="/productdetails?id=<%=product[i]._id %>" 
                                                 class="btn btn-lg btn-black-default-hover"><i
                                                     class="icon-magnifier"></i></a>
+                                                     <%if (wish != null && wish.product != null ) { 
+                                                                        if (wish.product.length > 0 && wish.product.some(wishItem => wishItem.toString() === product[i]._id.toString())) { 
+                                                                    %>
+                                                                            <a href="#" onclick="removewishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart text-danger" id="heart"></i></a>
+                                                                    <% 
+                                                                        } 
+                                                                     else { 
+                                                                    %>
+                                                                        <a href="#" onclick="addtowishlist('<%= product[i]._id %>')" id="add-to-wishlist-<%=product[i]._id%>"><i class="fa-solid fa-heart" id="wishlist-<%=product[i]._id%>"></i></a>
+                                                                    <% 
+                                                                    } }}%>
                                                     
-                                                    <a href="#" id="add-to-wishlist-<%= product[i]._id %>" onclick="addtowishlist('<%= product[i]._id %>')"><i class="fa-solid fa-heart" style="color: #cac2c2;" id="heart-<%= product[i]._id %>"></i></a>
+                                                   
                                                                             
                                            
                                         </div>
@@ -1122,12 +1138,25 @@ async function removewishlist(productid) {
         if (response.ok) {
             
            
-            await Swal.fire({
-                title: 'removed ',
-                text: 'removed from wishlist',
-                icon: 'success',
-                showConfirmButton: true
-            });
+            const Toast = Swal.mixin({
+  toast: true,
+  position: "bottom", 
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  background:"black",
+  color:"white",
+  didOpen: (toast) => {
+    toast.addEventListener('mouseenter', Swal.stopTimer); 
+    toast.addEventListener('mouseleave', Swal.resumeTimer); 
+  }
+});
+
+Toast.fire({
+  icon: "success",
+  title: "removed to wishlist"
+});
+
             location.reload();
             
         } else {

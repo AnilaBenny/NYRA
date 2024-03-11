@@ -486,6 +486,44 @@ const loadreset=async(req,res)=>{
     console.log('loadrest:',error.message);
   }
 };
+const loadpassword=async(req,res)=>{
+  try{
+   
+    const otp=sentOtp(req,req.session.email);
+    console.log(otp);
+    res.render('reset-password');
+  }
+  catch(error){
+    console.log('loadrest:',error.message);
+  }
+};
+
+const postPassword=async (req, res) => {
+  try {
+      const { otp, password } = req.body;
+      const dbOtp = await otpModel.findOne({ otp });
+
+      if (!dbOtp) {
+          return res.render('reset-password', { message: 'Invalid OTP' });
+      }
+
+      const updatedUser = await userModel.findOneAndUpdate(
+          { email: req.session.email },
+          { password: await securePassword(password) },
+          { new: true }
+      );
+
+      if (!updatedUser) {
+          return res.render('reset-password', { message: 'Failed to update password' });
+      }
+
+      console.log('Password updated successfully');
+      res.redirect('/userAc');
+  } catch (error) {
+      console.error('postPassword', error.message);
+      
+  }
+}
 
 const postreset = async (req, res) => {
   try {
@@ -1102,7 +1140,10 @@ module.exports = {
     reqreturn,
 
     newArrivals,
-    addToWallet
+    addToWallet,
+
+    loadpassword,
+    postPassword
 
     
 };

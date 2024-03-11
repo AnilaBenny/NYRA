@@ -75,7 +75,9 @@ const productSchema = new mongoose.Schema({
       type: Number,
       default: 0,
    },
-//    afterDiscount:Number
+offerTime:{
+type:Date
+}
    
 }, {
    timestamps: true

@@ -166,17 +166,23 @@
                                             <th>Order Total</th>
                                             <td><strong>Rs.<%=cart.billTotal%>.00</strong></td>
                                         </tr>
-                                        <%}%>
+                                       
                                     </tfoot>
                                 </table>
                             </div>
                             <div class="payment_method">
                                 
                                 <div class="panel-default">
+                                    <%if(cart.billTotal>1000){%>
                                     <label class="radio-default d-flex"  for="COD" data-bs-toggle="collapse" data-bs-target="#methodCod">
                                     <input type="radio" style="width: 15px;" name="paymentOption" id="COD" value="COD" required>
                                     <span>Cash on Delivery (COD)</span>
                                     </label>
+                                    <%}else{%>
+                                        <label class="radio-default d-flex"  for="COD" >
+                                    <span class="text-warning">Cash on delivery is not available for this order. Please add more items for the option to become available</span>
+                                    </label>
+                                    <%}}%>
                                     <br>
                                 <label class="radio-default d-flex">
                                 <input type="radio" name="paymentOption" style="width: 15px;" id="razorpay" value="razorpay" required>
@@ -386,10 +392,7 @@
                                     <div class="col-md-8">
                                         <div class="modal-add-cart-info"><i class="fa fa-check-square"></i>Added to cart
                                             successfully!</div>
-                                        <div class="modal-add-cart-product-cart-buttons">
-                                            <a href="cart.html">View Cart</a>
-                                            <a href="checkout.html">Checkout</a>
-                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>

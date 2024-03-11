@@ -9,6 +9,8 @@ const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const cartModel = require('../models/cartModel');
 const WalletModel=require('../models/walletModel');
+const { error } = require('console');
+const categoryModel = require('../models/categoryModel');
 
 
 async function salesReport(date){
@@ -114,68 +116,81 @@ console.log('salesreport',err.message);
 
 const pdf = async (req, res) => {
     try {
-      
-      let salesData = null; 
+        let salesData = null; 
+
+        if (req.query.type === 'daily') {
+            salesData = await salesReport(1);
+        } else if (req.query.type === 'weekly') {
+            salesData = await salesReport(7);
+        } else if (req.query.type === 'monthly') {
+            salesData = await salesReport(30);
+        } else if (req.query.type === 'yearly') {
+            salesData = await salesReport(365);
+        }
+
+        let doc = new PDFDocument();
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="sales_report.pdf"');
+        
+        doc.pipe(res);
+        
+        doc.fontSize(20).text('Sales Report', { align: 'center' });
+        
+        if (salesData) {
+            doc.moveDown(2);
+            const tableHeaders = ['Metric', 'Value'];
+            const columnStartPositions = [50, 300];
+
+            const fontSize = 12;
+            
+            doc.font('Helvetica-Bold').fontSize(fontSize);
   
-      if (req.query.type === 'daily') {
-        salesData = await salesReport(1);
-      } else if (req.query.type === 'weekly') {
-        salesData = await salesReport(7);
-      } else if (req.query.type === 'monthly') {
-        salesData = await salesReport(30);
-      } else if (req.query.type === 'yearly') {
-        salesData = await salesReport(365);
-      }
-  
-      let doc = new PDFDocument();
-  
+            tableHeaders.forEach((header, index) => {
+                doc.text(header, columnStartPositions[index], doc.y, { width: 200, align: 'center' });
+                doc.strokeColor('black').lineWidth(1);
+            });
+            
+          
 
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'attachment; filename="sales_report.pdf"');
-  
-      doc.pipe(res);
-  
-      doc.fontSize(20).text('Sales Report', { align: 'center' });
-      
-      if (salesData) {
-        console.log(salesData.totalOrder);
-        const couponDetails = salesData.totalOrder.map(order => {
-    
-                return {
-                    coupon:order.coupon,
-                    discountPrice:order.discountPrice};
-        });
+            doc.font('Helvetica').fontSize(fontSize);
+          
+            const tableRows = [
+                ['Total Revenue', `INR ${salesData.totalRevenue}`],
+                ['Total Orders', salesData.totalOrders],
+                ['Total Order Count', salesData.totalOrderCount],
+                ['Total Count In Stock', salesData.totalCountInStock],
+                ['Average Sales', `${salesData.averageSales ? salesData.averageSales.toFixed(2) : 'N/A'}%`],
+                ['Average Revenue', `${salesData.averageRevenue ? salesData.averageRevenue.toFixed(2) : 'N/A'}%`],
+            ];
+            
+            salesData.totalOrder.forEach(order => {
+                if (order.coupon !== 'nil') {
+                    tableRows.push([`Coupon: ${order.coupon}`, `INR ${order.discountPrice}`]);
+                }
+            });
+            
+            const overallDiscountPrice = salesData.totalOrder.reduce((total, order) => total + order.discountPrice, 0);
+            tableRows.push(['Overall Discount Price', `INR ${overallDiscountPrice}`]);
 
-
-        // console.log(salesData);
-        // console.log(couponDetails);
-        doc.fontSize(12).text(`Total Revenue: INR ${salesData.totalRevenue}`);
-        doc.text(`Total Orders: ${salesData.totalOrders}`);
-        doc.text(`Total Order Count: ${salesData.totalOrderCount}`);
-        doc.text(`Total Count In Stock: ${salesData.totalCountInStock}`);
-        doc.text(`Average Sales: ${salesData.averageSales ? salesData.averageSales.toFixed(2) : 'N/A'}%`);
-        doc.text(`Average Revenue: ${salesData.averageRevenue ? salesData.averageRevenue.toFixed(2) : 'N/A'}%`);
-       let couponText = "Coupon codes used in this report:\n";
-        couponDetails.forEach((detail) => {
-         couponText += `${detail.coupon}: ${detail.discountPrice}\n`;
-        });
-
-        doc.text(couponText, 70, 190); 
-        const overallDiscountPrice = salesData.totalOrder.reduce((total, order) => {
-        return total + order.discountPrice;
-        }, 0);
-
-        doc.text(`Overall discount Price deducted from the actual price via applied coupons: INR ${overallDiscountPrice}`, 70, 180 + couponDetails.length * 20 + 30);
-
-      } else {
-        doc.text('No sales data available.');
-      }
-      doc.end();
+            tableRows.forEach((row, rowIndex) => {
+                row.forEach((text, index) => {
+                    doc.text(text, columnStartPositions[index], doc.y, { width: 200, align: 'center' });
+                   
+                });
+                doc.moveDown(0.5);
+            });
+        } else {
+            doc.text('No sales data available.');
+        }
+        
+        doc.end();
     } catch (error) {
-      console.log(error.message);
-      res.status(500).send('Error generating PDF.');
+        console.log(error.message);
+        res.status(500).send('Error generating PDF.');
     }
-  };
+};
+
 
   const generateExcel = async (req, res, next) => {
     try {
@@ -647,6 +662,145 @@ let logout = (req, res) => {
     res.redirect("/admin");
   };
 
+const bestSelling=async(req,res)=>{
+    try{
+
+        const popularityByCategory = await orderModel.aggregate([
+            {
+                $unwind: "$items" // Unwind the items array in orders
+            },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "items.productId",
+                    foreignField: "_id",
+                    as: "product"
+                }
+            },
+            {
+                $unwind: "$product" // Unwind the product array
+            },
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "product.category",
+                    foreignField: "_id",
+                    as: "category"
+                }
+            },
+            {
+                $unwind: "$category" // Unwind the category array
+            },
+            {
+                $group: {
+                    _id: { categoryId: "$product.category", categoryName: "$category.name", productId: "$items.productId" },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id.categoryId",
+                    categoryName: { $first: "$_id.categoryName" },
+                    products: {
+                        $push: {
+                            productId: "$_id.productId",
+                            count: "$count"
+                        }
+                    }
+                }
+            }
+        ]);
+        
+      
+        const bestSellingBrands= await orderModel.aggregate([
+            {
+                $unwind: "$items" 
+            },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "items.productId",
+                    foreignField: "_id",
+                    as: "product"
+                }
+            },
+            {
+                $unwind: "$product" 
+            },
+            {
+                $group: {
+                    _id: "$product.brand", // Group by brand
+                    totalQuantitySold: { $sum: "$items.quantity" } // Calculate the total quantity sold for each brand
+                }
+            },
+            {
+                $sort: { totalQuantitySold: 1 } // Sort by total quantity sold in descending order
+            }
+        ]);
+        
+console.log(bestSellingBrands);
+
+        const product=await productModel.find({list:true}).sort({popularity:1}).limit(10);
+        
+        res.render('bestSelling',{product,popularityByCategory,bestSellingBrands})
+
+    }
+    catch(error){
+        console.log('best selling',error.message);
+    }
+}
+
+const offer=async(req,res)=>{
+    try{
+        let product=await productModel.find({list:true});
+        const category=await categoryModel.find({is_active:true});
+        for (let i = 0; i < product.length; i++) {
+            const offerDate = new Date(product[i].offerTime);
+            const currentDate=new Date();
+
+            if (currentDate > offerDate) {
+                product[i].discountPrice = 0;
+                product[i].offerTime = null;
+            }
+    
+            await product[i].save();
+        }
+        for (let i = 0; i < category.length; i++) {
+            const offerDate = new Date(category[i].offerTime);
+            const currentDate = new Date();
+        
+            if (currentDate > offerDate) {
+                const products = await productModel.find({category: category[i]._id});
+        
+              
+                const updateProductPromises = products.map(async (product) => {
+                    product.discountPrice = 0;
+                    product.offerTime = null;
+                    return product.save();
+                });
+        
+                await Promise.all(updateProductPromises);
+        
+                await categoryModel.findByIdAndUpdate(category[i]._id, {
+                    $unset: { offerTime: "" } 
+                });
+        
+           
+            }
+        }
+        
+      
+        
+        
+        
+    
+    res.render('offer',{product,category});
+    }
+    catch(error){
+        console.log('offer',error.message);
+    }
+}
+
 module.exports = {
     adminLogin,
     adminPost,
@@ -670,4 +824,7 @@ module.exports = {
     pdf,
     generateExcel,
     logout
+    ,
+    bestSelling,
+    offer
 };
