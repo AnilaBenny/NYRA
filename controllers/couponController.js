@@ -10,7 +10,7 @@ const Couponcart = async (req, res) => {
         const user = await userModel.findOne({ email: req.session.email });
         const cart = await cartModel.findOne({ owner: user._id });
 
-        // console.log(coupon);
+       
         if (!coupon) {
             return res.status(404).send('Coupon not found');
         }
@@ -34,7 +34,7 @@ const Couponcart = async (req, res) => {
         cart.billTotal = Number(cart.billTotal.toFixed()); 
         let discountAmount = (coupon.discountPercentage / 100) * cart.billTotal;
         discountAmount = Number(discountAmount.toFixed()); 
-console.log(cart.billTotal,discountAmount);
+
         cart.isApplied=true;
         cart.discountPrice=discountAmount;
         cart.coupon=code;
@@ -66,7 +66,7 @@ const removeCoupon=async(req,res)=>{
         cart.coupon='nil';
         cart.discountPrice=0;
         await cart.save();
-        console.log(coupon);
+    
         const userIdIndex = coupon.usersUsed.indexOf(user._id);
         if (userIdIndex !== -1) {
             coupon.usersUsed.splice(userIdIndex, 1);

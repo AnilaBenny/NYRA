@@ -16,11 +16,11 @@ var instance = new Razorpay({
         instance.orders.create(options, function(err, order) {
             if (err) {
                 console.error('Error creating Razorpay order:', err);
-                reject(err); // Reject the promise with the error
+                reject(err); 
                 return;
             }
-            // console.log('New order in Razorpay:', order);
-            resolve(order); // Resolve the promise with the order
+          
+            resolve(order); 
         });
     });
 }

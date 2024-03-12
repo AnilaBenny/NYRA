@@ -25,8 +25,7 @@ const couponSchema = new mongoose.Schema({
       required: true,
       min: 0, 
       max: 100, 
-      // Convert from decimal to percentage when retrieving data
-      // set: (v) => (v / 100),  // Convert from percentage to decimal when saving data
+     
    },
    expirationDate: {
       type: Date,
@@ -39,7 +38,7 @@ const couponSchema = new mongoose.Schema({
    },
    maxDiscountAmount: {
       type: Number,
-      default: null, // Unlimited discount by default, set a number for a limit
+      default: null, 
    },
    usersUsed: [{
       type: mongoose.Schema.Types.ObjectId,
@@ -47,10 +46,10 @@ const couponSchema = new mongoose.Schema({
    }, ],
    maxUsers: {
       type: Number,
-      default: null, // Unlimited usage by default, set a number for a limit
+      default: null, 
    },
 
-   // Add any other fields you need for your coupons
+   
 }, {
    timestamps: true
 });

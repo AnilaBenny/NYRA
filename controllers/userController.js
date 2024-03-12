@@ -13,8 +13,8 @@ const wishlistModel=require('../models/wishlistModel');
 const walletModel=require('../models/walletModel');
 const cartModel=require('../models/cartModel') ;
 const Razorpay = require('razorpay');
-// const Email = process.env.Email;
-// const Pass = process.env.Pass;
+
+
 
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -27,7 +27,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-//password hashing
+
 
 const securePassword = async (password) => {
     try {
@@ -39,7 +39,6 @@ const securePassword = async (password) => {
 };
 
 
-//load home 
 let enterHome = async (req, res) => {
  
     try {
@@ -48,9 +47,8 @@ let enterHome = async (req, res) => {
             
             const userData = await userModel.findOne({ email: req.session.email });
 
-            // Check if user is not blocked
             if (userData && !userData.isBlocked) {
-                // Find products and categories
+              
                 const products = await ProductModel.find({});
                 const categories = await categoryModel.find({});
                 let wish=await wishlistModel.findOne({user:userData._id});
@@ -63,8 +61,7 @@ let enterHome = async (req, res) => {
                 cart=null;
                 }
               
-                
-                // Render home page
+               
                 return res.render("home", { pro: products, category: categories,wish,cart});
             } else {
                 
@@ -86,7 +83,7 @@ let enterHome = async (req, res) => {
 };
 
 
-//load login page
+
 const loadLoginpage = async (req, res) => {
     try {
       if (req.session.data) {
@@ -99,7 +96,6 @@ const loadLoginpage = async (req, res) => {
 };
 
 
-//load register page
 const loadregisterpage = async (req, res) => {
     try {
      
@@ -116,7 +112,6 @@ const loadregisterpage = async (req, res) => {
 };
 
 
-//forgot password
 const forgotpassword = async (req, res) => {
     try {
         res.render('forgot.ejs',{message:null});
@@ -127,14 +122,13 @@ const forgotpassword = async (req, res) => {
 };
 
 
-//insert user & send the otp
 
 const insertUser=async(req,res)=>{
   try{
     const { name, email, mobile, password } = req.body;
  
 
-        // Validate request body using express-validator
+        
         const validators = [
           check('name')
         
@@ -222,11 +216,11 @@ const insertUser=async(req,res)=>{
         await Promise.all(validators.map((validator) => validator.run(req)));
 
         const errors = validationResult(req).array();
-        console.log(errors);
+      
        
         if (errors.length>0)
         {
-          // console.log(errors);
+       
           res.render('register',{errors:errors,message:null})
         }
         else{
@@ -241,15 +235,14 @@ const insertUser=async(req,res)=>{
               },
             ],
           });
-          //console.log(existingUser);
+        
           if(existingUser){
             if (existingUser.email === email && existingUser.mobile === mobile) {
               res.render('register',{errors:null,message:'email and mobile number is already registered'})
             } else if (existingUser.email === email) {
               res.render('register',{errors:null,message:"Email is already registered"});
             }
-            //req.body in string so have to convert existing data to string
-            //  else if(existingUser.phone+"" === phone+"") {
+          
             else if (existingUser.mobile === mobile) {
               res.render('register',{errors:null,message:"Mobile number is already registered"});
           }
@@ -257,7 +250,7 @@ const insertUser=async(req,res)=>{
             const data={name,email,mobile,password};
           
             req.session.data=data;
-            //console.log(req.session.data);
+          
             
             const otp = sentOtp(req,req.session.data.email);
             if (otp) {
@@ -274,7 +267,7 @@ const insertUser=async(req,res)=>{
   }
 }
 
-//post verify
+
 const postVerifyOtp = async (req, res, next) => {
     try {
     
@@ -311,31 +304,30 @@ const postVerifyOtp = async (req, res, next) => {
     }
   };
 
-//get otp page
+
 const loadOtp = async (req, res) => {
     try {
       res.render('otp',{message:null});
-      // await otpNull(req, res);
+    
     
     } catch (error) {
         console.log(error.message);
     }
 };
 
-//verify user
+
 
 const verifyUser = async (req, res) => {
     try {
       const {email,password}=req.body;
-      // req.session.logout=email
+  
       if (!(email.includes('@gmail.com') && email.trim() === email)) {
         const errMsg = 'Email is not a valid Gmail address';
         return res.render('login', { message: errMsg });
     }
       else{
         const userData = await userModel.findOne({ email: req.body.email});
-        
-        //console.log(userData);
+      
         if (userData) {
           
           if(userData.isBlocked){
@@ -362,14 +354,13 @@ const verifyUser = async (req, res) => {
     }
 };
 
-//logout
+
 let logout = (req, res) => {
   req.session.email = false;
   res.redirect("/");
 };
 
 
-//sent otp here
 async function sentOtp(req,email)
 {
   const otp= randomstring.generate({
@@ -386,7 +377,7 @@ async function sentOtp(req,email)
 );
 
   if(updatedOtp){
-  // Send OTP via email
+ 
     const mailOptions = {
         from: 'nyraproduct@gmail.com',
         to: email,
@@ -402,33 +393,17 @@ async function sentOtp(req,email)
             console.log('Email sent:', info.response);
         }
     });}
-  
-  
+    setTimeout(async () => {
+      const nullifiedOtp = await otpModel.findOneAndUpdate(
+          { email: email },
+          { otp: null },
+          { new: true }
+      );
+      console.log('OTP set to null after 30 seconds:', nullifiedOtp);
+  }, 30000); 
 }
-
-// const otpNull = async (req, res) => {
-//   try {
-    
-//     setTimeout(async () => {
-     
-//       await otpModel.findOneAndUpdate(
-//         { email: req.session.data.email },
-//         { otp: null },
-//         { new: true, upsert: true }
-//       );
-      
-//       console.log('OTP set to null after timeout');
-//     }, 1000 * 30);
-
-    
-//   } catch (error) {
-    
-//     console.error('otpNull error:', error);
   
-// }};
-
-
-//resend otp
+  
 let resendOtp = async (req, res) => {
   try {
     if (req.session.data && req.session.data.email) {
@@ -517,7 +492,7 @@ const postPassword=async (req, res) => {
           return res.render('reset-password', { message: 'Failed to update password' });
       }
 
-      console.log('Password updated successfully');
+    
       res.redirect('/userAc');
   } catch (error) {
       console.error('postPassword', error.message);
@@ -544,7 +519,7 @@ const postreset = async (req, res) => {
           return res.render('forgot', { message: 'Failed to update password' });
       }
 
-      console.log('Password updated successfully');
+   
       res.redirect('/');
   } catch (error) {
       console.error('postreset', error.message);
@@ -650,7 +625,7 @@ const editprofile = async (req, res) => {
   }
 };
 
-//address
+
 const loadAddadd=async(req,res)=>{
   try{
     const user=await userModel.findOne({email:req.session.email});
@@ -685,7 +660,7 @@ const userAddAddress = async (req, res) => {
 
  
     const user = await userModel.findOne({email:req.session.email});
-    // console.log(user);
+   
     if (!user) {
      console.log('user is not found');
     }
@@ -696,7 +671,7 @@ const userAddAddress = async (req, res) => {
     });
 
     if (!useraddresses) {
-      // If the useraddresses document doesn't exist, create a new one
+   
       useraddresses = new addressModel({
         user:  user._id,
         addresses: []
@@ -712,7 +687,7 @@ const userAddAddress = async (req, res) => {
     cart=null;
     }
 
-    // Check if the address already exists for the user
+  
     const existingAddress = useraddresses.addresses.find((address) =>
       address.addressType === addressType &&
       address.HouseNo === houseNo &&
@@ -740,7 +715,7 @@ const userAddAddress = async (req, res) => {
       res.render('add-address',{error:'User cannot have more than 3 addresses',cart,wish});
     }
 else{
-    // Create a new address object
+ 
     const newAddress = {
       addressType: addressType,
       HouseNo: houseNo,
@@ -778,11 +753,11 @@ try{
         });
       }
      
-      //console.log(user);
+      
       const addresses = await addressModel.findOne({
         user: user._id
       })
-      // console.log(addresses);
+     
   
      
   
@@ -808,15 +783,15 @@ catch(error){
 const loadeditAddress=async(req,res)=>{
   try{
     const user= await userModel.findOne({email:req.session.email});
-    // console.log(user)
+   
     let useraddresses = await addressModel.findOne({
       user:user._id
     });
-    //console.log(useraddresses)
+   
     const addressType=req.query.addressType;
     
     const address = useraddresses.addresses.find(address => address.addressType === addressType);
- // console.log(address);
+
  let wish=await wishlistModel.findOne({user:user._id});
  if(!wish){
    wish=null;
@@ -908,6 +883,7 @@ const loadorderpage = async (req, res) => {
   try {
    
   const user = await userModel.findOne({email:req.session.email});
+ 
   const perPage=5;
   const page=req.query.page || 1;
   const orderLength=await orderModel.countDocuments({ user: user._id });
@@ -916,8 +892,8 @@ const loadorderpage = async (req, res) => {
 
    
     const order= await orderModel.find({ user: user._id }).skip(perPage * (page - 1))
-    .limit(perPage);
-    //console.log(order);
+    .limit(perPage).sort({updatedAt:-1});
+   
     let wish=await wishlistModel.findOne({user:user._id});
     if(!wish){
       wish=null;
@@ -1032,11 +1008,12 @@ if (sort === 'lowtohigh') {
 } else if (sort === 'z-a') {
     sortQuery = { name: -1 };
 } else if (sort === 'featured') {
-    sortQuery = { isFeatured: true };
+  product=await ProductModel.find({list:true,isFeatured: true }).populate('category').sort(sortQuery).skip(perPage * (page - 1))
+  .limit(perPage);
 } else if (sort === 'popularity') {
     sortQuery = { popularity: -1 };
 } else if (sort === 'averagerating') {
-    sortQuery = { rating: -1 };
+  sortQuery = { "review.rating": -1 };
 } else if (sort === 'Newarrivals') {
     sortQuery = { createdAt: -1 };
 }
@@ -1100,7 +1077,7 @@ const addToWallet=async(req,res)=>{
       order: razorpayOrder,
     });
   } catch (orderError) {
-    // Handle errors from Razorpay order creation
+  
     console.error('Razorpay Order Creation Error:', orderError);
     res.status(500).json({
       success: false,

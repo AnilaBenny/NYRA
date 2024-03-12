@@ -2,13 +2,13 @@ const WalletModel=require('../models/walletModel');
 const OrderModel=require('../models/orderModel');
 const userModel=require('../models/userModels');
 const addtoWallet = async (req, res) => {
-    console.log("Refund amount");
+    
     try {
         const { orderId, userId } = req.body;
-        console.log("orderId:", orderId, "userId:", userId);
+      
 
         const order = await OrderModel.findById(orderId);
-        console.log("Order details:", order);
+       
         if (!order) {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }

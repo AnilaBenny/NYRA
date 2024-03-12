@@ -8,7 +8,7 @@ const addToWishlist = async (req, res) => {
         const user = await userModels.findOne({ email: req.session.email });
 
         let wishlist = await wishlistModel.findOne({ user: user._id });
-        //  let exist=wishlist.some(wishItem => wishItem.product.includes(id));
+     
         
         if (!wishlist) {
             wishlist = new wishlistModel({

@@ -9,7 +9,7 @@ const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const cartModel = require('../models/cartModel');
 const WalletModel=require('../models/walletModel');
-const { error } = require('console');
+
 const categoryModel = require('../models/categoryModel');
 
 
@@ -81,19 +81,7 @@ try{
     
       let averageSales = orders.length / date; 
       let averageRevenue = totalRevenue / date; 
-    //   const coupons = await couponModel.find();
-
-    //   const filteredCoupons = coupons.filter(coupon => {
-    //       return coupon.usersUsed.length > 0;
-    //   });
-      
-    //   // Retrieve only the 'code' and 'discountPrice' fields from the filtered coupons
-    //   const couponDetails = filteredCoupons.map(coupon => {
-    //       return {
-    //           code: coupon.code,
-    //           discountPrice: coupon.discountPrice
-    //       };
-    //   });
+ 
      
       return {
         users,
@@ -105,7 +93,7 @@ try{
         averageRevenue,
         Revenue,
         productEntered:productEntered.length,
-        // couponDetails,
+       
         totalOrder:orders
       };
 }
@@ -200,7 +188,7 @@ const pdf = async (req, res) => {
       const overallDiscountPrice=salesDatas.totalOrder.reduce((total, order) => total + order.discountPrice, 0);
       const couponcode = salesDatas.totalOrder.map(order => { return order.coupon;});
       const couponCodesString = couponcode.join(', ');
-    //   console.log(couponCodesString,overallDiscountPrice);
+   
       worksheet.columns = [
         { header: 'Total Revenue', key: 'totalRevenue', width: 15 },
         { header: 'Total Orders', key: 'totalOrders', width: 15 },
@@ -212,7 +200,7 @@ const pdf = async (req, res) => {
         { header: 'overall discount price', key: 'overalldiscountprice', width: 15 }
       ];
       
-      // Set up worksheet columns
+    
 
 
 
@@ -237,8 +225,8 @@ const pdf = async (req, res) => {
   
       workbook.xlsx.write(res).then(() => res.end());
     } catch (error) {
-      console.log(error);
-      return res.status(500).send('Error generating Excel file.');
+      console.log(error.message);
+      return res.status(500);
     }
   };
 
@@ -247,7 +235,7 @@ async function orderPieChart() {
     const statuses = ["Pending", "Processing", "Shipped", "Delivered", "Canceled", "Returned"];
     const counts = await Promise.all(statuses.map(status => orderModel.countDocuments({ status })));
 
-    // console.log(counts);
+    
 
     const [Pending, Processing, Shipped, Delivered, Canceled, Returned] = counts;
 
@@ -255,7 +243,7 @@ async function orderPieChart() {
 }
 
 
-// Admin login (get)
+
 let adminLogin = async (req, res) => {
     try {
         res.render('admin-login', { err: null });
@@ -265,20 +253,20 @@ let adminLogin = async (req, res) => {
     }
 };
 
-// Admin login (post)
+
 let adminPost = async (req, res) => {
     try {
         const { email, password} = req.body;
-        //console.log(email, password);
+       
   
         
         const adminExist = await adminModel.findOne({
             adminEmail: email,
           });
-        //console.log(adminExist);
+        
 
         if (adminExist) {
-            // Compare passwords
+           
            
             if (password===adminExist.adminPassword) {
                
@@ -298,14 +286,14 @@ let adminPost = async (req, res) => {
     }
 };
 
-// Admin logout
+
 let adminLogout = (req, res) => {
     req.session.admin = false;
-    console.log("Session destroyed");
+
     res.redirect("/admin");
 };
 
-// Admin panel (get)
+
 const loadPanel = async (req, res) => {
     try {
         let daily = await salesReport(1);
@@ -313,14 +301,12 @@ const loadPanel = async (req, res) => {
         let monthly = await salesReport(30);
         let yearly = await salesReport(365);
         let allProductsCount = await productModel.countDocuments();
-        let orders=await orderModel.find().populate('user');
+        let orders=await orderModel.find().populate('user').limit(5);
     
         
-        //pie chart
+        
         let orderChart=await orderPieChart();
-        // console.log(orderChart);
-
-        // console.log(daily,weekly,monthly,yearly,allProductsCount,orders);
+        
         res.render('adminpanel.ejs',{daily,weekly,monthly,yearly,allProductsCount,orders,orderChart});
     } catch (error) {
         console.error(error);
@@ -331,10 +317,10 @@ const loadPanel = async (req, res) => {
 const loadusermanagement = async (req, res) => {
     try {
         const userdetails = await userModel.find();
-        console.log(userdetails)
+       
         res.render('user-management', { users: userdetails });
     } catch (error) {
-        console.log(error.message);
+        console.log('load user manage',error.message);
     }
 };
 
@@ -344,12 +330,12 @@ let userblock = async (req, res) => {
         const userData = await userModel.findById(id);
         if(userData.isBlocked){
             await userModel.findByIdAndUpdate({_id:id},{$set:{ isBlocked:false}});
-            await userData.save(); // Save the updated user data
+            await userData.save(); 
             res.status(200).json({ status: true, users: userData });
         }
         else{
             await userModel.findByIdAndUpdate({_id:id},{$set:{ isBlocked:true}});
-            await userData.save(); // Save the updated user data
+            await userData.save(); 
             res.status(201).json({ status: true, users: userData });
         } 
         } 
@@ -362,7 +348,7 @@ let userblock = async (req, res) => {
         try {
         
             const order = await orderModel.find().populate('user');
-            //console.log(orders);
+            
             res.render('admin-orderlist', { order });
         } catch (err) {
             console.error('Error in load order management:', err.message);
@@ -401,7 +387,6 @@ let userblock = async (req, res) => {
             await wallet.save();
     
     
-            // Restore stock count for products associated with the canceled order
             for (const orderItem of canceledOrder.items) {
                 const product = await productModel.findById(orderItem.productId);
     
@@ -434,7 +419,7 @@ let userblock = async (req, res) => {
 const requestCancel=async(req,res)=>{
     try {
         const { orderId} = req.body;
-        //console.log(id);
+       
 
             const Order = await orderModel.findOne({oId:orderId});
 
@@ -477,7 +462,7 @@ const loadorderdetail=async(req,res)=>{
     try{
         
         const orders = await orderModel.findById(req.query.id).populate('user');
-        //console.log(orders);
+        
         res.render('adminorderdetail',{orders});
 
     }catch(error){
@@ -488,7 +473,7 @@ const loadorderdetail=async(req,res)=>{
 const uporder=async(req,res)=>{
     try{
         const {newStatus,orderId}=req.body;
-        // console.log(newStatus,orderId);
+       
         const order=await orderModel.findOne({oId:orderId});
         if(newStatus==='Canceled'){
             for (const orderItem of order.items) {
@@ -543,14 +528,7 @@ const couponCreate=async(req,res)=>{
             expirationDate,
             maxUsers
         }=req.body;
-        console.log(code,
-            description,
-            discountPercentage,
-            maxDiscountAmount,
-            minimumAmount,
-            maximumAmount,
-            expirationDate,
-            maxUsers);
+      
             const coupon = new couponModel({
                 code,
                 description,
@@ -607,7 +585,7 @@ catch(err){
 const filterData=async(req,res)=>{
     try{
         const filterData=req.body;
-        console.log(filterData);
+       
         if(filterData.type==='today'){
             date=1
         }else if(filterData.type==='week'){
@@ -623,7 +601,7 @@ const filterData=async(req,res)=>{
             const differenceDays = differenceMs / (1000 * 3600 * 24);
            date = Math.round(differenceDays);
             
-            console.log(date);
+            
             
         }
         const currentDate = new Date();
@@ -647,8 +625,7 @@ const filterData=async(req,res)=>{
         
             order= [...order, ...dailyOrders];
           }
-    // console.log(orders)
-    // res.render('salesdetails',{order});
+   
         res.json({ success: true, message: 'Filter data received successfully',order:order });
     }
     catch(error){
@@ -667,7 +644,7 @@ const bestSelling=async(req,res)=>{
 
         const popularityByCategory = await orderModel.aggregate([
             {
-                $unwind: "$items" // Unwind the items array in orders
+                $unwind: "$items" 
             },
             {
                 $lookup: {
@@ -678,7 +655,7 @@ const bestSelling=async(req,res)=>{
                 }
             },
             {
-                $unwind: "$product" // Unwind the product array
+                $unwind: "$product" 
             },
             {
                 $lookup: {
@@ -689,7 +666,7 @@ const bestSelling=async(req,res)=>{
                 }
             },
             {
-                $unwind: "$category" // Unwind the category array
+                $unwind: "$category" 
             },
             {
                 $group: {
@@ -729,16 +706,16 @@ const bestSelling=async(req,res)=>{
             },
             {
                 $group: {
-                    _id: "$product.brand", // Group by brand
-                    totalQuantitySold: { $sum: "$items.quantity" } // Calculate the total quantity sold for each brand
+                    _id: "$product.brand", 
+                    totalQuantitySold: { $sum: "$items.quantity" } 
                 }
             },
             {
-                $sort: { totalQuantitySold: 1 } // Sort by total quantity sold in descending order
+                $sort: { totalQuantitySold: 1 } 
             }
         ]);
         
-console.log(bestSellingBrands);
+
 
         const product=await productModel.find({list:true}).sort({popularity:1}).limit(10);
         

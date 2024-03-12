@@ -100,7 +100,7 @@ const orderSchema = new Schema({
           default: 'Pending',
         },
         reason: String,
-        // Add other fields as needed for your specific use case
+        
       }, ],
     coupon:{
         type:String

@@ -2,7 +2,7 @@
 <html lang="en">
 
 
-<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:32:35 GMT -->
+
 <head>
     <meta charset="utf-8">
     <title>Admin</title>
@@ -13,11 +13,11 @@
     <meta property="og:type" content="">
     <meta property="og:url" content="">
     <meta property="og:image" content="">
-    <!-- Favicon -->
+   
     <link rel="shortcut icon" type="image/x-icon" href="/public/assets/images/theme/favicon.svg">
-    <!-- Template CSS -->
+  
     <link href="/public/assets/css/main.css" rel="stylesheet" type="text/css" />
-     <!-- Vendor CSS -->
+    
      <link rel="stylesheet" href="/public/assets/css/vendor/font-awesome.min.css">
      <link rel="stylesheet" href="/public/assets/css/vendor/ionicons.css">
      <link rel="stylesheet" href="/public/assets/css/vendor/simple-line-icons.css">
@@ -29,7 +29,7 @@
  
 
  
-     <!-- Plugin CSS -->
+   
      <link rel="stylesheet" href="/public/assets/css/plugins/swiper-bundle.min.css">
      <link rel="stylesheet" href="/public/assets/css/plugins/animate.min.css">
      <link rel="stylesheet" href="/public/assets/css/plugins/nice-select.css">
@@ -55,7 +55,7 @@
             <div>
               <h2 class="card-title mb-4"> Admin Log in</h4>
 
-              <!-- Add this section to display error messages -->
+            
               <% if (err ) { %>
                   <center><p id="error-message" class="text-danger mb-2"><%= err %></p></center>
               <% } %>
@@ -64,7 +64,7 @@
                     <input class="form-control" name="email" id="adminEmail" placeholder="Enter your email"
                         type="text" >
                     <span id="emailMessage" class="text-danger"></span>
-                </div> <!-- form-group// -->
+                </div> 
 
 
                 <div class="mb-3">
@@ -86,7 +86,7 @@
                 <div class="mb-4">
                     <button type="submit" class="btn btn-primary w-100" name="login"> Login </button>
                 </div>
-                <!-- form-group// -->
+                
             </form>
             </div>
         </div>
@@ -103,10 +103,10 @@ function togglePasswordVisibilityAdmin(button) {
   const passwordInput = button.parentElement.querySelector('input[name="password"]');
   if (passwordInput.type === "password") {
       passwordInput.type = "text";
-      button.innerHTML = '<i class="bi bi-eye"></i>'; // Show the "eye-slash" icon
+      button.innerHTML = '<i class="bi bi-eye"></i>'; 
   } else {
       passwordInput.type = "password";
-      button.innerHTML = '<i class="bi bi-eye-slash"></i>'; // Show the "eye" icon
+      button.innerHTML = '<i class="bi bi-eye-slash"></i>'; 
   }
 }
 
@@ -114,43 +114,41 @@ function togglePasswordVisibilityAdmin(button) {
 
 
 
-//form validation
+
 function validateForm() {
-  // Get all input fields
+
 
   const emailInput = document.getElementById('adminEmail');
   const passwordInput = document.getElementById('adminPassword');
 
-  // Get all validation messages
 
   const emailMessage = document.getElementById('emailMessage');
   const passwordMessage = document.getElementById('passwordMessage');
 
-  // Clear all validation messages
+
 
   emailMessage.textContent = '';
   passwordMessage.textContent = '';
 
 
 
-  // Validate the email field
   if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(emailInput.value)) {
       emailMessage.textContent = 'Please enter a valid email address.';
   }
 
-  // Validate the password field
+
   if (passwordInput.value.length < 6) {
       passwordMessage.textContent = 'Please enter a password of 6 characters.';
   }
 
-  // If all fields are valid, return true
+
   if (emailMessage.textContent === '' &&
       passwordMessage.textContent === ''
   ) {
       return true;
   }
 
-  // Otherwise, return false
+ 
   return false;
 }
 </script>

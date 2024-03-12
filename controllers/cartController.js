@@ -17,7 +17,7 @@ const addToCartIn = async (req, res) => {
         const productId = req.body.productId;
         const quantity=parseInt(req.body.quantity);
 
-        // console.log(productId, quantity);
+    
 
         const product = await productModel.findById(productId);
         if (!product) {
@@ -47,8 +47,7 @@ const addToCartIn = async (req, res) => {
                 return res.status(400).json({ message: 'Maximum quantity per person reached' });
             }
         } else {
-            // If the item doesn't exist in the cart, add it
-            // if(userCart.items.productId.countInStock==)
+            
             userCart.items.push({
                 productId: productId,
                 name: product.name,
@@ -60,10 +59,9 @@ const addToCartIn = async (req, res) => {
             });
           
         }
-          // Update the total bill
-          userCart.billTotal = userCart.items.reduce((total, item) => total + item.price, 0);
+            userCart.billTotal = userCart.items.reduce((total, item) => total + item.price, 0);
 
-          // Save the cart to the database
+         
           await userCart.save();
           
           return res.status(200).json({ message: 'Item added to cart successfully' });
@@ -87,7 +85,7 @@ const addTocart = async (req, res) => {
         const productId = req.body.productId;
 
         const product = await productModel.findById(productId);
-        //console.log(product);
+      
         if (!product) {
             console.log('Product is not found');
             return res.status(404).json({ message: 'Product not found' });
@@ -139,11 +137,11 @@ const addTocart = async (req, res) => {
 const showcart=async(req,res)=>{
     try{
         const user=await userModel.findOne({email:req.session.email});
-        //console.log(user);
+      
         const userId=user._id;
         
         let userCart = await cartModel.findOne({ owner: userId }).populate({path:'items.productId',model:'Products'});
-        console.log(userCart);
+       
         const coupon=await couponModel.find();
         const eligibleCoupons = coupon.filter(coupon => {
             return userCart.billTotal >= coupon.minimumAmount && userCart.billTotal <= coupon.maximumAmount && coupon.isActive
@@ -161,7 +159,7 @@ const showcart=async(req,res)=>{
         {
         cart=null;
         }
-        // console.log(userCart);
+        
      
         if(userCart.items.length>0){
             res.render('cart',{cart:userCart,coupon:eligibleCoupons,wish})
@@ -187,7 +185,7 @@ const deleteCart = async (req, res) => {
         const userId = user._id;
         const { productId } = req.body;
 
-        // Find the product in the cart
+       
         let userCart = await cartModel.findOne({ owner: userId });
         if (!userCart) {
             userCart = new cartModel({
@@ -200,12 +198,12 @@ const deleteCart = async (req, res) => {
         const existingCartItem = userCart.items.find(item => item.productId.toString() === productId);
         if (existingCartItem) {
             if (existingCartItem.quantity > 0) {
-                // Decrease quantity and update price
+            
                 existingCartItem.quantity = 0;
                 existingCartItem.price = existingCartItem.productPrice;
                 userCart.billTotal -= existingCartItem.productPrice;
 
-                // If quantity becomes 0, remove the item from the cart
+               
                 if (existingCartItem.quantity === 0) {
                     userCart.items = userCart.items.filter(item => item.productId.toString() !== productId);
                     userCart.billTotal =0;
@@ -234,13 +232,13 @@ const updateCart = async (req, res) => {
         if(!user){
             console.log('user is not found in update cart');
         }
-        //console.log(user);
+     
         const cart = await cartModel.findOne({ owner: userId });
-        console.log(cart)
+       
         const { productId, need } = req.body;
-        // console.log(productId, need);
+      
         const cartItem = cart.items.find(item => item.productId.toString() === productId);
-        console.log(cartItem);
+      
         if(!cartItem){
             console.log('cart is not found in update cart');
         }

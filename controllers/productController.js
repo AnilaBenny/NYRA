@@ -27,7 +27,7 @@ const showsearch = async (req, res) => {
         const category = await categoryModel.findOne({ name: cat });
         products = await productModel
         .find({
-            category: category._id,
+            category: category._id,list:true,
             $or: [
                 { name: { $regex: search, $options: 'i' } },
                 { brand: { $regex: search, $options: 'i' } }
@@ -36,7 +36,7 @@ const showsearch = async (req, res) => {
         .populate('category');
 }else{
      products = await productModel
-    .find({
+    .find({list:true,
        
         $or: [
             { name: { $regex: search, $options: 'i' } },
@@ -52,19 +52,17 @@ const showsearch = async (req, res) => {
     }
 };
 
-//insert product
+
 
 const insertproduct = async (req, res) => {
     try {
-        // console.log(req.body.category)
+        
         const images = [];
         for (let i = 0; i < req.files.length; i++) {
             images.push(req.files[i].filename);
         }
 
-        console.log(images);
-        // const categoryname=await category.findById({_id:req.body.category}).populate("categories", { name: 1 }) ;
-        // console.log(categoryname);
+       
 
         const product = new productModel({
             name: req.body.name,
@@ -74,8 +72,7 @@ const insertproduct = async (req, res) => {
             countInStock:req.body.stock,
             category: req.body.category,
             price: req.body.price
-            // ,discountPrice: req.body.discountPrice,
-            // afterDiscount: Math.floor(parseInt(req.body.price) - (parseInt(req.body.price) * (parseInt(req.body.discountPrice) / 100)))
+
         });
 
         const savedProduct = await product.save();
@@ -83,7 +80,6 @@ const insertproduct = async (req, res) => {
         const categorydetails = await categoryModel.find();
         if (savedProduct) {
 
-        //    res.render('admin-product', { cate: categorydetails, message: 'Product saved successfully.' })
            res.redirect('/admin/productlist')
 
         } else {
@@ -98,11 +94,11 @@ const insertproduct = async (req, res) => {
     }
 };
 
-//product list
+
 const productlist = async (req, res) => {
     try {
-        const productdetails = await productModel.find().populate('category');
-        //console.log(productdetails);
+        const productdetails = await productModel.find({list:true,}).populate('category');
+      
         res.render('admin-product-list', { pro: productdetails });
     }
     catch (error) {
@@ -117,7 +113,7 @@ const loadpro = async (req, res) => {
         const productdetails = await productModel.findById({ _id: id }).populate('category');
         const index = productdetails.images.indexOf(image);
         if(image){
-            // console.log('enter');
+          
         if (index > -1) {
 
             await productModel.findByIdAndUpdate(id, { $unset: { [`images.${index}`]: 1 } });
@@ -132,7 +128,7 @@ const loadpro = async (req, res) => {
         
         const categorydetails = await categoryModel.find();
         if (productdetails) {
-            // console.log(productdetails);
+            
 
             res.render('admin-product-edit', { cate: categorydetails, pro: productdetails, message: null });
         }
@@ -252,10 +248,10 @@ const showproduct = async (req, res) => {
             const category = await categoryModel.findOne({ name: cat });
             const perPage=8;
             const page = parseInt(req.query.page) || 1;
-            const totalproducts= await productModel.countDocuments({});
+            const totalproducts= await productModel.countDocuments({list:true,});
             const totalPage=Math.ceil(totalproducts / perPage)
             if (!category) {
-                product = await productModel.find()
+                product = await productModel.find({list:true})
              
             }
     
@@ -274,18 +270,19 @@ const showproduct = async (req, res) => {
             } else if (sort === 'z-a') {
                 sortQuery = { name: -1 };
             } else if (sort === 'featured') {
-                sortQuery = { isFeatured: true };
+                product = await productModel.find({ category: category._id,list:true,isFeatured: true }).populate('category').sort(sortQuery).skip(perPage * (page - 1))
+                .limit(perPage);
             } else if (sort === 'popularity') {
                 sortQuery = { popularity: -1 };
             } else if (sort === 'averagerating') {
-                sortQuery = { rating: -1 };
+                sortQuery = { "review.rating": -1 };
             } else if (sort === 'Newarrivals') {
                 sortQuery = { createdAt: -1 };
             }
             if (search !== '') {
                 product = await productModel
                     .find({
-                        category: category._id,
+                        category: category._id,list:true,
                         $or: [
                             { name: { $regex: search, $options: 'i' } },
                             { brand: { $regex: search, $options: 'i' } }
@@ -295,10 +292,10 @@ const showproduct = async (req, res) => {
                     .sort(sortQuery).skip(perPage * (page - 1))
                     .limit(perPage);
             }else if(sort){
-                product = await productModel.find({ category: category._id }).populate('category').sort(sortQuery).skip(perPage * (page - 1))
+                product = await productModel.find({ category: category._id,list:true }).populate('category').sort(sortQuery).skip(perPage * (page - 1))
                 .limit(perPage);
         }else{
-            product = await productModel.find({ category: category._id }).populate('category').skip(perPage * (page - 1))
+            product = await productModel.find({ category: category._id,list:true}).populate('category').skip(perPage * (page - 1))
             .limit(perPage);
         }
         const userData = await userModels.findOne({ email: req.session.email });
@@ -313,8 +310,7 @@ const showproduct = async (req, res) => {
     if (!wish) {
         wish = null;
     }
-console.log(wish);
-console.log(product);
+
             res.render('shop-product', { product, cat,totalPage,page,wish,cart});
         } catch (error) {
             console.error('Error in showproduct:', error.message);
@@ -325,13 +321,16 @@ console.log(product);
     
 const allProduct=async(req,res)=>{
     try{
-        let product=await productModel.find({})
+        let product=await productModel.find({list:true})
         const perPage=8;
             const page = parseInt(req.query.page) || 1;
             const totalproducts= await productModel.countDocuments({});
             const totalPage=Math.ceil(totalproducts / perPage);
             const userData = await userModels.findOne({ email: req.session.email });
             const wish=await wishlistModel.findOne({user:userData._id});
+            const id=req.query.id;
+            let category=await categoryModel.find({});
+            
             
             const search = req.query.search || '';
             
@@ -348,18 +347,19 @@ const allProduct=async(req,res)=>{
             } else if (sort === 'z-a') {
                 sortQuery = { name: -1 };
             } else if (sort === 'featured') {
-                sortQuery = { isFeatured: true };
+                product = await productModel.find({list:true,isFeatured: true }).populate('category').sort(sortQuery).skip(perPage * (page - 1))
+                .limit(perPage);
             } else if (sort === 'popularity') {
                 sortQuery = { popularity: -1 };
             } else if (sort === 'averagerating') {
-                sortQuery = { rating: -1 };
+                sortQuery = { "review.rating": -1 };
             } else if (sort === 'Newarrivals') {
                 sortQuery = { createdAt: -1 };
             }
             if (search !== '') {
                 product = await productModel
                     .find({
-                        
+                        list:true,
                         $or: [
                             { name: { $regex: search, $options: 'i' } },
                             { brand: { $regex: search, $options: 'i' } }
@@ -369,10 +369,10 @@ const allProduct=async(req,res)=>{
                     .sort(sortQuery).skip(perPage * (page - 1))
                     .limit(perPage);
             }else if(sort){
-                product = await productModel.find({}).populate('category').sort(sortQuery).skip(perPage * (page - 1))
+                product = await productModel.find({list:true}).populate('category').sort(sortQuery).skip(perPage * (page - 1))
                 .limit(perPage);
         }else{
-            product = await productModel.find({}).populate('category').skip(perPage * (page - 1))
+            product = await productModel.find({list:true}).populate('category').skip(perPage * (page - 1))
             .limit(perPage);
         }
         
@@ -384,7 +384,11 @@ const allProduct=async(req,res)=>{
     {
     cart=null;
     }
-        res.render('shopAll',{product,totalPage,page,wish,cart});
+    if(id){
+        product=await productModel.find({category:id,list:true}).populate('category').skip(perPage * (page - 1))
+        .limit(perPage);
+   }
+        res.render('shopAll',{product,totalPage,page,wish,cart,category});
     }
     catch(error)
     {

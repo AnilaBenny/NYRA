@@ -6,11 +6,11 @@ const {AdminLogSession,adminisLogout}=require('../middlewares/auth')
 const wallet=require('../controllers/walletController');
 
 
-//controller connection
+
 const adminController=require('../controllers/adminController');
 const category=require('../controllers/categoryController')
 
-//multer setup
+
 const storage=multer.diskStorage({
   destination:function(req,file,cb){
     cb(null,'./uploads/productImages');
@@ -22,35 +22,33 @@ const storage=multer.diskStorage({
   }
   });
 
-  const upload=multer({storage:storage}).array('images', 3);//directly placed
+  const upload=multer({storage:storage}).array('images', 3);
 
 
-//login
+
 admin_route.get('/',adminisLogout,adminController.adminLogin);
 
 admin_route.post('/',adminisLogout,adminController.adminPost);
 
 admin_route.get('/logout',adminController.logout);
 
-//adminpanel
+
 admin_route.get('/adminpanel',AdminLogSession,adminController.loadPanel);
 
-//load category
+
 admin_route.get('/adminCategory',AdminLogSession,category.loadCategory);
 admin_route.post('/adminCategory',AdminLogSession,category.insertCategory);
 
-//edit category
+
 admin_route.get('/edit-cate',AdminLogSession,category.loadcateedit);
 admin_route.post('/edit-cate',AdminLogSession,category.upcateedit);
 
-//delete category
+
 admin_route.get('/delete-cate',AdminLogSession,category.deletecate);
 
-//load product add
 admin_route.get('/productmanagement',AdminLogSession,product.loadproduct);
 admin_route.post('/productmanagement',AdminLogSession,upload,product.insertproduct);
 
-//load productlist
 admin_route.get('/productlist',AdminLogSession,product.productlist);
 
 admin_route.get('/edit-pro',AdminLogSession,product.loadpro);

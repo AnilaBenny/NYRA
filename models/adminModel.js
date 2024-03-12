@@ -1,7 +1,7 @@
 const mongoose=require('mongoose');
 
 
-//adminschema
+
 const adminModel=new mongoose.Schema({
 
     adminEmail:{

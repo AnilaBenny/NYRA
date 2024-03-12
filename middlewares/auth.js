@@ -51,10 +51,10 @@ const adminisLogout=async(req,res,next)=>{
 const isAuthenticated = (req, res, next) => {
    console.log(req.session.email)
    if (req.session.email) {
-     // User is authenticated, redirect them to the home page
+    
      return res.redirect("/");
    } else {
-       // User is not authenticated, continue to the next middleware or route handler
+
       next();
    }
   

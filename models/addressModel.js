@@ -9,9 +9,9 @@ const addressSchema = new mongoose.Schema({
    },
    addresses:[{
        addressType: {
-           type: String, // This will store the address type, e.g., 'home' or 'work'
+           type: String, 
            required: true,
-           enum: ['home', 'work','temp'], // Define the allowed values for address type
+           enum: ['home', 'work','temp'], 
        },
        HouseNo:{
            type:String,
@@ -50,7 +50,7 @@ const addressSchema = new mongoose.Schema({
 
 })
 
-// Add a custom validation function to limit the number of addresses
+
 addressSchema.path('addresses').validate(function (value) {
    return value.length <= 3;
 }, 'You can have a maximum of 3 addresses.');

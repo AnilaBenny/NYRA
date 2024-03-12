@@ -1,13 +1,11 @@
 const categoryModel = require("../models/categoryModel");
 const userModel = require("../models/userModels");
-// const productModel = require("../model/productSchema");
 const mongoose = require("mongoose");
-const { log } = require("console");
 const { check, validationResult } = require('express-validator');
+const ProductModel = require("../models/productModel");
 
 
 
-//load category
 const loadCategory=async(req,res)=>{
   try{
           const categorydetails = await categoryModel.find();
@@ -16,19 +14,19 @@ const loadCategory=async(req,res)=>{
   catch(error){
       console.log(error.message);
       if (error.code === 11000) {
-        // Handle duplicate key 
+    
         res.render('category', {cate: null ,errors: null, message: 'Duplicate category found' });
       } else {
         res.render('category',{cate: null ,errors: null, message: 'Failed to load categories' });
       }
 }};
 
-//insert category
+
 const insertCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
    
-    // Validation
+  
     const validators=[
       check('name')
       .exists({ checkFalsy: true })
@@ -61,10 +59,10 @@ const insertCategory = async (req, res) => {
     await Promise.all(validators.map((validator) => validator.run(req)));
 
         const errors = validationResult(req).array();
-        console.log(errors);
+        
         if (errors.length>0)
         {
-          // console.log(errors);
+       
           const categorydetails = await categoryModel.find();
           res.render('category',{cate:categorydetails,errors,message: null})
         }
@@ -75,7 +73,7 @@ const insertCategory = async (req, res) => {
             name: name.toLowerCase(),
         
       });
-      //console.log(existingUser);
+      
       if(existingcate ){
         const categorydetails = await categoryModel.find();
           res.render('category',{cate:categorydetails,errors:null,message:'name is already entered'})
@@ -86,7 +84,7 @@ const insertCategory = async (req, res) => {
       description
     });
     const savedCategory = await category.save();
-    console.log(savedCategory)
+   
     const categorydetails = await categoryModel.find();
     if(savedCategory){
      
@@ -101,13 +99,13 @@ const insertCategory = async (req, res) => {
 };
 
 
-//cate edit
+
 const loadcateedit=async(req,res)=>{
   try{
              const id=req.query.id;
             const categorydetails=await categoryModel.findById({_id:id});
             if(categorydetails){
-              // console.log(categorydetails);
+             
               res.render('admin-edit-cate',{cate:categorydetails});
             }
             else{
@@ -122,7 +120,7 @@ const loadcateedit=async(req,res)=>{
 const upcateedit=async(req,res)=>{
   try{
     const Data=await categoryModel.findByIdAndUpdate({_id:req.body.id},{$set:{ name:req.body.name,description:req.body.description}});
-    // console.log(Data);
+   
     if(Data){
       res.redirect('/admin/adminCategory');
     }
@@ -133,22 +131,30 @@ const upcateedit=async(req,res)=>{
   }
 };
 
-//category deletion
-const deletecate=async(req,res)=>{
-  try {
-      const id=req.query.id;
-      const action=req.query.action;
-      if(action==='Active'){
-      await categoryModel.findByIdAndUpdate({_id:id},{is_active:false});
-      }else{
-        await categoryModel.findByIdAndUpdate({_id:id},{is_active:true});
-      }
-     res.redirect('/admin/adminCategory'); 
-  } catch (error) {
-      console.log(error.message);
-  }
 
+const deletecate = async (req, res) => {
+  try {
+    const id = req.query.id;
+    const action = req.query.action;
+
+    if (action === 'Active') {
+      await categoryModel.findByIdAndUpdate(id, { is_active: false });
+
+      await ProductModel.updateMany({ category: id }, { list: false });
+    } else {
+      await categoryModel.findByIdAndUpdate(id, { is_active: true });
+
+    
+      await ProductModel.updateMany({ category: id }, { list: true });
+    }
+
+    res.redirect('/admin/adminCategory');
+  } catch (error) {
+    console.error(error.message);
+    res.status(500);
+  }
 };
+
 
 module.exports = {
   insertCategory,

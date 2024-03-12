@@ -81,7 +81,11 @@ userRoute.post('/addToWallet',userController.addToWallet);
 userRoute.post('/reviewUpdate',product.reviewUpdate)
 
 userRoute.get('/changePassword',logSession,userController.loadpassword);
-userRoute.post('/changePassword',logSession,userController.postPassword);
+userRoute.post('/changePassword',userController.postPassword);
+
+userRoute.post('/failedPayment',checkout.failedPayment);
+userRoute.post('/retryPayment',checkout.retryPayment);
+userRoute.post('/orderOnline',checkout.verifyPayment);
 
 
 module.exports = userRoute;

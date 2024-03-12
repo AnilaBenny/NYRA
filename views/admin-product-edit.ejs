@@ -2,7 +2,7 @@
 <style>
     .image-container {
         position: relative;
-        display: inline-block; /* Or 'block' depending on your layout */
+        display: inline-block; 
         margin-left: 10px;
     }
     .close-icon {
@@ -12,51 +12,31 @@
         cursor: pointer;
         background-color: red ;
         color: rgb(239, 232, 232);
-        border-radius: 50%; /* Makes the background fully rounded */
-    padding: 5px; /* Adds space around the icon */
-    border: 1px solid #ddd; /* Optional: adds a subtle border */
-    /* Ensure the size is suitable for the close icon content */
+        border-radius: 50%; 
+    padding: 5px; 
+    border: 1px solid #ddd; 
+   
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px; /* Adjust based on your design */
-    height: 20px; /* Adjust based on your design */
+    width: 20px; 
+    height: 20px; 
     }
 </style>
 <body>
    
     <main class="main-wrap">
         <header class="main-header navbar">
-            <!-- <div class="col-search">
-                <form class="searchform">
-                    <div class="input-group">
-                        <input list="search_terms" type="text" class="form-control" placeholder="Search term">
-                        <button class="btn btn-light bg" type="button"> <i class="material-icons md-search"></i></button>
-                    </div>
-                    <datalist id="search_terms">
-                        <option value="Products">
-                        <option value="New orders">
-                        <option value="Apple iphone">
-                        <option value="Ahmed Hassan">
-                    </datalist>
-                </form>
-            </div> -->
+          
             <div class="col-nav ms-auto">
                 <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i
                         class="material-icons md-apps"></i> </button>
                 <ul class="nav">
-                    <!-- <li class="nav-item">
-                        <a class="nav-link btn-icon" href="#">
-                            <i class="material-icons md-notifications animation-shake"></i>
-                            <span class="badge rounded-pill">3</span>
-                        </a>
-                    </li> -->
+                  
                     <li class="nav-item">
                         <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i> </a>
                     </li>
-                    <!-- <li class="nav-item">
-                        <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
-                    </li> -->
+                   
                     <li class="dropdown nav-item">
                         <a class="dropdown-item text-danger" href="/admin/logout"><i
                             class="material-icons md-exit_to_app"></i>Logout</a>
@@ -70,11 +50,10 @@
                 <div class="col-6">
                     <div class="content-header">
                         <h2 class="content-title">Edit Product</h2>
-                        <!-- <div>
-                             <button class="btn btn-light rounded font-sm mr-5 text-body hover-up">Save to draft</button> -->
+                        
                             <button class="btn btn-md rounded font-sm hover-up">Update</button>
                             
-                        <!-- </div> -->
+                       
                     </div>
                     <%if(message){%>
                         <p class="text-danger"><%=message%></p>
@@ -105,8 +84,8 @@
                                         <input type="text" placeholder="Type here" name="brand" value="<%=pro.brand%>" class="form-control">
                                        
                                     </div>
-                                </div> <!-- col.// -->
-                            </div> <!-- row.// -->
+                                </div> 
+                            </div> 
                             <hr class="mb-4 mt-0">
                             <div class="row">
                                 <div class="col-md-3">
@@ -117,8 +96,8 @@
                                         <label class="form-label">Cost in Rupee</label>
                                         <input type="text" placeholder="Rs.00.0" name="price" value="<%=pro.price%>" class="form-control">
                                     </div>
-                                </div> <!-- col.// -->
-                            </div> <!-- row.// -->
+                                </div> 
+                            </div> 
                             <hr class="mb-4 mt-0">
                             <div class="row">
                                 <div class="col-md-3">
@@ -139,8 +118,8 @@
                                         </label>
                                       <%}}%>
                                     </div>
-                                </div> <!-- col.// -->
-                            </div> <!-- row.// -->
+                                </div> 
+                            </div> 
                             <hr class="mb-4 mt-0">
                             <div class="row">
                                 <div class="col-md-3">
@@ -159,9 +138,9 @@
                                         
                                        
                                     </div>
-                                </div> <!-- col.// -->
+                                </div> 
                            
-                            </div> <!-- .row end// -->
+                            </div> 
                         
                         </div>
                     </div>
@@ -169,7 +148,7 @@
             </div>
             </div>
         </form>
-        </section> <!-- content-main end// -->
+        </section> 
         <footer class="main-footer font-xs">
             <div class="row pb-30 pt-15">
                 <div class="col-sm-6">
@@ -215,7 +194,7 @@
         return; 
     }
 
-    // Check each file for its extension
+    
     for (var i = 0; i < fileInput.files.length; i++) {
         var file = fileInput.files[i];
         var extension = file.name.split('.').pop().toLowerCase();
@@ -289,5 +268,4 @@ function validateInput(inputId, pattern, errorId, errorMessage) {
 </body>
 
 
-<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-form-product-2.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:32 GMT -->
 </html>

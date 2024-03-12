@@ -10,7 +10,7 @@ const jwt=require('jsonwebtoken');
 
 
 
-//database connection
+
 
 const connectToDatabase = require('./config/databaseconnect');
 connectToDatabase();
@@ -19,13 +19,12 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 
-//Use body parsing middlewares before session middleware
+
 app.use(express.json());
 app.use(express.urlencoded({
    extended: true
 }));
 
-//Session configuration
 app.use(session({
     secret: 'secret-key',
     resave: false,
@@ -42,9 +41,9 @@ app.set('views', path.join(__dirname, 'views'));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/uploads',express.static(path.join(__dirname, 'uploads')))
 
-//for user routes
+
 app.use('/',userRoute);
-//for admin
+
 app.use('/admin',adminRoute);
 
 app.listen(PORT, () => {
