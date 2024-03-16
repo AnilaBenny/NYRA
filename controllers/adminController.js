@@ -124,9 +124,24 @@ const pdf = async (req, res) => {
         
         doc.pipe(res);
         
-        doc.fontSize(20).text('Sales Report', { align: 'center' });
+       
+
+        const today = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
+        doc.fontSize(20).text(`Sales Report - ${today}`, { align: 'center' });
+        if (req.query.type === 'daily') {
+       
+            doc.fontSize(20).text(`today's Report`, { align: 'center' });
+        }else if (req.query.type === 'weekly') {
+       
+            doc.fontSize(20).text(`weekly Report`, { align: 'center' });
+        }
         
         if (salesData) {
+
             doc.moveDown(2);
             const tableHeaders = ['Metric', 'Value'];
             const columnStartPositions = [50, 300];
@@ -134,6 +149,7 @@ const pdf = async (req, res) => {
             const fontSize = 12;
             
             doc.font('Helvetica-Bold').fontSize(fontSize);
+            
   
             tableHeaders.forEach((header, index) => {
                 doc.text(header, columnStartPositions[index], doc.y, { width: 200, align: 'center' });
@@ -147,12 +163,11 @@ const pdf = async (req, res) => {
             const tableRows = [
                 ['Total Revenue', `INR ${salesData.totalRevenue}`],
                 ['Total Orders', salesData.totalOrders],
-                ['Total Order Count', salesData.totalOrderCount],
-                ['Total Count In Stock', salesData.totalCountInStock],
+                ['Total Order Count till now', salesData.totalOrderCount],
                 ['Average Sales', `${salesData.averageSales ? salesData.averageSales.toFixed(2) : 'N/A'}%`],
                 ['Average Revenue', `${salesData.averageRevenue ? salesData.averageRevenue.toFixed(2) : 'N/A'}%`],
             ];
-            
+             
             salesData.totalOrder.forEach(order => {
                 if (order.coupon !== 'nil') {
                     tableRows.push([`Coupon: ${order.coupon}`, `INR ${order.discountPrice}`]);
@@ -348,7 +363,7 @@ let userblock = async (req, res) => {
     const loadordermanagement = async (req, res) => {
         try {
         
-            const order = await orderModel.find().populate('user');
+            const order = await orderModel.find().populate('user').sort({updatedAt:1});
             
             res.render('admin-orderlist', { order });
         } catch (err) {
@@ -581,7 +596,7 @@ const listunlist=async(req,res)=>{
 
 const salesdetails=async(req,res)=>{
 try{
-const order=await orderModel.find().populate('user');
+const order=await orderModel.find({status: "Delivered"}).populate('user');
 res.render('salesdetails',{order});
 }
 catch(err){

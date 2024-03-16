@@ -32,7 +32,7 @@
                     <div class="col-12">
                         <div class="table_desc">
                             <div class="table_page table-responsive">
-                                <table>
+                                <table class=".table-cart">
                                   
                                     <thead>
                                         <tr>
@@ -66,12 +66,12 @@
                                             <td class="product-price">Rs.<%=cart.items[i].productId.price%>.00</td>
                                                 <td>
                                             <div class="detail-qty  radius  m-auto">
-                                            <button class="qty-down " id="qty-down<%=cart.items[i].productId._id %>" onclick="updateQuantity( '<%=cart.items[i].productId._id %>','<%= cart.items[i].productId.countInStock %>','sub')"><i class="fa-solid fa-angle-down"></i>
+                                            <button class="qty-down " id="qty-down<%=cart.items[i].productId._id %>" onclick="updateQuantity( '<%=cart.items[i].productId._id %>','<%= cart.items[i].productId.countInStock %>','<%=cart.items[i].quantity %>','sub')"><i class="fa-solid fa-angle-down"></i>
                                                     </button>
                                                     
                                             <span class="qty-val me-3" id="qty-<%= cart.items[i].productId._id%>"><%= cart.items[i].quantity %></span>
                                                    
-                                            <button class="qty-up" id="qty-up<%=cart.items[i].productId._id %>"  onclick=" updateQuantity('<%=cart.items[i].productId._id %>','<%= cart.items[i].productId.countInStock %>','sum')"><i class="fa-solid fa-angle-up"></i>
+                                            <button class="qty-up" id="qty-up<%=cart.items[i].productId._id %>"  onclick=" updateQuantity('<%=cart.items[i].productId._id %>','<%= cart.items[i].productId.countInStock %>','<%=cart.items[i].quantity %>','sum')"><i class="fa-solid fa-angle-up"></i>
                                                     </i></button>
                                         </div>
                                             </td>
@@ -125,7 +125,7 @@
                                 <div class="cart_subtotal ">
                                     <p>Shipping</p>
                                     <%if(cart.shipping>0){%>
-                                    <p class="cart_amount" id="shipping">Rs.<%=cart.shipping%>.00</p>
+                                    <p class="cart_amount1" id="shipping">Rs.<%=cart.shipping%>.00</p>
                                   
                                     <%}else{%>
                                     <p class="cart_amount">Free Shipping</p>
@@ -418,9 +418,6 @@
 }
 
 
-
-
-
 async function updateQuantity(productId, stock, qty, need) {
     const verify = (need === 'sub') ? (parseInt(qty) > 1) : ((need === 'sum') ? (parseInt(qty) < parseInt(stock)) : false);
 
@@ -443,7 +440,7 @@ async function updateQuantity(productId, stock, qty, need) {
                 for (let i = 0; i < data.cart.items.length; i++) {
                     document.getElementById(`qty-${data.cart.items[i].productId._id}`).innerHTML = data.cart.items[i].quantity;
                     document.getElementById(`carttotal-${data.cart.items[i].productId._id}`).innerHTML = `Rs.${data.cart.items[i].price}.00`;
-                    setupClickListeners(data.cart.items[i].productId._id, data.cart.items[i].productId.countInStock, dat);
+                    setupClickListeners(data.cart.items[i].productId._id, data.cart.items[i].productId.countInStock);
                 }
                 document.getElementById(`carttotal2`).innerHTML = `Rs.${data.cart.billTotal}.00`;
                 document.getElementById(`carttotal3`).innerHTML = `Rs.${data.cart.billTotal}.00`;
@@ -469,24 +466,42 @@ async function updateQuantity(productId, stock, qty, need) {
     }
 }
 
-function setupClickListeners(productId, stock, qty) {
-    console.log(productId, stock, qty);
+function setupClickListeners(productId, stock) {
     const qtyDownElement = document.getElementById(`qty-down${productId}`);
     const qtyUpElement = document.getElementById(`qty-up${productId}`);
 
     if (qtyDownElement && qtyUpElement) {
-        qtyDownElement.addEventListener('click', function () {
-            updateQuantity(productId, stock, qty, 'sub');
-        });
+        const currentQty = parseInt(document.getElementById(`qty-${productId}`).innerHTML);
+        qtyDownElement.disabled = currentQty <= 1;
+        qtyUpElement.disabled = currentQty >= stock;
 
-        qtyUpElement.addEventListener('click', function () {
-            updateQuantity(productId, stock, qty, 'sum');
-        });
+        qtyDownElement.removeEventListener('click', handleQtyDownClick);
+        qtyUpElement.removeEventListener('click', handleQtyUpClick);
+
+        qtyDownElement.addEventListener('click', handleQtyDownClick);
+        qtyUpElement.addEventListener('click', handleQtyUpClick);
     } else {
         console.error(`Elements for product ${productId} not found.`);
     }
 }
 
+function handleQtyDownClick() {
+    const productId = this.id.replace('qty-down', '');
+    const stock = parseInt(document.getElementById(`qty-${productId}`).getAttribute('data-stock'));
+    const currentQty = parseInt(document.getElementById(`qty-${productId}`).innerHTML);
+    if (currentQty > 1) {
+        updateQuantity(productId, stock, currentQty, 'sub');
+    }
+}
+
+function handleQtyUpClick() {
+    const productId = this.id.replace('qty-up', '');
+    const stock = parseInt(document.getElementById(`qty-${productId}`).getAttribute('data-stock'));
+    const currentQty = parseInt(document.getElementById(`qty-${productId}`).innerHTML);
+    if (currentQty < stock) {
+        updateQuantity(productId, stock, currentQty, 'sum');
+    }
+}
 
     async function applycoupon() {
     const code = document.getElementById('coupon').value;
