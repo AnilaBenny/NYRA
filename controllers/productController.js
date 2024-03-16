@@ -7,7 +7,7 @@ const orderModel = require('../models/orderModel');
 
 const loadproduct = async (req, res) => {
     try {
-        const categorydetails = await categoryModel.find();
+        const categorydetails = await categoryModel.find({is_active:true});
         res.render('admin-product', { cate: categorydetails, message: null });
 
 
@@ -56,53 +56,81 @@ const showsearch = async (req, res) => {
 
 const insertproduct = async (req, res) => {
     try {
-        
+        console.log(req.body);
         const images = [];
-        for (let i = 0; i < req.files.length; i++) {
-            images.push(req.files[i].filename);
+        
+      
+        if (req.files && req.files.length > 0) {
+            
+            for (let i = 0; i < req.files.length; i++) {
+                images.push(req.files[i].filename);
+            }
+        } else {
+            console.log('No files were uploaded');
+          
+            return res.render('admin-product', { message: 'No files were uploaded' });
         }
 
-       
-
-        const product = new productModel({
+        const category=await categoryModel.findById(req.body.category) || null;
+        let product={};
+        
+        if(category !==null && typeof category.offerTime!=='undefined'  )
+        {
+           
+         product = new productModel({
             name: req.body.name,
             description: req.body.description,
             images: images,
             brand: req.body.brand,
-            countInStock:req.body.stock,
+            countInStock: req.body.stock,
+            category: req.body.category,
+            price: req.body.price,
+            offerTime:category.offerTime,
+            discountPrice:category.discountPrice
+
+        });
+    }else{
+         product = new productModel({
+            name: req.body.name,
+            description: req.body.description,
+            images: images,
+            brand: req.body.brand,
+            countInStock: req.body.stock,
             category: req.body.category,
             price: req.body.price
 
         });
 
+    }
         const savedProduct = await product.save();
 
-        const categorydetails = await categoryModel.find();
         if (savedProduct) {
-
-           res.redirect('/admin/productlist')
-
+            return res.redirect('/admin/productlist');
         } else {
-            res.render('admin-product', { cate: categorydetails, message: ' Error saving product.' })
+            const categorydetails = await categoryModel.find();
+            return res.render('admin-product', { cate: categorydetails, message: 'Error saving product.' });
         }
-
-
-    }
-    catch (error) {
-        console.error('Error saving product:', error);
-
+    } catch (error) {
+        console.error('Error saving product:', error.message);
+      
+        return res.render('admin-product', { message: 'Error saving product.' });
     }
 };
 
 
+
 const productlist = async (req, res) => {
     try {
-        const productdetails = await productModel.find({list:true,}).populate('category');
+        const perPage=8;
+        const page = parseInt(req.query.page) || 1;
+        const totalproducts= await productModel.countDocuments({});
+        const totalPage=Math.ceil(totalproducts / perPage)
+        const productdetails = await productModel.find({}).populate('category').skip(perPage*(page-1)).limit(perPage);;
       
-        res.render('admin-product-list', { pro: productdetails });
+        res.render('admin-product-list', { pro:productdetails,totalPage,page});
     }
     catch (error) {
-        console.log(error.message);
+        console.log('product List',error.message);
     }
 
 };
@@ -126,7 +154,7 @@ const loadpro = async (req, res) => {
   
 
         
-        const categorydetails = await categoryModel.find();
+        const categorydetails = await categoryModel.find({});
         if (productdetails) {
             
 
@@ -142,12 +170,13 @@ const loadpro = async (req, res) => {
     }
 
 }
+
 const updatepro = async (req, res) => {
     try {
 
         let existingImages = [];
         const existingProduct = await productModel.findById(req.query.id);
-        const categorydetails = await categoryModel.find();
+        const categorydetails = await categoryModel.find({});
 
         if (existingProduct && existingProduct.images && Array.isArray(existingProduct.images) ) {
             existingImages = existingProduct.images;
@@ -163,6 +192,26 @@ const updatepro = async (req, res) => {
         if(allImages.length>3){
             res.render('admin-product-edit', { cate: categorydetails, pro: existingProduct, message: 'maximum 3 images per product' });
         }else{
+            
+            const category=await categoryModel.findById(req.body.category) || null;
+        
+            if(category !==null && typeof category.offerTime!=='undefined'  )
+            {
+               
+                await productModel.findByIdAndUpdate(req.query.id, {
+                    $set: {
+                        name: req.body.name,
+                        description: req.body.description,
+                        images: allImages,
+                        brand: req.body.brand,
+                        category: req.body.category,
+                        price: req.body.price,
+                        countInStock:req.body.stock,
+                        offerTime:category.offerTime,
+                        discountPrice:category.discountPrice
+        
+                    }});
+       }else{
         await productModel.findByIdAndUpdate(req.query.id, {
             $set: {
                 name: req.body.name,
@@ -171,15 +220,21 @@ const updatepro = async (req, res) => {
                 brand: req.body.brand,
                 category: req.body.category,
                 price: req.body.price,
-                countInStock:req.body.stock,
-
+                countInStock: req.body.stock
+            },
+            $unset: {
+                offerTime: "",
+                discountPrice: ""
             }
-        });}
+        });
+        
+            
+        }
         
             res.redirect('/admin/productlist');
         
 
-    }
+    }}
     catch (error) {
         console.log('update product:', error.message);
     }
@@ -327,7 +382,7 @@ const allProduct=async(req,res)=>{
             const totalproducts= await productModel.countDocuments({});
             const totalPage=Math.ceil(totalproducts / perPage);
             const userData = await userModels.findOne({ email: req.session.email });
-            const wish=await wishlistModel.findOne({user:userData._id});
+            let wish=await wishlistModel.findOne({user:userData._id});
             const id=req.query.id;
             let category=await categoryModel.find({});
             
@@ -479,6 +534,7 @@ const postOffer2 = async (req, res) => {
         }
 
         category.offerTime = date;
+        category.discountPrice=discount;
         await category.save();
 
         res.redirect('/admin/offer');
