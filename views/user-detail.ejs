@@ -200,34 +200,31 @@
                             <div class="login">
                                 <div class="login_form_container">
                                     <div class="account_login_form">
-                                        <form action="#" method="post">
-                                           
-                                             <br>
-                                             
-                                            <div class="default-form-box mb-20">
-                                                <label>Name</label>
-                                                <input type="text" name="name" value="<%=user.name%>">
-                                            </div>
-                                            <div class="default-form-box mb-20">
-                                                <label>Email</label>
-                                                <input type="text" name="email" value="<%=user.email%>" style="background-color: rgba(219, 215, 215, 0.456);"  disabled>
-                                            </div>
-                                            <div class="default-form-box mb-20">
-                                                <label>Mobile</label>
-                                                <input type="text" name="mobile" value="<%=user.mobile%>">
-                                            </div>
-                                            <div class="default-form-box mb-20">
-                                                <a href="/changePassword" class="btn btn-md btn-black-default-hover">Change password</a>
-                                            </div>
-                                            
-                                          
-                                            <br>
-                                           
-                                            <div class="save_button mt-3">
-                                                <button class="btn btn-md btn-black-default-hover"
-                                                    type="submit">Save</button>
-                                            </div>
-                                        </form>
+                                    <form action="" method="post" onsubmit="return validateForm(event)">
+                                        <br>
+                                        <div class="default-form-box mb-20">
+                                            <label>Name</label>
+                                            <input type="text" id="name" name="name" value="<%=user.name%>" onblur="validateName()" onfocus="clearNameError()">
+                                            <div id="nameError" class="text-danger"></div>
+                                        </div>
+                                        <div class="default-form-box mb-20">
+                                            <label>Email</label>
+                                            <input type="text" name="email" value="<%=user.email%>" style="background-color: rgba(219, 215, 215, 0.456);" disabled>
+                                        </div>
+                                        <div class="default-form-box mb-20">
+                                            <label>Mobile</label>
+                                            <input type="text" id="mobile" name="mobile" value="<%=user.mobile%>" onblur="validateMobile()" onfocus="clearMobileError()">
+                                            <div id="mobileError" class="text-danger"></div>
+                                        </div>
+                                        <div class="default-form-box mb-20">
+                                            <a href="/changePassword" class="btn btn-md btn-black-default-hover">Change password</a>
+                                        </div>
+                                        <br>
+                                        <div class="save_button mt-3">
+                                            <button class="btn btn-md btn-black-default-hover" type="submit">Save</button>
+                                        </div>
+                                    </form>
+
                                     </div>
                                 </div>
                             </div>
@@ -403,6 +400,76 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script>
+
+        function validateName() {
+    const nameInput = document.getElementById('name');
+    const nameError = document.getElementById('nameError');
+    const nameValue = nameInput.value.trim();
+
+    if (!nameValue) {
+        nameError.textContent = 'Name is required';
+        return false;
+    } else if (nameValue.length < 3 || nameValue.length > 15) {
+        nameError.textContent = 'Name must be between 3 and 15 characters long';
+        return false;
+    } else if (!/^[a-zA-Z\s]*$/.test(nameValue)) {
+        nameError.textContent = 'Name cannot contain numbers or special characters';
+        return false;
+    } else if (nameValue[0] === ' ') {
+        nameError.textContent = 'Name cannot start with a space';
+        return false;
+    }else if (nameValue.includes('  ') || nameValue.trim().split(/\s+/).length > 3) {
+        nameError.textContent = 'Name cannot have more than two consecutive spaces';
+        return false;
+    } else if (nameValue.split(' ').some(word => word.length === 1)) {
+        nameError.textContent = 'Name cannot consist of single-letter entries';
+        return false;
+    } else {
+        nameError.textContent = '';
+        return true;
+    }
+}
+
+function clearNameError() {
+    const nameError = document.getElementById('nameError');
+    nameError.textContent = '';
+}
+
+function validateMobile() {
+    const mobileInput = document.getElementById('mobile');
+    const mobileError = document.getElementById('mobileError');
+    const mobileValue = mobileInput.value.trim();
+
+    if (!mobileValue) {
+        mobileError.textContent = 'Mobile number is required';
+        return false;
+    } else if (!/^[6-9]\d{9}$/.test(mobileValue)) {
+        mobileError.textContent = 'Invalid mobile number format. Must start with a digit from 6 to 9 and be 10 digits long';
+        return false;
+    } else {
+        mobileError.textContent = '';
+        return true;
+    }
+}
+
+function clearMobileError() {
+    const mobileError = document.getElementById('mobileError');
+    mobileError.textContent = '';
+}
+
+function validateForm(event) {
+    const isValidName = validateName();
+    const isValidMobile = validateMobile();
+
+    if (!isValidName || !isValidMobile) {
+        event.preventDefault(); 
+        document.getElementById('main-error').innerText = 'Please correct the fields.';
+        return false;
+    }
+    return true;
+}
+
+
 
 document.getElementById('editAddressLink').addEventListener('click', function(event) {
     event.preventDefault(); 
