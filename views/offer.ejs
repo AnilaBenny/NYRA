@@ -4,36 +4,16 @@
    
     <main class="main-wrap">
         <header class="main-header navbar">
-            <!-- <div class="col-search">
-                <form class="searchform">
-                    <div class="input-group">
-                        <input list="search_terms" type="text" class="form-control" placeholder="Search term">
-                        <button class="btn btn-light bg" type="button"> <i class="material-icons md-search"></i></button>
-                    </div>
-                    <datalist id="search_terms">
-                        <option value="Products">
-                        <option value="New orders">
-                        <option value="Apple iphone">
-                        <option value="Ahmed Hassan">
-                    </datalist>
-                </form>
-            </div> -->
+         
             <div class="col-nav ms-auto">
                 <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i
                         class="material-icons md-apps"></i> </button>
                 <ul class="nav">
-                    <!-- <li class="nav-item">
-                        <a class="nav-link btn-icon" href="#">
-                            <i class="material-icons md-notifications animation-shake"></i>
-                            <span class="badge rounded-pill">3</span>
-                        </a>
-                    </li> -->
+                  
                     <li class="nav-item">
                         <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i> </a>
                     </li>
-                    <!-- <li class="nav-item">
-                        <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
-                    </li> -->
+                   
                     <li class="dropdown nav-item">
                         <a class="dropdown-item text-danger" href="/admin/logout"><i
                             class="material-icons md-exit_to_app"></i>Logout</a>
@@ -52,10 +32,7 @@
                   <a class="nav-link" data-bs-toggle="tab" href="#menu2">
                     Category offer</a>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" data-bs-toggle="tab" href="#menu3">
-                    Referral offer</a>
-                </li>
+                
               </ul>
             
               <!-- Tab panes -->
@@ -107,6 +84,7 @@
                                             <div class="card" style="height: 200px;">
                                                 <p href="#" class="text-center font-xl" id="time<%= product[i]._id %>" onclick="timer('<%= product[i]._id %>','<%= product[i].offerTime %>')">offer Ends in</p>
                                                 </div>
+                                                <a href="/admin/offer/end?id=<%= product[i]._id %>" class="btn btn-primary">Lets end</a>
                                         
                                         <%}%>
                                     </div>
@@ -142,7 +120,7 @@
                     <td><%= category[i].name %></td>
                     <% if(category[i].offerTime) { %>
                         <td><h6>Offer Ends in:</h6><span> <%= category[i].offerTime %></span></td>
-                        <td></td> 
+                        <td><a href="/admin/offer/endcategory?id=<%= category[i]._id %>" class="btn btn-primary">Lets end</a></td> 
                         <td></td>
                     <% } else { %>
                         <td>
@@ -160,13 +138,12 @@
                         <td>
                                 <div class="form-group">
                                     <input type="submit" class="btn btn-success" value="Submit">
+
                                 </div>
                             </form>
                         </td>
                     <% } %>
-                    <td>
-                        <a href="/admin/edit-cate?id=<%= category[i]._id %>" class="btn btn-primary">Edit</a>
-                    </td>
+                   
                 </tr>
             <% } %>
         <% } else { %>

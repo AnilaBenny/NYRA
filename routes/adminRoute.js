@@ -91,6 +91,9 @@ admin_route.get('/bestSelling',AdminLogSession,adminController.bestSelling);
 
 admin_route.get('/offer',AdminLogSession,adminController.offer);
 
+admin_route.get('/offer/end',AdminLogSession,adminController.offerEnd);
+admin_route.get('/offer/endcategory',AdminLogSession,adminController.categoryofferEnd);
+
 admin_route.post('/productoffer',product.postOffer);
 admin_route.post('/offer',product.postOffer2);
 

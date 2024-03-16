@@ -207,6 +207,9 @@
         <div class="content-header">
             <div>
                 <h2 class="content-title card-title">Coupon Management</h2>
+                <%if(message){%>
+                    <p class="text-danger"><%=message%></p>
+                <%}%>
                 
             </div>
          
@@ -239,9 +242,13 @@
                             <th>Coupon Name</th>
                             <th>Description</th>
                             <th>Discount in %</th>
-                            <th>Max Discount <br> Amount</th>
+                           
                             <th>Min Purchase <br> Amount</th>
-                            <th>Max amount</th>
+                            <th>Max Purchase<br> amount</th>
+                            <th>Expired On</th>
+                            <th>
+                                Maximum users 
+                            </th>
                             <th>Status</th>
                          
                             <th col-2>Actions</th>
@@ -258,11 +265,12 @@
                             </td>
                             <td class="text-center mt-2"><%= item.description  %></td>
                             <td class="text-center mt-2"><%= item.discountPercentage  %> %</td>
-                            <td class="text-center mt-2"><%= item.maxDiscountAmount  %> </td>
+            
                             <td class="text-center mt-2"><%= item.minimumAmount  %></td>
                             <td class="text-center mt-2"><%= item.maximumAmount  %></td>
 
-
+                            <td class="text-center mt-2"><%= item.expirationDate.toLocaleDateString() %></td>
+                            <td class="text-center mt-2" ><%=item.maxUsers%></td>
                             <td class="text-center "><span class="<%= item.isActive ? 'actives' : 'inactive' %> mt-3">
                                     <%= item.isActive ? 'Active' : 'Inactive' %>
                                 </span></td>
@@ -478,13 +486,10 @@
                                     <td class="text-center"><%= item.minimumAmount %></td>
                                 </tr>
                                 <tr class="mb-3">
-                                    <td class="text-center"><strong>Maximum Amount:</strong></td>
+                                    <td class="text-center"><strong>Maximum Purchase Amount:</strong></td>
                                     <td class="text-center"><%= item.maximumAmount %></td>
                                 </tr>
-                                <tr class="mb-3">
-                                    <td class="text-center"><strong>Maximum Discount Amount:</strong></td>
-                                    <td class="text-center"><%= item.maxDiscountAmount %></td>
-                                </tr>
+                               
                                 <tr class="mb-3">
                                     <td class="text-center"><strong>Discount Percentage:</strong></td>
                                     <td class="text-center"><%= item.discountPercentage %> %</td>
@@ -527,7 +532,7 @@
                     </div>
                     <div class="modal-body">
                
-                        <form id="createCouponForm" action="" method="post">
+                        <form id="createCouponForm" action="" method="post" onsubmit="return submitForm(event)">
                             <div class="form-row d-flex mb-3">
                                 <div class="form-group col-md-6">
                                     <label for="code" class="text-right">Coupon Code</label>
@@ -557,38 +562,28 @@
                                     <label for="discountAmount" class="text-right">Discount Percentage</label>
                                 </div>
                                 <div class="form-group col-md-6">
-                                    <input type="text" class="form-control" id="discountAmount"
-                                        name="discountPercentage">
+                                    <input type="number" class="form-control" min="1" max="70" id="discountAmount"
+                                        name="discountPercentage" required>
                                     <span id="discountAmountError" class="error-message text-danger"></span>
                                 </div>
                             </div>
 
                             <div class="form-row d-flex mb-3">
                                 <div class="form-group col-md-6">
-                                    <label for="maxDiscountAmount" class="text-right"> Maximum Discount Amount</label>
+                                    <label for="minimumAmount"  class="text-right">Minimum Purchase Amount</label>
                                 </div>
                                 <div class="form-group col-md-6">
-                                    <input type="text" class="form-control" id="maxDiscountAmount"
-                                        name="maxDiscountAmount" required>
-                                    <span id="maxDiscountAmountError" class="error-message text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="form-row d-flex mb-3">
-                                <div class="form-group col-md-6">
-                                    <label for="minimumAmount" class="text-right">Minimum Purchase Amount</label>
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <input type="text" class="form-control" id="minimumAmount" name="minimumAmount"
+                                    <input type="number" class="form-control"  id="minimumAmount" name="minimumAmount"
                                         required>
                                     <span id="minimumAmountError" class="error-message text-danger"></span>
                                 </div>
                             </div>
                             <div class="form-row d-flex mb-3">
                                 <div class="form-group col-md-6">
-                                    <label for="maximumAmount" class="text-right">Maximum Amount</label>
+                                    <label for="maximumAmount" class="text-right">Maximum Purchase Amount</label>
                                 </div>
                                 <div class="form-group col-md-6">
-                                    <input type="text" class="form-control" id="maximumAmount" name="maximumAmount"
+                                    <input type="number" class="form-control" id="maximumAmount" name="maximumAmount"
                                         required>
                                     <span id="maximumAmountError" class="error-message text-danger"></span>
                                 </div>
@@ -600,7 +595,7 @@
                                     <label for="expirationDate" class="text-right">Expiration Date</label>
                                 </div>
                                 <div class="form-group col-md-6">
-                                    <input type="date" class="form-control" id="expirationDate" name="expirationDate"
+                                    <input type="date" class="form-control" id="expirationDate" value="" name="expirationDate"
                                         required>
                                     <span id="expirationDateError" class="error-message text-danger"></span>
                                 </div>
@@ -611,13 +606,16 @@
                                     <label for="maxUsers" class="text-right">Maximum Users Allowed</label>
                                 </div>
                                 <div class="form-group col-md-6">
-                                    <input type="text" class="form-control" id="maxUsers" name="maxUsers">
+                                    <input type="number" class="form-control" id="maxUsers" min="1" max="<%=users.length%>" name="maxUsers" required>
                                     <span id="maxUsersError" class="error-message text-danger"></span>
                                 </div>
                             </div>
                         
                     </div>
+                    
                     <div class="modal-footer">
+                        <p id="main-error" class="text-danger"></p>
+                       
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary" id="createCouponSubmit">Create</button>
                     </div>
@@ -636,7 +634,7 @@
             <div class="col-sm-6">
                 <script>
                 document.write(new Date().getFullYear())
-                </script> © <a href="/">NYRA</a> .
+                </script> © <a href="/home">NYRA</a> .
             </div>
             <div class="col-sm-6">
                 <div class="text-sm-end">
@@ -667,9 +665,18 @@
      <script src="/public/assets/js/main.js" type="text/javascript"></script>
 
      <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const formattedDate = tomorrow.toISOString().split('T')[0];
+  
+    const expirationDateInput = document.getElementById('expirationDate');
+    expirationDateInput.value = formattedDate;
+    expirationDateInput.min = formattedDate;
+});
 
-   
-        function getElementValue(id) {
+function getElementValue(id) {
     const element = document.getElementById(id);
     return element.value.trim();
 }
@@ -689,8 +696,6 @@ function validateInput(inputId, pattern, errorId, errorMessage) {
         return true;
     }
 }
-
-
 
 function validateDescription() {
     return validateInput('description', null, 'descriptionError', 'Description');
@@ -720,8 +725,13 @@ function validateMaxUsers() {
     return validateInput('maxUsers', /^(0*[1-9]\d*)$/, 'maxUsersError', 'Maximum users allowed');
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-   
+function clearErrorMessage(event) {
+    const input = event.target;
+    const errorElement = document.getElementById(input.id + 'Error');
+    errorElement.innerText = '';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
     const descriptionInput = document.getElementById('description');
     const discountAmountInput = document.getElementById('discountAmount');
     const maxDiscountAmountInput = document.getElementById('maxDiscountAmount');
@@ -730,7 +740,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const expirationDateInput = document.getElementById('expirationDate');
     const maxUsersInput = document.getElementById('maxUsers');
 
- 
     descriptionInput.addEventListener('blur', validateDescription);
     discountAmountInput.addEventListener('blur', validateDiscountAmount);
     maxDiscountAmountInput.addEventListener('blur', validateMaxDiscountAmount);
@@ -739,40 +748,47 @@ document.addEventListener('DOMContentLoaded', function () {
     expirationDateInput.addEventListener('blur', validateExpirationDate);
     maxUsersInput.addEventListener('blur', validateMaxUsers);
 
-  
-    descriptionInput.addEventListener('focus', clearErrorMessage);
-    discountAmountInput.addEventListener('focus', clearErrorMessage);
-    maxDiscountAmountInput.addEventListener('focus', clearErrorMessage);
-    minimumAmountInput.addEventListener('focus', clearErrorMessage);
-    maximumAmountInput.addEventListener('focus', clearErrorMessage);
-    expirationDateInput.addEventListener('focus', clearErrorMessage);
-    maxUsersInput.addEventListener('focus', clearErrorMessage);
+    const inputs = [
+        descriptionInput, discountAmountInput, maxDiscountAmountInput,
+        minimumAmountInput, maximumAmountInput, expirationDateInput, maxUsersInput
+    ];
 
-
+    inputs.forEach(input => {
+        input.addEventListener('focus', clearErrorMessage);
+    });
 });
 
+function validateAmounts() {
+  
 
-    function clearErrorMessage(event) {
-    const input = event.target;
-    const errorElement = document.getElementById(input.id + 'Error');
-    errorElement.innerText = '';
-}
-function submitForm() {
-    if (
-        
-         validateDescription() && validateDiscountAmount() &&
-        validateMaxDiscountAmount() && validateMinimumAmount() && validateMaximumAmount() &&
-        validateExpirationDate() && validateMaxUsers()
-    ) {
-        document.getElementById('createCouponForm').submit();
+    const minimumAmountError = document.getElementById('minimumAmountError');
+    const maximumAmountError = document.getElementById('maximumAmountError');
+
+    if (minimumAmount >= maximumAmount) {
+        minimumAmountError.innerHTML = 'Minimum amount must be less than maximum amount.';
+        maximumAmountError.innerHTML = 'Maximum amount must be greater than minimum amount.';
+        return false;
     } else {
-        document.getElementById('main-error').innerText = 'CANNOT SUBMIT';
+        minimumAmountError.innerHTML = '';
+        maximumAmountError.innerHTML = '';
+        return true;
     }
 }
+function submitForm(event) {
+    const isValid = validateDescription() && validateDiscountAmount() &&
+        validateMaxDiscountAmount() && validateMinimumAmount() &&
+        validateMaximumAmount() && validateExpirationDate() &&
+        validateMaxUsers() && validateAmounts();
 
+    if (!isValid) {
+        event.preventDefault();
+        document.getElementById('main-error').innerText = 'Please correct the fields.';
+    }
 
-        
-document.getElementById('generateCode').addEventListener('click', function () {
+    return isValid;
+}
+
+document.getElementById('generateCode').addEventListener('click', function() {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const codeLength = 8;
     let randomCode = '';
@@ -785,30 +801,28 @@ document.getElementById('generateCode').addEventListener('click', function () {
     document.getElementById('code').value = randomCode;
 });
 
-
 async function list(id) {
-            let response = await fetch('/admin/coupon/list', {
-               method: 'POST',
-               headers: {
-                  'Content-Type': 'application/json'
-               },
-               body: JSON.stringify({
-                  id
-               })
-            })
-            if (response.status === 200) {
-                document.getElementById('blockButton_' + id).className = 'btn btn-danger'
-               document.getElementById('blockButton_' + id).innerHTML = 'Unlist'
-                
-               
-            } else {
-             
-               document.getElementById('blockButton_' + id).className = 'btn btn-success'
-               document.getElementById('blockButton_' + id).innerHTML = 'list'
-            } 
-            
-         }
-           
+    try {
+        let response = await fetch('/admin/coupon/list', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id })
+        });
+
+        if (response.status === 200) {
+            document.getElementById('blockButton_' + id).className = 'btn btn-danger';
+            document.getElementById('blockButton_' + id).innerHTML = 'Unlist';
+        } else {
+            document.getElementById('blockButton_' + id).className = 'btn btn-success';
+            document.getElementById('blockButton_' + id).innerHTML = 'List';
+        }
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+}
+
      </script>
      </body>
      

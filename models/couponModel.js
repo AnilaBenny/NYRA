@@ -36,10 +36,6 @@ const couponSchema = new mongoose.Schema({
       required: true,
       default: true,
    },
-   maxDiscountAmount: {
-      type: Number,
-      default: null, 
-   },
    usersUsed: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

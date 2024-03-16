@@ -60,7 +60,7 @@ const removeCoupon=async(req,res)=>{
         const coupons= Fullcoupon.filter(coupon => coupon.usersUsed.includes(user._id));
         let coupon=coupons[0];
         const cart = await cartModel.findOne({ owner: user._id });
-
+        if(cart.isApplied){
         cart.billTotal =cart.items.reduce((total, item) => total + item.price, 0);
         cart.isApplied=false;
         cart.coupon='nil';
@@ -74,8 +74,9 @@ const removeCoupon=async(req,res)=>{
         coupon.maxUsers++;
         
         await coupon.save();
-        res.status(200).send('Coupon updated successfully');
-
+    }
+        
+    res.status(200).send('Coupon updated successfully');
         
     }
     catch(error){
