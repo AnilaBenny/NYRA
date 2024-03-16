@@ -93,7 +93,7 @@
                                                 
                                             <td width="60%">
                                                 <a href="/admin/edit-cate?id=<%=cate[i]._id %>" class="btn btn-success">Edit</a>
-                                                <a href="/admin/delete-cate?id=<%=cate[i]._id %>&action=<%= cate[i].is_active ? 'Active' : 'InActive' %>" class="btn btn-danger"><%= cate[i].is_active ? 'Unlist and Restore' : 'list' %></a>
+                                                <a href="/admin/delete-cate?id=<%=cate[i]._id %>&action=<%= cate[i].is_active ? 'Active' : 'InActive' %>" class="btn btn-danger"><%= cate[i].is_active ? 'Unlist' : 'list and Restore' %></a>
                                                 
                                              </td>
                                             </tr>

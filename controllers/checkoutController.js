@@ -38,7 +38,7 @@ async function generateUniqueOrderID() {
 const loadcheckout=async(req,res)=>{
     try{
         const user=await userModel.findOne({email:req.session.email});
-        const cart=await cartModel.findOne({owner:user._id}) || null;
+        const cart=await cartModel.findOne({owner:user._id}).populate({ path: 'items.productId', model: 'Products' }) || null;
         let address=await addressModel.findOne({user:user._id});
         let wish=await wishlistModel.findOne({user:user._id}) || null;
        

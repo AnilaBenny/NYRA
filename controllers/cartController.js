@@ -25,7 +25,7 @@ const addToCartIn = async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        let userCart = await cartModel.findOne({ owner: userId });
+        let userCart = await cartModel.findOne({ owner: userId }).populate({path:'items.productId',model:'Products'});
         if (!userCart) {
             userCart = new cartModel({
                 owner: userId,
@@ -34,7 +34,7 @@ const addToCartIn = async (req, res) => {
             });
         }
         
-        const existingCartItemIndex = userCart.items.findIndex(item => item.productId.toString() === productId);
+        const existingCartItemIndex = userCart.items.findIndex(item => item.productId._id.toString() === productId);
         
         if (existingCartItemIndex !== -1) {
             const existingCartItem = userCart.items[existingCartItemIndex];
@@ -50,11 +50,9 @@ const addToCartIn = async (req, res) => {
             
             userCart.items.push({
                 productId: productId,
-                name: product.name,
-                image: product.images[0],
-                productPrice: product.price,
+            
                 quantity: quantity,
-                countInStock: product.countInStock,
+                
                 price: product.price * quantity,
             });
           
@@ -82,10 +80,10 @@ const addTocart = async (req, res) => {
         }
 
         const userId = user._id;
-        const productId = req.body.productId;
+        const {productId} = req.body;
 
         const product = await productModel.findById(productId);
-      
+    
         if (!product) {
             console.log('Product is not found');
             return res.status(404).json({ message: 'Product not found' });
@@ -113,11 +111,9 @@ const addTocart = async (req, res) => {
             
             userCart.items.push({
                 productId: productId,
-                name: product.name,
-                image: product.images[0],
-                productPrice: product.price,
+              
                 quantity: 1,
-                countInStock: product.countInStock,
+                
                 price: product.price,
                 
             });
@@ -137,36 +133,24 @@ const addTocart = async (req, res) => {
 const showcart=async(req,res)=>{
     try{
         const user=await userModel.findOne({email:req.session.email});
-      
         const userId=user._id;
         
-        let userCart = await cartModel.findOne({ owner: userId }).populate({path:'items.productId',model:'Products'});
-       
-        const coupon=await couponModel.find();
+        let userCart = await cartModel.findOne({ owner: userId }).populate({path:'items.productId',model:'Products'}) || null;
+        let wish=await wishlistModel.findOne({user:userId}) || null;
+        
+        if(userCart !==null){
+            const coupon=await couponModel.find({isActive:true});
         const eligibleCoupons = coupon.filter(coupon => {
             return userCart.billTotal >= coupon.minimumAmount && userCart.billTotal <= coupon.maximumAmount && coupon.isActive
 
         });
-        
-       
-        let wish=await wishlistModel.findOne({user:userId});
-           
-        if(!wish){
-          wish=null;
-        }
-        
-        if(!userCart)
-        {
-        cart=null;
-        }
-        
-     
-        if(userCart.items.length>0){
+        if( userCart.items.length>0){
             res.render('cart',{cart:userCart,coupon:eligibleCoupons,wish})
-        }
-        else{
+        }}
+        if(userCart===null || userCart.items.length===0 )
             res.render('empty-cart',{wish,cart:userCart});
-        }
+
+        
     }
     catch(err){
         console.log('show cart:',err.message);
@@ -177,44 +161,43 @@ const showcart=async(req,res)=>{
 const deleteCart = async (req, res) => {
     try {
         const user = await userModel.findOne({ email: req.session.email });
+        
         if (!user) {
             console.log('User is not found');
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const userId = user._id;
         const { productId } = req.body;
-
-       
-        let userCart = await cartModel.findOne({ owner: userId });
+        let userCart = await cartModel.findOne({ owner: user._id }).populate({ path: 'items.productId', model: 'Products' });
+        
         if (!userCart) {
-            userCart = new cartModel({
-                owner: userId,
-                items: [],
-                billTotal: 0,
-            });
+            console.log('Cart not found');
+            return res.status(404).json({ message: 'Cart not found' });
         }
 
-        const existingCartItem = userCart.items.find(item => item.productId.toString() === productId);
-        if (existingCartItem) {
-            if (existingCartItem.quantity > 0) {
-            
-                existingCartItem.quantity = 0;
-                existingCartItem.price = existingCartItem.productPrice;
-                userCart.billTotal -= existingCartItem.productPrice;
+        const productIndex = userCart.items.findIndex(item => item.productId._id.toString() === productId);
 
-               
-                if (existingCartItem.quantity === 0) {
-                    userCart.items = userCart.items.filter(item => item.productId.toString() !== productId);
-                    userCart.billTotal =0;
+        if (productIndex !== -1) {
+            const [productItem] = userCart.items.splice(productIndex, 1); 
+            userCart.billTotal -= (productItem.quantity * productItem.productId.price); 
+
+            if (userCart.isApplied) {
+                
+                userCart.billTotal = userCart.items.reduce((total, item) => total + (item.quantity * item.productId.price), 0); 
+                userCart.isApplied = false;
+                userCart.coupon = 'nil';
+                userCart.discountPrice = 0;
+
+                const coupon = await couponModel.findOne({ usersUsed: user._id }); 
+                if (coupon) {
+                    coupon.usersUsed.pull(user._id); 
+                    coupon.maxUsers++;
+                    await coupon.save();
                 }
-
-                await userCart.save();
-                return res.status(200).json({ success: true, message: 'Item removed from cart' });
-            } else {
-                console.log('Quantity cannot be less than 0');
-                return res.status(400).json({ message: 'Quantity cannot be less than 0' });
             }
+
+            await userCart.save();
+            res.status(200).json({ success: true, message: 'Item removed from cart' });
         } else {
             console.log('Item not found in cart');
             return res.status(404).json({ message: 'Item not found in cart' });
@@ -225,45 +208,53 @@ const deleteCart = async (req, res) => {
     }
 };
 
+
 const updateCart = async (req, res) => {
     try {
         const user = await userModel.findOne({ email: req.session.email });
+        if (!user) {
+            console.log('User not found in update cart');
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
         const userId = user._id;
-        if(!user){
-            console.log('user is not found in update cart');
-        }
-     
-        const cart = await cartModel.findOne({ owner: userId });
-       
-        const { productId, need } = req.body;
-      
-        const cartItem = cart.items.find(item => item.productId.toString() === productId);
-      
-        if(!cartItem){
-            console.log('cart is not found in update cart');
-        }
-       
-        const product = await productModel.findById(productId);
-        if(!product){
-            console.log('product is not found in update cart');
-        }
-        if(cartItem.quantity >= 5 && need !== "sub"){
-            return res.status(400).json({ success: false, message: "Maximum quantity per person for this product has been reached" })
-        }
-        else{
-        cartItem.quantity = (need === "sub") ? Math.max(1, cartItem.quantity - 1) : cartItem.quantity + 1;
-        cartItem.price = cartItem.quantity * cartItem.productPrice;
-        cart.billTotal = (need === "sub") ? Math.max(product.price, cart.billTotal - product.price) : cart.billTotal + product.price;
-        
-        await cart.save();
 
-        return res.status(200).json({ success: true,cart});
+        let cart = await cartModel.findOne({ owner: userId }).populate({ path: 'items.productId', model: 'Products' });
+        if (!cart) {
+            return res.status(404).json({ success: false, message: "Cart not found" });
         }
+
+        const { productId, need } = req.body;
+        const cartItem = cart.items.find(item => item.productId._id.toString() === productId);
+        if (!cartItem) {
+            console.log('Cart item not found in update cart');
+            return res.status(404).json({ success: false, message: "Cart item not found" });
+        }
+
+        const maxPerPerson = 5;
+        if (cartItem.quantity >= maxPerPerson && need !== "sub") {
+            return res.status(400).json({ success: false, message: "Maximum quantity per person for this product has been reached" });
+        }
+
+        if (need === "sub") {
+            cartItem.quantity = Math.max(1, cartItem.quantity - 1);
+        } else if (need === "sum") {
+            const maxQuantity = Math.min(cartItem.productId.countInStock, maxPerPerson);
+            cartItem.quantity = Math.min(cartItem.quantity + 1, maxQuantity);
+        } else {
+            return res.status(404).json({ success: false, message: "Invalid operation" });
+        }
+
+        cartItem.price = cartItem.quantity * cartItem.productId.price;
+        cart.billTotal = cart.items.reduce((total, item) => total + (item.quantity * item.productId.price), 0);
+
+        await cart.save();
+        return res.status(200).json({ success: true, cart });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
+
 
 
 

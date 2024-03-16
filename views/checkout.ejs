@@ -88,7 +88,7 @@
                                             for (let i = 0; i < cart.items.length; i++) {
                                                 %>
                                         <tr>
-                                            <td> <%=cart.items[i].name%> <strong> × <%=cart.items[i].quantity%></strong></td>
+                                            <td> <%=cart.items[i].productId.name%> <strong> × <%=cart.items[i].quantity%></strong></td>
                                             <td> Rs.<%=cart.items[i].price%>.00</td>
                                         </tr>
                                         <%}%>
@@ -117,21 +117,22 @@
                                     <%if(cart.billTotal>1000){%>
                                     <label class="radio-default d-flex"  for="COD" data-bs-toggle="collapse" data-bs-target="#methodCod">
                                     <input type="radio" style="width: 15px;" name="paymentOption" id="COD" value="COD" required>
-                                    <span>Cash on Delivery (COD)</span>
+                                    &nbsp;<span>Cash on Delivery (COD)</span>
                                     </label>
+                                 
                                     <%}else{%>
                                         <label class="radio-default d-flex"  for="COD" >
                                     <span class="text-warning">Cash on delivery is not available for this order. Please add more items for the option to become available</span>
                                     </label>
                                     <%}}%>
-                                    <br>
+                                   
                                 <label class="radio-default d-flex">
                                 <input type="radio" name="paymentOption" style="width: 15px;" id="razorpay" value="razorpay" required>
-                                    <span>Online Payment</span>
+                                &nbsp;<span>Online Payment</span>
                                     </label>
                                     <label class="radio-default d-flex">
                                 <input type="radio" name="paymentOption" style="width: 15px;" id="wallet" value="wallet" required>
-                                    <span>wallet</span>
+                                &nbsp;<span>wallet</span>
                                     </label>
 
 

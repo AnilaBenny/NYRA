@@ -81,7 +81,7 @@ type:Date
    
 }, {
    timestamps: true
-})
+},{strictPopulate : false})
 
 
 const ProductModel = mongoose.model('Products', productSchema)

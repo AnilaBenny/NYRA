@@ -11,21 +11,8 @@ const cartSchema = new mongoose.Schema({
  items: [{
     productId: {
       type: ObjectID,
-      ref: 'products',
+      ref: 'Products',
       required: true
-    },
-    image:{
-    type: String,
-    required:true
-    },
-
-    name: {
-      type:String,
-      required:true,
-    },
-    productPrice:{
-      type:Number,
-      required:true
     },
     quantity: {
       type: Number,
@@ -35,14 +22,7 @@ const cartSchema = new mongoose.Schema({
       },
     price: {
       type:Number
-    },
-    countInStock: {
-      type: Number
-   },
-    selected: {
-      type: Boolean, 
-      default: false, 
-  },
+    }
    }],
  
 billTotal: {
@@ -68,7 +48,7 @@ billTotal: {
  }
 }, {
 timestamps: true
-})
+},{strictPopulate : false})
 
 cartSchema.pre('save', function(next) {
 
