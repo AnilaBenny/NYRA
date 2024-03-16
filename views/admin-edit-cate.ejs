@@ -34,6 +34,9 @@
                     <div class="card-body">
                         <div class="row">
                             <form action="" method="post" >
+                                <%if(message){%>
+                                    <p class="text-danger"><%= message %></p>
+                                    <%}%>
         <div class="container p-4 form-group">
             
             <h1>Edit category</h1>
@@ -44,7 +47,7 @@
             <br><br>
             <input type="hidden" name="id" value="<%=cate._id%>">
             <br><br>
-            <button class="btn btn-success rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2">
+            <button class="btn btn-success rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2" type="submit">
                 update 
             </button>
             <a class="btn btn-info rounded-pill ps-4 pe-4 pt-2 pb-2 mt-2" href="/admin/adminCategory"> Go Back</a>

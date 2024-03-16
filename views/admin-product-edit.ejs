@@ -45,19 +45,21 @@
             </div>
         </header>
         <section class="content-main">
-            <form action="" method="post" enctype="multipart/form-data" onsubmit="return validateForm(event)" >
+            <form action="" method="post" enctype="multipart/form-data"  onsubmit="return validateForm(event)" >
             <div class="row">
                 <div class="col-6">
                     <div class="content-header">
                         <h2 class="content-title">Edit Product</h2>
                         
-                            <button class="btn btn-md rounded font-sm hover-up">Update</button>
+                        <button class="btn btn-md rounded font-sm hover-up" type="submit">Update</button>
+                        
                             
                        
                     </div>
                     <%if(message){%>
                         <p class="text-danger"><%=message%></p>
                     <%}%>
+                    <p id="mainError" class="text-danger"></p>
                 </div>
             </div>
             <div class="row">
@@ -73,16 +75,18 @@
                                 <div class="col-md-9">
                                     <div class="mb-4">
                                         <label class="form-label">Product name</label>
-                                        <input type="text" placeholder="Type here" name="name" value="<%=pro.name%>" class="form-control">
+                                        <input type="text" placeholder="Type here" id="name" name="name" value="<%=pro.name%>" class="form-control">
+                                        <p id="nameError" class="text-danger"></p>
                                     </div>
                                     <div class="mb-4">
                                         <label class="form-label">Description</label>
-                                        <input placeholder="Type here" class="form-control" name="description" value="<%=pro.description%>" rows="4"></input>
+                                        <input placeholder="Type here" class="form-control" id="description" name="description" value="<%=pro.description%>" rows="4"></input>
+                                        <p id="descriptionError" class="text-danger"></p>
                                     </div>
                                     <div class="mb-4">
                                         <label class="form-label">Brand name</label>
-                                        <input type="text" placeholder="Type here" name="brand" value="<%=pro.brand%>" class="form-control">
-                                       
+                                        <input type="text" placeholder="Type here" id="brand" name="brand" value="<%=pro.brand%>" class="form-control">
+                                        <p id="brandError" class="text-danger"></p>
                                     </div>
                                 </div> 
                             </div> 
@@ -94,7 +98,13 @@
                                 <div class="col-md-9">
                                     <div class="mb-4">
                                         <label class="form-label">Cost in Rupee</label>
-                                        <input type="text" placeholder="Rs.00.0" name="price" value="<%=pro.price%>" class="form-control">
+                                        <input type="text" placeholder="Rs.00.0" min="0" id="price"  name="price" value="<%=pro.price%>" class="form-control">
+                                        <p id="priceError" class="text-danger"></p>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Count in stock</label>
+                                        <input type="number"  name="stock" value="<%=pro.countInStock%>" id="stock" min="0" max="300" class="form-control" required>
+                                        <p id="stockError" class="text-danger"></p>
                                     </div>
                                 </div> 
                             </div> 
@@ -110,12 +120,12 @@
                                        <% if(cate.length > 0) {
                                             for(let i=0; i<cate.length; i++) { %>
                                         <label class="mb-2 form-check form-check-inline" style="width: 45%;">
-                                           <%if(pro.category.name===cate[i].name){%><input class="form-check-input" checked=""  value="<%=cate[i]._id%>" name="category" checked="" type="radio">
+                                           <%if(pro.category.name===cate[i].name){%><input class="form-check-input" checked=""  value="<%=cate[i]._id%>" name="category" checked="" type="radio" required>
                                            <span class="form-check-label"> <%=cate[i].name%> </span>
                                            <%}else{%>
-                                            <input class="form-check-input"   value="<%=cate[i]._id%>" name="category" type="radio">
+                                            <input class="form-check-input"   value="<%=cate[i]._id%>" name="category" type="radio" required>
                                             <span class="form-check-label"> <%=cate[i].name%> </span><%}%>
-                                        </label>
+                                           </label>
                                       <%}}%>
                                     </div>
                                 </div> 
@@ -134,8 +144,8 @@
                                             <a href="/admin/edit-pro?id=<%=pro._id%>&delete=<%= image %>" class="close-icon" ><span aria-hidden="true">&times;</span></a>
                                         </div>
                                   <% }) %>
-                                        <input class="form-control" type="file" name="images" multiple>
-                                        
+                                        <input class="form-control" type="file" id="images" name="images" multiple>
+                                        <p id="imagesError" class="text-danger"></p>
                                        
                                     </div>
                                 </div> 
@@ -169,79 +179,45 @@
     <script src="/public/assets/js/vendor/select2.min.js"></script>
     <script src="/public/assets/js/vendor/perfect-scrollbar.js"></script>
     <script src="/public/assets/js/vendor/jquery.fullscreen.min.js"></script>
-    <!-- Main Script -->
+   
     <script src="/public/assets/js/main.js" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 
     <script>
-        document.getElementById('images').addEventListener('change', function(e) {
-    var fileInput = e.target;
-    var maxFiles = 3;
-    var validExtensions = ['jpg', 'jpeg', 'png', 'gif','webp']; 
-
-    if (fileInput.files.length > maxFiles) {
-        Swal.fire({
-            title: 'Error',
-            text: `You can only upload a maximum of ${maxFiles} files.`,
-            icon: 'error',
-            showConfirmButton: true
-        }).then(() => {
-            fileInput.value = '';
-            document.getElementById('file-upload-error').textContent = `You can only upload a maximum of ${maxFiles} files.`;
-        });
-        return; 
-    }
-
-    
-    for (var i = 0; i < fileInput.files.length; i++) {
-        var file = fileInput.files[i];
-        var extension = file.name.split('.').pop().toLowerCase();
-        if (!validExtensions.includes(extension)) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Please upload only image files (jpg, jpeg, png, gif).',
-                icon: 'error',
-                showConfirmButton: true
-            }).then(() => {
-                fileInput.value = '';
-                document.getElementById('file-upload-error').textContent = 'Please upload only image files (jpg, jpeg, png, gif).';
-            });
-            return; 
-        }
-    }
-
-    document.getElementById('file-upload-error').textContent = '';
-});
-document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
     const nameInput = document.getElementById('name');
     const descriptionInput = document.getElementById('description');
     const brandInput = document.getElementById('brand');
     const priceInput = document.getElementById('price');
     const stockInput = document.getElementById('stock');
   
-
+    // Event listeners for input validation on blur
     nameInput.addEventListener('blur', () => validateInput('name', /^\S.{0,99}$/, 'nameError', 'Product Name'));
     descriptionInput.addEventListener('blur', () => validateInput('description', /^\S.{0,499}$/, 'descriptionError', 'Description'));
     brandInput.addEventListener('blur', () => validateInput('brand', /^[a-zA-Z\s]+$/, 'brandError', 'Brand'));
     priceInput.addEventListener('blur', () => validateInput('price', /^\d+(\.\d{1,2})?$/, 'priceError', 'Price'));
-    stockInput.addEventListener('blur', () => validateInput('stock', /^(?:0|[1-9]|[1-9]\d|1\d\d|300)$/, 'stockError', 'stock'));
+    stockInput.addEventListener('blur', () => validateInput('stock', /^(?:0|[1-9]\d{0,2}|300)$/, 'stockError', 'Stock')); // Simplified regex for stock
 
+    // Assuming your form has an id of 'productForm', attach the submit event listener
+    document.getElementById('productForm').addEventListener('submit', validateForm);
 });
 
-function validateForm() {
+function validateForm(event) {
     const isValidName = validateInput('name', /^\S.{0,99}$/, 'nameError', 'Product Name');
     const isValidDescription = validateInput('description', /^\S.{0,499}$/, 'descriptionError', 'Description');
     const isValidBrand = validateInput('brand', /^[a-zA-Z\s]+$/, 'brandError', 'Brand');
     const isValidPrice = validateInput('price', /^\d+(\.\d{1,2})?$/, 'priceError', 'Price');
-    const isValidStock = validateInput('stock', /^(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-9]{2}|300)$/, 'stockError', 'stock');
-  
+    const isValidStock = validateInput('stock', /^(?:0|[1-9]\d{0,2}|300)$/, 'stockError', 'Stock');
 
-    if (!isValidName || !isValidDescription || !isValidBrand || !isValidPrice ||isValidStock) {
-        document.getElementById('mainError').innerText = 'Cannot submit form. Please fix errors.';
+    // Corrected the condition here
+    if (!isValidName || !isValidDescription || !isValidBrand || !isValidPrice || !isValidStock) {
+        event.preventDefault();
+        document.getElementById('mainError').innerText = 'Please correct the highlighted fields.';
         return false;
     }
+    // If all validations pass, form will be submitted
     return true;
 }
 
@@ -261,11 +237,47 @@ function validateInput(inputId, pattern, errorId, errorMessage) {
     }
 }
 
+document.getElementById('images').addEventListener('change', function(e) {
+    var fileInput = e.target;
+    var maxFiles = 3;
+    var validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']; // Added 'webp' as a valid extension
+
+    if (fileInput.files.length > maxFiles) {
+        Swal.fire({
+            title: 'Error',
+            text: `You can only upload a maximum of ${maxFiles} files.`,
+            icon: 'error',
+            showConfirmButton: true
+        }).then(() => {
+            fileInput.value = '';
+            document.getElementById('file-upload-error').textContent = `You can only upload a maximum of ${maxFiles} files.`;
+        });
+        return;
+    }
+
+    for (var i = 0; i < fileInput.files.length; i++) {
+        var file = fileInput.files[i];
+        var extension = file.name.split('.').pop().toLowerCase();
+        if (!validExtensions.includes(extension)) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Please upload only image files (jpg, jpeg, png, gif, webp).',
+                icon: 'error',
+                showConfirmButton: true
+            }).then(() => {
+                fileInput.value = '';
+                document.getElementById('file-upload-error').textContent = 'Please upload only image files (jpg, jpeg, png, gif, webp).';
+            });
+            return;
+        }
+    }
+
+    document.getElementById('file-upload-error').textContent = '';
+});
+
+
 </script>
 
-
-
 </body>
-
 
 </html>
