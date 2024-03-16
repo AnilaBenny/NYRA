@@ -106,7 +106,7 @@ const loadcateedit=async(req,res)=>{
             const categorydetails=await categoryModel.findById({_id:id});
             if(categorydetails){
              
-              res.render('admin-edit-cate',{cate:categorydetails});
+              res.render('admin-edit-cate',{cate:categorydetails,message:null});
             }
             else{
               res.redirect('/admin/adminCategory');
@@ -127,7 +127,14 @@ const upcateedit=async(req,res)=>{
     
   }
   catch(error){
-    console.log(error.message);
+    console.log('update cate',error.message);
+    const categorydetails=await categoryModel.findById({_id:req.body.id});
+    if (error.code === 11000) {
+  
+      res.render('admin-edit-cate', {cate:categorydetails,message: 'Duplicate category found' });
+    } else {
+      res.render('admin-edit-cate',{cate:categorydetails, message: 'Failed to load categories' });
+    }
   }
 };
 

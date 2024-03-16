@@ -463,42 +463,56 @@ const loadreset=async(req,res)=>{
 };
 const loadpassword=async(req,res)=>{
   try{
-   
-    const otp=sentOtp(req,req.session.email);
-    console.log(otp);
-    res.render('reset-password');
+  
+    res.render('change-password');
   }
   catch(error){
-    console.log('loadrest:',error.message);
+    console.log('load password:',error.message);
   }
 };
 
-const postPassword=async (req, res) => {
-  try {
-      const { otp, password } = req.body;
-      const dbOtp = await otpModel.findOne({ otp });
 
-      if (!dbOtp) {
-          return res.render('reset-password', { message: 'Invalid OTP' });
-      }
 
-      const updatedUser = await userModel.findOneAndUpdate(
-          { email: req.session.email },
-          { password: await securePassword(password) },
-          { new: true }
-      );
+const postPassword = async (req, res) => {
+    try {
+        const { current, password } = req.body;
+        if (!current || !password) {
+            return res.render('change-password', { message: 'Please provide both current and new passwords.' });
+        }
 
-      if (!updatedUser) {
-          return res.render('reset-password', { message: 'Failed to update password' });
-      }
+        const userData = await userModel.findOne({ email: req.session.email });
+        if (!userData) {
+            
+            return res.render('change-password', { message: 'An error occurred. Please try again.' });
+        }
 
-    
-      res.redirect('/userAc');
-  } catch (error) {
-      console.error('postPassword', error.message);
-      
-  }
-}
+        const isPasswordValid = await bcrypt.compare(current, userData.password);
+        if (!isPasswordValid) {
+            return res.render('change-password', { message: 'Current password is incorrect.' });
+        }
+
+        
+        const saltRounds = 10; 
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        const updatedUser = await userModel.findOneAndUpdate(
+            { email: req.session.email },
+            { password: hashedPassword },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.render('change-password', { message: 'An error occurred while updating the password. Please try again.' });
+        }
+
+        
+        res.redirect('/userAc');
+    } catch (error) {
+        console.error('postPassword Error:', error.message);
+       
+    }
+};
+
 
 const postreset = async (req, res) => {
   try {
@@ -757,10 +771,7 @@ try{
       const addresses = await addressModel.findOne({
         user: user._id
       })
-     
-  
-     
-  
+   
       const addressTypeToDelete = req.query.addressType; 
   
       const addressIndexToDelete = addresses.addresses.findIndex((address) => address.addressType === addressTypeToDelete);
@@ -771,7 +782,7 @@ try{
   
       await addresses.save();
   
-     
+     res.redirect('/userAc');
   
 }
 catch(error){
@@ -796,7 +807,7 @@ const loadeditAddress=async(req,res)=>{
  if(!wish){
    wish=null;
  }
- let cart=await cartModel.findOne({owner:user._id})
+ let cart=await cartModel.findOne({owner:user._id});
  if(!cart)
  {
  cart=null;
@@ -832,7 +843,7 @@ const editAddress = async (req, res) => {
       state,
       country
     } = req.body;
-
+console.log(req.body);
     const user = await userModel.findOne({email:req.session.email});
   
     if (!user) {
@@ -855,12 +866,11 @@ const editAddress = async (req, res) => {
     cart=null;
     }
     const addressToEdit = addresses.addresses.find(addr => addr.addressType === addressType);
-
+console.log(addressToEdit);
     if (!addressToEdit) {
       
       console.log('Address with type not found')
-    }
-
+    }else{
     addressToEdit.HouseNo = houseNo;
     addressToEdit.Street = street;
     addressToEdit.Landmark = landmark;
@@ -871,7 +881,8 @@ const editAddress = async (req, res) => {
     addressToEdit.Country = country;
 
     await addresses.save();
-    res.render('edit-address', { addresses,message:'Updated sucessfully!',wish,cart});
+    res.redirect('/userAc')
+    }
 
   } catch (err) {
     console.error(err);

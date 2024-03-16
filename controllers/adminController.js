@@ -11,6 +11,7 @@ const cartModel = require('../models/cartModel');
 const WalletModel=require('../models/walletModel');
 
 const categoryModel = require('../models/categoryModel');
+const userModels = require('../models/userModels');
 
 
 async function salesReport(date){
@@ -508,7 +509,8 @@ const uporder=async(req,res)=>{
 const couponManager=async(req,res)=>{
     try{
         const coupons=await couponModel.find({});
-        res.render('admincoupon',{coupons});
+        const users=await userModels.find({});
+        res.render('admincoupon',{coupons,users,message:null});
     }
     catch(error){
         console.log('coupon manager',error.message);
@@ -528,6 +530,11 @@ const couponCreate=async(req,res)=>{
             expirationDate,
             maxUsers
         }=req.body;
+        const coupons=await couponModel.find({});
+        const users=await userModels.find({});
+        if(minimumAmount>maximumAmount){
+           return res.render('admincoupon',{coupons,users,message:'minimum amount is not greater than maximum amount'});
+        }
       
             const coupon = new couponModel({
                 code,
@@ -755,21 +762,17 @@ const offer=async(req,res)=>{
                     product.offerTime = null;
                     return product.save();
                 });
-        
+                
                 await Promise.all(updateProductPromises);
         
                 await categoryModel.findByIdAndUpdate(category[i]._id, {
-                    $unset: { offerTime: "" } 
+                    $unset: { offerTime: "",discountPrice:"" } 
                 });
         
            
             }
         }
-        
-      
-        
-        
-        
+
     
     res.render('offer',{product,category});
     }
@@ -777,6 +780,50 @@ const offer=async(req,res)=>{
         console.log('offer',error.message);
     }
 }
+
+const offerEnd=async(req,res)=>{
+    try{
+        const id=req.query.id;
+        let product=await productModel.findOne({_id:id,list:true});
+      
+            product.discountPrice = 0;
+            product.offerTime = null;
+    
+        await product.save();
+        res.redirect('/admin/offer')
+
+    }
+    catch(error){
+        console.log('offer End',error.message);
+    }
+
+}
+
+const categoryofferEnd=async(req,res)=>{
+    try {
+        const id = req.query.id;
+        const products = await productModel.find({ category: id });
+    
+        const updateProductPromises = products.map(async (product) => {
+            product.discountPrice = 0;
+            product.offerTime = null;
+            return product.save();
+        });
+    
+        await Promise.all(updateProductPromises);
+    
+        await categoryModel.findByIdAndUpdate(id, {
+            $unset: { offerTime: "" ,discountPrice:"" }
+        });
+    
+        res.redirect('/admin/offer');
+    } catch (error) {
+        console.log('Error ending category offer:', error.message);
+    }
+    
+
+}
+
 
 module.exports = {
     adminLogin,
@@ -803,5 +850,7 @@ module.exports = {
     logout
     ,
     bestSelling,
-    offer
+    offer,
+    offerEnd,
+    categoryofferEnd
 };

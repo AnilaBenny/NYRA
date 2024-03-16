@@ -21,6 +21,9 @@ const categorySchema = new mongoose.Schema({
     },
     offerTime:{
         type: Date
+    },
+    discountPrice:{
+        type:Number
     }
 });
 
