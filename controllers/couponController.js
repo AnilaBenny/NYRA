@@ -22,18 +22,23 @@ const Couponcart = async (req, res) => {
             return res.status(400).send('Coupon not applicable');
         }
 
-       
-
-       
-
         if (!cart) {
             return res.status(404).send('Cart not found');
         }
+        let discountAmount = 0;
 
-        cart.billTotal *= (1 - coupon.discountPercentage / 100);
-        cart.billTotal = Number(cart.billTotal.toFixed()); 
-        let discountAmount = (coupon.discountPercentage / 100) * cart.billTotal;
-        discountAmount = Number(discountAmount.toFixed()); 
+        if (cart.billTotal <= 500) {
+            discountAmount = (coupon.discountPercentage / 100) * cart.billTotal;
+            cart.billTotal -= discountAmount;
+        } else {
+            discountAmount = (coupon.discountPercentage / 100) * cart.billTotal;
+            cart.billTotal *= (1 - coupon.discountPercentage / 100);
+        }
+        cart.billTotal = Number(cart.billTotal.toFixed());
+        
+        
+    
+       
 
         cart.isApplied=true;
         cart.discountPrice=discountAmount;
@@ -44,7 +49,6 @@ const Couponcart = async (req, res) => {
         coupon.usersUsed.push(user._id);
         coupon.maxUsers--;
         await coupon.save();
-        
 
         res.status(200).send('Coupon applied successfully');
     } catch (error) {

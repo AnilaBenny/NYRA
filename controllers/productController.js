@@ -117,8 +117,6 @@ const insertproduct = async (req, res) => {
     }
 };
 
-
-
 const productlist = async (req, res) => {
     try {
         const perPage=8;
