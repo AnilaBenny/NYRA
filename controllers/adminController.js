@@ -165,7 +165,7 @@ const pdf = async (req, res) => {
                 ['Total Orders', salesData.totalOrders],
                 ['Total Order Count till now', salesData.totalOrderCount],
                 ['Average Sales', `${salesData.averageSales ? salesData.averageSales.toFixed(2) : 'N/A'}%`],
-                ['Average Revenue', `${salesData.averageRevenue ? salesData.averageRevenue.toFixed(2) : 'N/A'}%`],
+                ['Average Revenue', `${salesData.averageRevenue ? salesData.averageRevenue.toFixed(2) : 'N/A'}`],
             ];
              
             salesData.totalOrder.forEach(order => {
