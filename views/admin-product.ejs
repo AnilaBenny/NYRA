@@ -90,7 +90,7 @@
                                 </div>
                                 <div class="col-md-9">
                                     <div class="mb-4">
-                                       <% if(cate.length > 0) {
+                                       <% if(cate && cate.length > 0) {
                                             for(let i=0; i<cate.length; i++) { %>
                                         <label class="mb-2 form-check form-check-inline" style="width: 45%;">
                                             <input class="form-check-input" checked=""  value="<%=cate[i]._id%>" name="category" id="category" type="radio" required>
@@ -161,7 +161,8 @@
     descriptionInput.addEventListener('blur', () => validateInput('description', /^\S.{0,499}$/, 'descriptionError', 'Description'));
     brandInput.addEventListener('blur', () => validateInput('brand', /^[a-zA-Z\s]+$/, 'brandError', 'Brand'));
     priceInput.addEventListener('blur', () => validateInput('price', /^\d+(\.\d{1,2})?$/, 'priceError', 'Price'));
-    stockInput.addEventListener('blur', () => validateInput('stock', /^(?:0|[1-9]\d{0,2}|300)$/, 'stockError', 'Stock')); // Simplified regex for stock
+    stockInput.addEventListener('blur', () => validateInput('stock',/^(?:0|[1-9]\d?|29\d|2[0-9]{2})$/
+, 'stockError', 'Stock')); // Simplified regex for stock
 
     // Assuming your form has an id of 'productForm', attach the submit event listener
     document.getElementById('productForm').addEventListener('submit', validateForm);
@@ -172,7 +173,8 @@ function validateForm(event) {
     const isValidDescription = validateInput('description', /^\S.{0,499}$/, 'descriptionError', 'Description');
     const isValidBrand = validateInput('brand', /^[a-zA-Z\s]+$/, 'brandError', 'Brand');
     const isValidPrice = validateInput('price', /^\d+(\.\d{1,2})?$/, 'priceError', 'Price');
-    const isValidStock = validateInput('stock', /^(?:0|[1-9]\d{0,2}|300)$/, 'stockError', 'Stock');
+    const isValidStock = validateInput('stock', /^(?:0|[1-9]\d?|29\d|2[0-9]{2})$/
+, 'stockError', 'Stock');
 
     // Corrected the condition here
     if (!isValidName || !isValidDescription || !isValidBrand || !isValidPrice || !isValidStock) {
