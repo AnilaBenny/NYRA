@@ -87,5 +87,7 @@ userRoute.post('/failedPayment',checkout.failedPayment);
 userRoute.post('/retryPayment',checkout.retryPayment);
 userRoute.post('/orderOnline',checkout.verifyPayment);
 
+userRoute.get('/pdf',checkout.invoice)
+
 
 module.exports = userRoute;

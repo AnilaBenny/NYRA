@@ -171,7 +171,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Coupon Details</h5>
                         <p class="card-text">Coupon code: <%=coupon[i].code%></p>
-                        <p class="card-text">Discount: <%=coupon[i].discountPercentage%></p>
+                        <p class="card-text">Discount: <%=coupon[i].discountPercentage%> %</p>
                         <p class="card-text">Expiration Date: <%=new Date(coupon[i].expirationDate).toLocaleDateString()%></p>
                         <a class="p-2"></a><i class="bi bi-clipboard"></i> Use Code: <span class="badge-primary p-1 rounded-pill"><%=coupon[i].code%></span></a>
                         
@@ -366,7 +366,7 @@
 
     function goTocheckout(){
        
-        removecoupon();
+       
     window.location.href = '/checkout'; 
     
     }

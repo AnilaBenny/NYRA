@@ -9,6 +9,7 @@ const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const cartModel = require('../models/cartModel');
 const WalletModel=require('../models/walletModel');
+const { Table } = require('pdfkit-table');
 
 const categoryModel = require('../models/categoryModel');
 const userModels = require('../models/userModels');
@@ -103,97 +104,209 @@ console.log('salesreport',err.message);
 }
 }
 
-const pdf = async (req, res) => {
+async function salesReportmw(startDate, endDate) {
     try {
-        let salesData = null; 
+        let orders = await orderModel.find({
+            status: "Delivered",
+            orderDate: {
+                $gte: startDate,
+                $lte: endDate,
+            },
+        });
 
-        if (req.query.type === 'daily') {
-            salesData = await salesReport(1);
-        } else if (req.query.type === 'weekly') {
-            salesData = await salesReport(7);
-        } else if (req.query.type === 'monthly') {
-            salesData = await salesReport(30);
-        } else if (req.query.type === 'yearly') {
-            salesData = await salesReport(365);
+        let productEntered = await productModel.find({
+            createdAt: {
+                $gte: startDate,
+                $lte: endDate,
+            },
+        });
+
+        let usersCount = await userModel.countDocuments();
+
+        let totalRevenue = orders.reduce((total, order) => total + order.billTotal, 0);
+
+        let totalOrderCount = orders.length;
+
+        let stock = await productModel.find(); // Consider filtering or processing this only if necessary for the given date range
+        let totalCountInStock = stock.reduce((total, product) => total + product.countInStock, 0);
+
+        // Since we're now looking at a specific range, the concept of "average sales" per day may or may not make sense depending on your application
+        let daysInRange = (endDate - startDate) / (1000 * 60 * 60 * 24);
+        let averageSales = totalOrderCount / daysInRange; 
+        let averageRevenue = totalRevenue / daysInRange; 
+
+        return {
+            usersCount,
+            totalOrders: totalOrderCount,
+            totalRevenue,
+            totalCountInStock,
+            averageSales,
+            averageRevenue,
+            productEntered: productEntered.length,
+            totalOrder: orders // This returns the orders, you might want to summarize this data further
+        };
+    } catch (err) {
+        console.error('salesReport error', err.message);
+        throw err; // Rethrowing the error is usually a good practice so the caller knows something went wrong.
+    }
+}
+
+
+const getWeeksInMonth = (currentDate) => {
+    const month = currentDate.getMonth();
+    const year = currentDate.getFullYear();
+    const weeks = [];
+    const firstDate = new Date(year, month, 1);
+    const numDays = currentDate.getDate();
+
+    let start = 1;
+    let end = 7 - currentDate.getDay();
+
+    while (start <= numDays) {
+        if (end > numDays) {
+            end = numDays;
         }
 
+        weeks.push({ start: new Date(year, month, start), end: new Date(year, month, end) });
+
+        start = end + 1;
+
+        // Calculate new end based on the new start
+        end = start + 6;
+
+        // If end exceeds the number of days in the month, set it to the last day of the month
+        if (end > numDays) {
+            end = numDays;
+        }
+    }
+
+
+    return weeks;
+};
+
+
+
+
+const getMonthsInYear = (currentMonth) => {
+    let months = [];
+    for (let month = 0; month <= currentMonth; month++) {
+        months.push({ month, year: new Date().getFullYear() });
+    }
+    return months;
+};
+function getMonthName(month) {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+    return monthNames[month];
+}
+
+const pdf = async (req, res) => {
+    try {
+        let title = "";
+        const currentDate = new Date();
+
+        switch (req.query.type) {
+            case 'daily':
+                let dailySalesData = await salesReport(1);
+                generatePDF([dailySalesData], "Daily Sales Report", res);
+                break;
+            case 'weekly':
+                let weeklySalesData = [];
+                const weeks = getWeeksInMonth(currentDate);
+                for (const week of weeks) {
+                    const data = await salesReportmw(week.start, week.end);
+                    weeklySalesData.push({ ...data, period:`Week ${weeks.indexOf(week) + 1}, ${getMonthName(currentDate.getMonth())}` });
+                }
+                generatePDF(weeklySalesData, "Weekly Sales Report", res);
+                break;
+            case 'monthly':
+                let monthlySalesData = [];
+                const months = getMonthsInYear(currentDate.getMonth());;
+                for (const { month, year } of months) {
+                    const monthStart = new Date(year, month, 1);
+                    const monthEnd = new Date(year, month + 1, 0);
+                    const data = await salesReportmw(monthStart, monthEnd);
+                    monthlySalesData.push({ ...data, period: `${getMonthName(month)} ${currentDate.getFullYear()}` });
+                }
+                generatePDF(monthlySalesData, "Monthly Sales Report", res);
+                break;
+            case 'yearly':
+                let yearlySalesData = [await salesReport(365)];
+                generatePDF(yearlySalesData, "Yearly Sales Report", res);
+                break;
+            default:
+                res.status(400).send('Invalid report type specified.');
+                return;
+        }
+    } catch (error) {
+        console.error('Error generating PDF:', error.message);
+        res.status(500).send('Error generating PDF.');
+    }
+};
+
+const generatePDF = (salesData, title, res) => {
+    try {
         let doc = new PDFDocument();
-        
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename="sales_report.pdf"');
-        
+        res.setHeader('Content-Disposition', `attachment; filename="${title.toLowerCase().replace(/\s+/g, "_")}.pdf"`);
         doc.pipe(res);
-        
-       
 
         const today = new Date().toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
         });
-        doc.fontSize(20).text(`Sales Report - ${today}`, { align: 'center' });
-        if (req.query.type === 'daily') {
-       
-            doc.fontSize(20).text(`today's Report`, { align: 'center' });
-        }else if (req.query.type === 'weekly') {
-       
-            doc.fontSize(20).text(`weekly Report`, { align: 'center' });
-        }
-        
-        if (salesData) {
+        doc.fontSize(20).text(`${title} - ${today}`, { align: 'center' });
+        doc.moveDown(2);
 
+        for (const data of salesData) {
             doc.moveDown(2);
+            doc.text(data.period, { align: 'left' });
+
             const tableHeaders = ['Metric', 'Value'];
             const columnStartPositions = [50, 300];
-
             const fontSize = 12;
-            
+
             doc.font('Helvetica-Bold').fontSize(fontSize);
-            
-  
             tableHeaders.forEach((header, index) => {
                 doc.text(header, columnStartPositions[index], doc.y, { width: 200, align: 'center' });
                 doc.strokeColor('black').lineWidth(1);
             });
-            
-          
 
             doc.font('Helvetica').fontSize(fontSize);
-          
             const tableRows = [
-                ['Total Revenue', `INR ${salesData.totalRevenue}`],
-                ['Total Orders', salesData.totalOrders],
-                ['Total Order Count till now', salesData.totalOrderCount],
-                ['Average Sales', `${salesData.averageSales ? salesData.averageSales.toFixed(2) : 'N/A'}%`],
-                ['Average Revenue', `${salesData.averageRevenue ? salesData.averageRevenue.toFixed(2) : 'N/A'}`],
-            ];
+                ['Total Revenue', `INR ${data.totalRevenue}`],
+                ['Total Orders', data.totalOrders],
              
-            salesData.totalOrder.forEach(order => {
+                ['Average Sales', `${data.averageSales ? data.averageSales.toFixed(2) : 'N/A'}%`],
+                ['Average Revenue', `${data.averageRevenue ? data.averageRevenue.toFixed(2) : 'N/A'}`],
+            ];
+
+            data.totalOrder.forEach(order => {
                 if (order.coupon !== 'nil') {
                     tableRows.push([`Coupon: ${order.coupon}`, `INR ${order.discountPrice}`]);
                 }
             });
-            
-            const overallDiscountPrice = salesData.totalOrder.reduce((total, order) => total + order.discountPrice, 0);
+
+            const overallDiscountPrice = data.totalOrder.reduce((total, order) => total + order.discountPrice, 0);
             tableRows.push(['Overall Discount Price', `INR ${overallDiscountPrice}`]);
 
             tableRows.forEach((row, rowIndex) => {
                 row.forEach((text, index) => {
                     doc.text(text, columnStartPositions[index], doc.y, { width: 200, align: 'center' });
-                   
                 });
                 doc.moveDown(0.5);
             });
-        } else {
-            doc.text('No sales data available.');
         }
-        
+
         doc.end();
     } catch (error) {
-        console.log(error.message);
+        console.error('Error generating PDF:', error.message);
         res.status(500).send('Error generating PDF.');
     }
 };
+
+
 
 
   const generateExcel = async (req, res, next) => {
@@ -360,19 +473,22 @@ let userblock = async (req, res) => {
         res.status(500).json({ status: false, message: 'Internal server error' });
     }};
 
-    const loadordermanagement = async (req, res) => {
+const loadordermanagement = async (req, res) => {
         try {
-        
-            const order = await orderModel.find().populate('user').sort({updatedAt:1});
+            const perPage=8;
+            const page = parseInt(req.query.page) || 1;
+            const totalorders= await orderModel.countDocuments({});
+            const totalPage=Math.ceil(totalorders / perPage);
+            const order = await orderModel.find({}).populate('user').sort({updatedAt:-1}).skip(perPage * (page - 1)).limit(perPage);
             
-            res.render('admin-orderlist', { order });
+            res.render('admin-orderlist', { order,totalPage,page});
         } catch (err) {
             console.error('Error in load order management:', err.message);
             
         }
     };
 
-    const requestAccept = async (req, res) => {
+const requestAccept = async (req, res) => {
         try {
             const { orderId,userId } = req.body;
     

@@ -58,6 +58,13 @@ cartSchema.pre('save', function(next) {
 
   this.billTotal += this.shipping;
 
+  if (this.isApplied && this.coupon !== 'nil') {
+    const discountPrice = this.discountPrice;
+    this.billTotal -= discountPrice; 
+  }
+  this.billTotal = this.billTotal.toFixed();
+
+
   next();
 });
 
@@ -65,3 +72,5 @@ cartSchema.pre('save', function(next) {
 const cartModel = mongoose.model('Cart',cartSchema);
 
 module.exports=cartModel;
+
+

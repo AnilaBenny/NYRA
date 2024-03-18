@@ -10,7 +10,7 @@ const walletModel = require('../models/walletModel');
 
 const {generateRazorpay,instance}=require('../config/razorpay');
 const Razorpay = require('razorpay');
-const PDFDocument = require('pdfkit');
+var easyinvoice = require('easyinvoice');
 const { UpdateModeEnum } = require("chart.js");
 const fs = require('fs');
 
@@ -54,7 +54,6 @@ const loadcheckout=async(req,res)=>{
 };
 
 
-
 const Postcheckout = async (req,res) => {
     try {
         const paymentOption=req.body.paymentOption ;
@@ -63,7 +62,7 @@ const Postcheckout = async (req,res) => {
         
        
         const user = await userModel.findOne({ email: req.session.email });
-        const cart = await cartModel.findOne({ owner: user._id });
+        const cart = await cartModel.findOne({ owner: user._id }).populate({path:'items.productId',model:'Products'});
         if (!cart) {
             return res.status(400).json({ message: "Cart not found" });
         }
@@ -84,6 +83,7 @@ const Postcheckout = async (req,res) => {
 
         const selectedItems = cart.items;
 
+
         for (const item of selectedItems) {
             const product = await productModel.findOne({ _id: item.productId });
          
@@ -97,6 +97,8 @@ const Postcheckout = async (req,res) => {
               
                     await product.save();
                 } 
+
+                
                 
             } else {
                 console.log('Product not found');
@@ -109,7 +111,6 @@ const Postcheckout = async (req,res) => {
           const orderData = new orderModel({
             user: user._id,
             cart: cart._id,
-            items: selectedItems,
             billTotal: cart.billTotal, 
             oId: order_id,
             paymentStatus: "Success",
@@ -119,9 +120,22 @@ const Postcheckout = async (req,res) => {
             discountPrice:cart.discountPrice
         });
 
+        for (const item of selectedItems) {
+          orderData.items.push({
+            productId:item.productId._id,
+            image:item.productId.images[0],
+            name:item.productId.name,
+            productPrice:item.productId.price,
+            quantity:item.quantity,
+            price:item.price
+          })
+      }
+        
+
         await orderData.save();
         
         cart.items = [];
+        cart.isApplied=flase;
         await cart.save();
 
          res.status(200).json({
@@ -185,7 +199,7 @@ const Postcheckout = async (req,res) => {
             const orderData = new orderModel({
               user: user._id,
               cart: cart._id,
-              items: selectedItems,
+             
               billTotal: cart.billTotal, 
               oId: order_id,
               paymentStatus: "Success",
@@ -194,10 +208,22 @@ const Postcheckout = async (req,res) => {
               coupon:cart.coupon,
               discountPrice:cart.discountPrice
           });
+
+          for (const item of selectedItems) {
+            orderData.items.push({
+              productId:item.productId._id,
+              image:item.productId.images[0],
+              name:item.productId.name,
+              productPrice:item.productId.price,
+              quantity:item.quantity,
+              price:item.price
+            })
+        }
   
           await orderData.save();
           
           cart.items = [];
+          cart.isApplied=flase;
           await cart.save();
          res.status(200).json({
           success: true,
@@ -240,22 +266,7 @@ const loadOrderdetail=async(req,res)=>{
         const user=await userModel.findOne({email:req.session.email});
         const cart=await cartModel.findOne({owner:user._id}) || null;
         let wish=await wishlistModel.findOne({user:user._id}) || null;
-        if(req.query.pdf){
-          let doc = new PDFDocument();
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename="invoice.pdf"');
-
-    doc.pipe(res);
-
-    doc.fontSize(20).text('Invoice', { align: 'center' });
-    
-    doc.fontSize(16).text(`Order ID: ${order.oId}`);
-    doc.fontSize(16).text(`User: ${order.user.name}`); 
-    
-
-    doc.end();
-        }
+      
         res.render('order-detail',{order,wish,cart});
     }catch(error){
         console.log('loadOrderdetail',error.message);
@@ -271,7 +282,7 @@ const razorpayVerify = async (req, res) => {
     const address = req.body.address || 'home';
 
     const user = await userModel.findOne({ email: req.session.email });
-    const cart = await cartModel.findOne({ owner: user._id });
+    const cart = await cartModel.findOne({ owner: user._id }).populate({path:'items.productId',model:'Products'});
 
     if (!cart) {
       return res.status(400).json({ message: "Cart not found" });
@@ -297,12 +308,15 @@ const razorpayVerify = async (req, res) => {
     expectedSignature=expectedSignature.digest("hex");
 
 
+    const selectedItems = cart.items;
+
+
+
 
     // if (expectedSignature === req.body.razorpay_signature) {
       const orderData = new orderModel({
         user: user._id,
         cart: cart._id,
-        items: cart.items, 
         billTotal: cart.billTotal, 
         oId: req.body.razorpay_order_id, 
         paymentStatus: "Success",
@@ -312,9 +326,21 @@ const razorpayVerify = async (req, res) => {
         discountPrice: cart.discountPrice
       });
 
+      for (const item of selectedItems) {
+        orderData.items.push({
+          productId:item.productId._id,
+          image:item.productId.images[0],
+          name:item.productId.name,
+          productPrice:item.productId.price,
+          quantity:item.quantity,
+          price:item.price
+        })
+    }
+
       await orderData.save();
     
       cart.items = [];
+      cart.isApplied=flase;
       await cart.save();
       res.json({ success: true, message: "Order processed successfully", orderId: req.body.razorpay_order_id });
 
@@ -348,16 +374,20 @@ const failedPayment = async (req, res) => {
       if (!addressdetails) {
        
       }
-      const cart = await cartModel.findOne({ owner: user._id });
+      const cart = await cartModel.findOne({ owner: user._id }).populate({path:'items.productId',model:'Products'});
       
       if (!cart) {
           return res.status(404).json({ success: false, message: "Cart not found" });
       }
+
+      const selectedItems = cart.items;
+
+
       const order_id = await generateUniqueOrderID();
       const orderData = new orderModel({
           user: user._id,
           cart: cart._id,
-          items: cart.items, 
+          
           billTotal: cart.billTotal, 
           oId: order_id, 
           paymentStatus: "Pending",
@@ -367,10 +397,22 @@ const failedPayment = async (req, res) => {
           discountPrice: cart.discountPrice
       });
 
+      for (const item of selectedItems) {
+        orderData.items.push({
+          productId:item.productId._id,
+          image:item.productId.images[0],
+          name:item.productId.name,
+          productPrice:item.productId.price,
+          quantity:item.quantity,
+          price:item.price
+        })
+    }
+
       await orderData.save();
     
-      // Clear cart items after order creation
+     
       cart.items = [];
+      cart.isApplied=flase;
       await cart.save();
 
       return res.json({ success: true, message: "Order processed successfully", orderId: order_id });
@@ -436,6 +478,70 @@ console.log(error.message);
 }
 }
 
+const invoice = async (req, res) => {
+  try {
+    
+      const order = await orderModel.findById(req.query.id).populate('user');
+  
+      
+      if (!order) {
+          return res.status(404).send('Order not found');
+      }
+
+      
+      const data = {
+          "documentTitle": "INVOICE", 
+          "currency": "INR",
+          "taxNotation": "gst", 
+          "marginTop": 25,
+          "marginRight": 25,
+          "marginLeft": 25,
+          "marginBottom": 25,
+          "logo": "https://public.easyinvoice.cloud/img/logo_en_original.png", 
+          "background": "https://public.budgetinvoice.com/img/watermark_draft.jpg", 
+          "sender": {
+              "company": "NYRA",
+              "address": "Cherthala, Alappuzha, Kerala",
+              "zip": "987654",
+              "city": "Cherthala",
+              "country": "India" 
+          },
+          "client": {
+              "company": order.user.name, 
+              "address": order.deliveryAddress.Street, 
+              "zip": order.deliveryAddress.pincode,
+              "city": order.deliveryAddress.city,
+              "country": order.deliveryAddress.Country 
+          },
+        
+          "products": order.items.map(item => ({
+            "description": item.name,
+            "quantity": item.quantity,
+            "price": item.price,
+           
+        })),
+        "information": {
+        
+        
+          "date": order.updatedAt.toLocaleDateString('en-US', { timeZone: 'UTC' })
+      },
+      
+           
+         
+      };
+
+      const result = await easyinvoice.createInvoice(data); 
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename=myInvoice.pdf');
+      res.send(Buffer.from(result.pdf, 'base64')); 
+  } catch (error) {
+      console.error('Error generating invoice:', error.message);
+
+  }
+};
+
+
 module.exports={
     loadcheckout,
     Postcheckout,
@@ -444,5 +550,6 @@ module.exports={
     razorpayVerify,
     failedPayment,
     retryPayment,
-    verifyPayment
+    verifyPayment,
+    invoice
 }

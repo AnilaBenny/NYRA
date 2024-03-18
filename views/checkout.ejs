@@ -66,7 +66,12 @@
                             
                              </div>
                                           <%}}}else{%>
-                                            <p>Please Add address</p>
+                                            <div class="card">
+                                <a href="#" id="addAddressLink" data-bs-toggle="tab" class="nav-link btn btn-block btn-md btn-black-default-hover">
+                                    Add Address
+                                </a>
+                            
+                             </div>
                                             <%}%>
                                             
                                           
@@ -114,7 +119,7 @@
                             <div class="payment_method">
                                 
                                 <div class="panel-default">
-                                    <%if(cart.billTotal>1000){%>
+                                    <%if(cart.billTotal<1000){%>
                                     <label class="radio-default d-flex"  for="COD" data-bs-toggle="collapse" data-bs-target="#methodCod">
                                     <input type="radio" style="width: 15px;" name="paymentOption" id="COD" value="COD" required>
                                     &nbsp;<span>Cash on Delivery (COD)</span>
@@ -122,7 +127,7 @@
                                  
                                     <%}else{%>
                                         <label class="radio-default d-flex"  for="COD" >
-                                    <span class="text-warning">Cash on delivery is not available for this order. Please add more items for the option to become available</span>
+                                    <span class="text-warning">Cash on delivery is not available for this order.</span>
                                     </label>
                                     <%}}%>
                                    
@@ -471,6 +476,27 @@ proceedButton.addEventListener("click", async () => {
     }
 }
 
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    const editAddressLink = document.getElementById('editAddressLink');
+    if (editAddressLink) {
+        editAddressLink.addEventListener('click', function(event) {
+            event.preventDefault(); 
+            window.location.href = '/editAddress'; 
+        });
+    }
+
+  
+    const addAddressLink = document.getElementById('addAddressLink');
+    if (addAddressLink) {
+        addAddressLink.addEventListener('click', function(event) {
+            event.preventDefault(); 
+            window.location.href = '/editAddress'; 
+        });
+    }
 });
 
  </script>
