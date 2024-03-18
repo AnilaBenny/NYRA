@@ -558,7 +558,7 @@ const loaduserAc = async (req, res) => {
     
           if (req.query.wallet) {
             const amount = Number(req.query.wallet) / 100; // Assuming amount is in smallest currency unit (e.g., cents)
-            if (!wallet) {
+            if (wallet===null) {
               wallet = new walletModel({
                 user: user._id,
                 balance: 0,
@@ -572,15 +572,8 @@ const loaduserAc = async (req, res) => {
               description: 'Add to wallet'
             });
             await wallet.save();
-          }
-    
-          // If no wallet was found or created, set to null for the response
-          if (!wallet) {
-            wallet = null;
-          }
-
             wallet.transactions.sort((a, b) => b.updatedAt - a.updatedAt);
-
+          }
     
           res.render('user-detail', { user, address, wallet, wish, cart });
         } else {
