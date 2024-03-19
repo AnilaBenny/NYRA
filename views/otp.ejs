@@ -48,15 +48,15 @@ crossorigin="anonymous"></head>
                             <div class="container p-1 form-group">
                                 <h2 class="text-center">Email verification with OTP</h2>
                                 <%if(message!==undefined){%>
-                                    <p class="text-danger"><%=message%></p>
+                                    <p class="text-danger text-center"><%=message%></p>
                                     <%}%>
                                
 
                 
               
                 <div class="mb-3" id="otpField">
-                    <div class="mobile-text mb-2 text-center">Enter the code that we just send on your email <b
-                            class="text-danger"></b></div>
+                    <div class="mobile-text mb-2 text-center">Enter the code that we just send on your email 
+                        <p class="text-danger"></p></div>
                     <input class="form-control" class="w-25"  type="text" id='otp' name="otp"
                         placeholder="Enter OTP">
                 </div>
@@ -76,7 +76,7 @@ crossorigin="anonymous"></head>
                                 id="minute">0</span>:<span id="seconds">29</span></div>
 
                 
-                            <a href="#" class="btn btn-primary w-75 mt-2" onclick="resendOtp()" id="resend-otp-button" style="display: none;">Resend OTP</a>
+                            <button class="btn btn-primary w-75 mt-2" onclick="resendOtp()" id="resend-otp-button" style="display: none;">Resend OTP</button>
 
                     </center>
                 </div>
