@@ -270,7 +270,7 @@ function validateForm(event) {
     const isValidHouseNo = validateInput('houseNo', /^\d{3}$/, 'housenoError', 'House Number');
     const isValidStreet = validateInput('street', /^[a-zA-Z0-9!@#$%^&*()-_+=\[\]{};:'",.<>?]+$/, 'streetError', 'Street');
     const isValidLandmark = validateInput('landmark', null, 'landmarkError', 'Landmark');
-    const isValidPincode = validateInput('pincode', /^\d{6}$/, 'pincodeError', 'Pincode (6 digits)');
+    const isValidPincode = validateInput('pincode', /^[1-9][0-9]{5}(?:\s[0-9]{3})?$/, 'pincodeError', 'Pincode (6 digits)');
     const isValidCity = validateInput('city', /^[a-zA-Z\s]+$/, 'cityError', 'City');
     const isValidDistrict = validateInput('district', /^[a-zA-Z\s]+$/, 'districtError', 'District');
     const isValidState = validateInput('state', /^[a-zA-Z\s]+$/, 'stateError', 'State');

@@ -147,16 +147,18 @@
                                                     <% }); %>
                                                 </tbody>
                                             </table>
-                                        <% }} else { %>
+                                        <% }%>
+                                    </div>
+                                <%} else { %>
                                             <p>No transactions found.</p>
                                         <% } %>
-                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>
                         
                         
-                        <div class="tab-pane" id="address">
+                        <div class="tab-pane fade" id="address">
                             <p>The following addresses will be used on the checkout page .</p>
                             <h5 class="billing-address">Address</h5>
                                
@@ -186,10 +188,12 @@
                                     Add Address
                                 </a>
                             
-                             </div></div>
+                             </div>
+                             </div>
                               
                         </div>
-                        <div class="tab-pane fade active" id="account-details">
+
+                        <div class="tab-pane fade show active" id="account-details">
                             <h3>Account details </h3>
                             <%if(typeof error !== 'undefined'){%>
                                 <p class="text-danger"><%=error%></p>
