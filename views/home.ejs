@@ -386,7 +386,16 @@
                                                                     %>
                                                                         <a href="#" onclick="addtowishlist('<%= pro[i]._id %>')" id="add-to-wishlist-<%=pro[i]._id%>"><i class="fa-solid fa-heart" id="wishlist-<%=pro[i]._id%>"></i></a>
                                                                     <% 
-                                                                    } }}%>
+                                                                    } }
+                                                                    else{%>
+
+                                                                        <a href="#" onclick="addtowishlist('<%= pro[i]._id %>')" id="add-to-wishlist-<%=pro[i]._id%>"><i class="fa-solid fa-heart" id="wishlist-<%=pro[i]._id%>"></i></a>
+                                                                        <%}}%>
+                                                                
+                                                                
+                                                                
+                                                                
+                                                               
                                                 </div>
                                             </div>
                                         </div>

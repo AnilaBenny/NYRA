@@ -159,29 +159,32 @@
                             <li><a class="nav-link active" data-bs-toggle="tab" href="#description">
                                    description
                                 </a></li>
-                                <div class="tab-pane active show" id="description">
-                                    <div class="single-tab-content-item">
-                                        <p><%=pro.description%></p>
-                                    </div>
-                                </div> 
+                              
                            
                                 <%if(pro.review!==null){%>
                             <li><a class="nav-link" data-bs-toggle="tab" href="#review">
                                     Reviews (<%=pro.review.length%>)
                                 </a></li>
-                        </ul> 
+                            <%}else{%>
+                                <li><a class="nav-link" data-bs-toggle="tab" href="#review">
+                                    Reviews (0)
+                                </a></li>
+                            <%}%>
 
+                        </ul> 
+                        
                         
                         <div class="product-details-content-tab">
                             <div class="tab-content">
                                
-                               
+                                
+
                                 <div class="tab-pane" id="review">
                                     <div class="single-tab-content-item">
                                        
                                         <ul class="comment">
                                             
-                                            
+                                             <%if(pro.review!==null){%>
                                                 <%if(pro.review.length>0){pro.review.forEach((review)=>{%>
                                                     <li class="comment-list"></li>
                                                 <div class="comment-wrapper">
@@ -223,14 +226,20 @@
                                                     </div>
                                                 </div>
                                             </li>
-                                                <%})}}%>
+                                                <%})}}else{%>
+                                                    <h3>No ratings yet.</h3>
                                                 
-
+<%}%>
                                         </ul>
 
                                             
                                         </div>
                                     </div>
+                                    <div class="tab-pane fade show active" id="description">
+                                    <div class="single-tab-content-item">
+                                        <h3><%=pro.description%></h3>
+                                    </div>
+                                </div> 
                                 </div> 
                             </div>
                         </div> 

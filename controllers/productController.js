@@ -364,7 +364,7 @@ const showproduct = async (req, res) => {
         wish = null;
     }
 
-            res.render('shop-product', { product, cat,totalPage,page,wish,cart});
+            res.render('shop-product', { product, cat,totalPage,page,wish,cart,sort});
         } catch (error) {
             console.error('Error in showproduct:', error.message);
             res.redirect('/home');
@@ -441,7 +441,7 @@ const allProduct=async(req,res)=>{
         product=await productModel.find({category:id,list:true}).populate('category').skip(perPage * (page - 1))
         .limit(perPage);
    }
-        res.render('shopAll',{product,totalPage,page,wish,cart,category});
+        res.render('shopAll',{product,totalPage,page,wish,cart,category,sort});
     }
     catch(error)
     {

@@ -661,24 +661,27 @@ const couponCreate=async(req,res)=>{
             expirationDate,
             maxUsers
         }=req.body;
+        const minAmount = parseInt(minimumAmount);
+        const maxAmount = parseInt(maximumAmount);
         const coupons=await couponModel.find({});
         const users=await userModels.find({});
-        if(minimumAmount>maximumAmount){
+        if(minAmount>maxAmount){
            return res.render('admincoupon',{coupons,users,message:'minimum amount is not greater than maximum amount'});
-        }
+        }else{
       
             const coupon = new couponModel({
                 code,
                 description,
                 maxDiscountAmount,
-                minimumAmount,
-                maximumAmount,
+                minimumAmount:minAmount,
+                maximumAmount:maxAmount,
                 discountPercentage: discountPercentage,
                 expirationDate,
                 maxUsers: maxUsers > 0 ? maxUsers : null, 
               });
               await coupon.save();
               res.redirect('/admin/coupon')
+            }
 
     }
     catch(error){

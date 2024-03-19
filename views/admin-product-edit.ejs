@@ -98,7 +98,7 @@
                                 <div class="col-md-9">
                                     <div class="mb-4">
                                         <label class="form-label">Cost in Rupee</label>
-                                        <input type="text" placeholder="Rs.00.0" min="0" id="price"  name="price" value="<%=pro.price%>" class="form-control">
+                                        <input type="number" placeholder="Rs.00.0" min="1" id="price"  name="price" value="<%=pro.price%>" class="form-control" required>
                                         <p id="priceError" class="text-danger"></p>
                                     </div>
                                     <div class="mb-4">
@@ -198,7 +198,7 @@
     descriptionInput.addEventListener('blur', () => validateInput('description', /^\S.{0,499}$/, 'descriptionError', 'Description'));
     brandInput.addEventListener('blur', () => validateInput('brand', /^[a-zA-Z\s]+$/, 'brandError', 'Brand'));
     priceInput.addEventListener('blur', () => validateInput('price', /^\d+(\.\d{1,2})?$/, 'priceError', 'Price'));
-    stockInput.addEventListener('blur', () => validateInput('stock', /^(?:0|[1-9]\d{0,2}|300)$/, 'stockError', 'Stock')); // Simplified regex for stock
+    stockInput.addEventListener('blur', () => validateInput('stock', /^(?:0|[1-9]\d{0,2}|300)$/, 'stockError', 'Stock')); 
 
     // Assuming your form has an id of 'productForm', attach the submit event listener
     document.getElementById('productForm').addEventListener('submit', validateForm);

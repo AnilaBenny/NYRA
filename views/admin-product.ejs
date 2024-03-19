@@ -72,13 +72,13 @@
                                 <div class="col-md-9">
                                     <div class="mb-4">
                                         <label class="form-label">Cost in Rupee</label>
-                                        <input type="text" placeholder="Rs.00.0" name="price" id="price" class="form-control">
+                                        <input type="number" min="1" placeholder="Rs.00.0" name="price" id="price" class="form-control" required>
                                         <p id="priceError" class="text-danger"></p>
                                     </div>
                                 
                                     <div class="mb-4">
                                         <label class="form-label">Count In Stock</label>
-                                        <input type="text" min="0" max="300" name="stock" id="stock" class="form-control">
+                                        <input type="number" min="0" max="300" name="stock" id="stock" min="1" max="300" class="form-control" required>
                                         <p id="stockError" class="text-danger"></p>
                                     </div>
                                 </div> 
@@ -110,7 +110,7 @@
                                 <div class="col-md-9">
                                     <div class="mb-4">
                                         <label class="form-label">Images</label>
-                                        <input class="form-control" type="file" name="images" id="images" required multiple>
+                                        <input class="form-control" type="file" name="images" id="images"  required multiple>
                                         <div id="file-upload-error" style="color: red;"></div>
                                     </div>
                                 </div> 
@@ -161,8 +161,7 @@
     descriptionInput.addEventListener('blur', () => validateInput('description', /^\S.{0,499}$/, 'descriptionError', 'Description'));
     brandInput.addEventListener('blur', () => validateInput('brand', /^[a-zA-Z\s]+$/, 'brandError', 'Brand'));
     priceInput.addEventListener('blur', () => validateInput('price', /^\d+(\.\d{1,2})?$/, 'priceError', 'Price'));
-    stockInput.addEventListener('blur', () => validateInput('stock',/^(?:0|[1-9]\d?|29\d|2[0-9]{2})$/
-, 'stockError', 'Stock')); // Simplified regex for stock
+    stockInput.addEventListener('blur', () => validateInput('stock',/^(?:0|[1-9]\d?|29\d|2[0-9]{2})$/, 'stockError', 'Stock')); // Simplified regex for stock
 
     // Assuming your form has an id of 'productForm', attach the submit event listener
     document.getElementById('productForm').addEventListener('submit', validateForm);
@@ -173,8 +172,7 @@ function validateForm(event) {
     const isValidDescription = validateInput('description', /^\S.{0,499}$/, 'descriptionError', 'Description');
     const isValidBrand = validateInput('brand', /^[a-zA-Z\s]+$/, 'brandError', 'Brand');
     const isValidPrice = validateInput('price', /^\d+(\.\d{1,2})?$/, 'priceError', 'Price');
-    const isValidStock = validateInput('stock', /^(?:0|[1-9]\d?|29\d|2[0-9]{2})$/
-, 'stockError', 'Stock');
+    const isValidStock = validateInput('stock', /^(?:0|[1-9]|[1-9]\d|1\d{2}|2[0-9]\d|300)$/, 'stockError', 'Stock');
 
     // Corrected the condition here
     if (!isValidName || !isValidDescription || !isValidBrand || !isValidPrice || !isValidStock) {

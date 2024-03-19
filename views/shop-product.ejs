@@ -240,7 +240,7 @@ crossorigin="anonymous">
                                     </ul>
         
                                     <div class="page-amount ml-2">
-                                        <span>Showing 1–8 of <%=product.length%> results</span>
+                                        <span>Showing <%=product.length%> results</span>
                                     </div> 
                                 </div>
                                 <div class="sort-box d-flex justify-content-between align-items-md-center align-items-start flex-md-row flex-column"
@@ -345,8 +345,12 @@ crossorigin="anonymous">
                                                                     %>
                                                                         <a href="#" onclick="addtowishlist('<%= product[i]._id %>')" id="add-to-wishlist-<%=product[i]._id%>"><i class="fa-solid fa-heart" id="wishlist-<%=product[i]._id%>"></i></a>
                                                                     <% 
-                                                                    } }
+                                                                    } }else{
                                                                     %>
+
+                                                                    
+                                                                        <a href="#" onclick="addtowishlist('<%= product[i]._id %>')" id="add-to-wishlist-<%=product[i]._id%>"><i class="fa-solid fa-heart" id="wishlist-<%=product[i]._id%>"></i></a>
+                                                                        <% }%>
                                                                 </div>
                                                             <% } %>
 
@@ -445,17 +449,17 @@ crossorigin="anonymous">
                             </div>
                         </div>
                     </div>
-                    <% if (totalPage && page) { %>
+                    <% if (totalPage && page || sort) { %>
                     <div class="page-pagination text-center" data-aos="fade-up" data-aos-delay="0">
                         <ul>
                             <% if (page > 1) { %>
-                                <li><a href="/shop?category=<%=cat%>&page=<%=page-1%>"><i class="ion-ios-skipforward"></i></a></li>
+                                <li><a href="/shop?category=<%=cat%>&page=<%=page-1%>&sort=<%=sort%>"><i class="ion-ios-skipforward"></i></a></li>
                             <% } %>
                             <% for (let i = Math.max(1, page - 2); i <= Math.min(page + 2, totalPage); i++) { %>
-                                <li><a href="/shop?category=<%=cat%>&page=<%=i%>"><%=i%></a></li>
+                                <li><a href="/shop?category=<%=cat%>&page=<%=i%>&sort=<%=sort%>"><%=i%></a></li>
                             <% } %>
                             <% if (page < totalPage) { %>
-                                <li><a href="/shop?category=<%=cat%>&page=<%=page+1%>"><i class="ion-ios-skipforward"></i></a></li>
+                                <li><a href="/shop?category=<%=cat%>&page=<%=page+1%>&sort=<%=sort%>"><i class="ion-ios-skipforward"></i></a></li>
                             <% } %>
                         </ul>
                     </div> 
