@@ -95,7 +95,8 @@
                         <% for (let j = 0; j < order.length; j++) { %>
                             <tr>
                                 <th>
-                                    <p>Sl no.<%= j+1 %></p>
+                                    <% var itemsPerPage = 5;  %>
+                                    <p>Sl no.<%= ((page - 1) * itemsPerPage) + (j + 1) %></p>
                                     <p>Order Id: <%= order[j].oId %><br>Date of order: <%= new Date(order[j].orderDate).toLocaleDateString() %></p>
                                 </th>
                             </tr>

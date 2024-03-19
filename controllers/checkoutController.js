@@ -135,7 +135,7 @@ const Postcheckout = async (req,res) => {
         await orderData.save();
         
         cart.items = [];
-        cart.isApplied=flase;
+        cart.isApplied=false;
         await cart.save();
 
          res.status(200).json({
@@ -223,7 +223,7 @@ const Postcheckout = async (req,res) => {
           await orderData.save();
           
           cart.items = [];
-          cart.isApplied=flase;
+          cart.isApplied=false;
           await cart.save();
          res.status(200).json({
           success: true,
@@ -340,7 +340,7 @@ const razorpayVerify = async (req, res) => {
       await orderData.save();
     
       cart.items = [];
-      cart.isApplied=flase;
+      cart.isApplied=false;
       await cart.save();
       res.json({ success: true, message: "Order processed successfully", orderId: req.body.razorpay_order_id });
 
@@ -412,7 +412,7 @@ const failedPayment = async (req, res) => {
     
      
       cart.items = [];
-      cart.isApplied=flase;
+      cart.isApplied=false;
       await cart.save();
 
       return res.json({ success: true, message: "Order processed successfully", orderId: order_id });

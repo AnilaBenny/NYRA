@@ -131,6 +131,13 @@
                                     <p class="cart_amount">Free Shipping</p>
                                     <%}%>
                                 </div>
+                                <div class="cart_subtotal ">
+                                    <%if(cart.discountPrice>0){%>
+                                        <p>dicount:</p>
+                                    <p class="cart_amount1" id="shipping">Rs.<%=cart.discountPrice%>.00</p>
+                                  
+                                    <%}%>
+                                </div>
                                
 
                                 <div class="cart_subtotal">
