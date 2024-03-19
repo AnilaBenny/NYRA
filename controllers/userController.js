@@ -54,6 +54,7 @@ let enterHome = async (req, res) => {
                 let wish=await wishlistModel.findOne({user:userData._id});
                 if(!wish){
                   wish=null;
+                  
                 }
                 let cart=await cartModel.findOne({owner:userData._id})
                 if(!cart)
@@ -272,8 +273,11 @@ const postVerifyOtp = async (req, res, next) => {
     try {
     
           const { otp } = req.body;
-          const dbOtp= await otpModel.findOne({ otp});
-          console.log('dbotp',dbOtp.otp);
+          console.log(otp);
+          const dbOtp= await otpModel.findOne({ otp}) || null;
+          if(dbOtp === null){
+            return res.render('otp', { message: 'OTP Invalid' });
+          }
          
                  
                     if (otp === dbOtp.otp) {
@@ -290,13 +294,14 @@ const postVerifyOtp = async (req, res, next) => {
                       const userData = await newUser.save();
                       
                       if (userData) {
+                        
                      
                         return res.redirect('/');
                       }
                     } 
                     
                     else{
-                      res.render('otp', { message: 'Your registration has failed!!!' });
+                      return res.render('otp', { message: 'Your registration has failed!!!' });
                     }}
      catch (error) {
         console.log('postverify otp',error.message);
@@ -314,8 +319,6 @@ const loadOtp = async (req, res) => {
         console.log(error.message);
     }
 };
-
-
 
 const verifyUser = async (req, res) => {
     try {
@@ -354,12 +357,10 @@ const verifyUser = async (req, res) => {
     }
 };
 
-
 let logout = (req, res) => {
   req.session.email = false;
   res.redirect("/");
 };
-
 
 async function sentOtp(req,email)
 {
@@ -399,8 +400,8 @@ async function sentOtp(req,email)
           { otp: null },
           { new: true }
       );
-      console.log('OTP set to null after 30 seconds:', nullifiedOtp);
-  }, 30000); 
+     
+  }, 60000); 
 }
   
   
@@ -425,9 +426,7 @@ let resendOtp = async (req, res) => {
     });
   }
 };
-
-
-   
+ 
 let  postforgot=async(req,res)=>{
   try{
     const {email}=req.body;
@@ -461,6 +460,7 @@ const loadreset=async(req,res)=>{
     console.log('loadrest:',error.message);
   }
 };
+
 const loadpassword=async(req,res)=>{
   try{
   
@@ -1041,7 +1041,7 @@ product = await ProductModel.find({}).populate('category').skip(perPage * (page 
 .limit(perPage) .sort({ createdAt: -1 })
 .limit(5) ;
 }
-res.render('newArrivals', { product, wish, totalPage, page, wish, cart });
+res.render('newArrivals', { product, wish, totalPage, page, wish, cart,sort });
 
 }
 catch(error){
