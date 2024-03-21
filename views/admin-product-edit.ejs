@@ -192,15 +192,14 @@
     const brandInput = document.getElementById('brand');
     const priceInput = document.getElementById('price');
     const stockInput = document.getElementById('stock');
-  
-    // Event listeners for input validation on blur
+ 
     nameInput.addEventListener('blur', () => validateInput('name', /^\S.{0,99}$/, 'nameError', 'Product Name'));
     descriptionInput.addEventListener('blur', () => validateInput('description', /^\S.{0,499}$/, 'descriptionError', 'Description'));
     brandInput.addEventListener('blur', () => validateInput('brand', /^[a-zA-Z\s]+$/, 'brandError', 'Brand'));
     priceInput.addEventListener('blur', () => validateInput('price', /^\d+(\.\d{1,2})?$/, 'priceError', 'Price'));
     stockInput.addEventListener('blur', () => validateInput('stock', /^(?:0|[1-9]\d{0,2}|300)$/, 'stockError', 'Stock')); 
 
-    // Assuming your form has an id of 'productForm', attach the submit event listener
+    
     document.getElementById('productForm').addEventListener('submit', validateForm);
 });
 
@@ -211,13 +210,13 @@ function validateForm(event) {
     const isValidPrice = validateInput('price', /^\d+(\.\d{1,2})?$/, 'priceError', 'Price');
     const isValidStock = validateInput('stock', /^(?:0|[1-9]\d{0,2}|300)$/, 'stockError', 'Stock');
 
-    // Corrected the condition here
+  
     if (!isValidName || !isValidDescription || !isValidBrand || !isValidPrice || !isValidStock) {
         event.preventDefault();
         document.getElementById('mainError').innerText = 'Please correct the highlighted fields.';
         return false;
     }
-    // If all validations pass, form will be submitted
+  
     return true;
 }
 
@@ -240,7 +239,7 @@ function validateInput(inputId, pattern, errorId, errorMessage) {
 document.getElementById('images').addEventListener('change', function(e) {
     var fileInput = e.target;
     var maxFiles = 3;
-    var validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']; // Added 'webp' as a valid extension
+    var validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']; 
 
     if (fileInput.files.length > maxFiles) {
         Swal.fire({
