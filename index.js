@@ -6,7 +6,7 @@ const adminRoute=require('./routes/adminRoute');
 const expressvalidator = require('express-validator');
 const session=require('express-session');
 const nocache=require('nocache');
-const jwt=require('jsonwebtoken');
+
 
 
 
