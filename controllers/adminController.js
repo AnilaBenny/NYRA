@@ -1,6 +1,6 @@
 const adminModel = require('../models/adminModel');
 const userModel = require('../models/userModels');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const orderModel=require('../models/orderModel');
 const productModel=require('../models/productModel');
 const {couponModel}=require('../models/couponModel');
