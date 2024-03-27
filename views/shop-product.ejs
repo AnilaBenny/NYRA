@@ -456,7 +456,7 @@ crossorigin="anonymous">
                                 <li><a href="/shop?category=<%=cat%>&page=<%=page-1%>&sort=<%=sort%>"><i class="ion-ios-skipforward"></i></a></li>
                             <% } %>
                             <% for (let i = Math.max(1, page - 2); i <= Math.min(page + 2, totalPage); i++) { %>
-                                <li><a href="/shop?category=<%=cat%>&page=<%=i%>&sort=<%=sort%>"><%=i%></a></li>
+                                <li><a class="<%= page == i ? 'active' : '' %>" href="/shop?category=<%=cat%>&page=<%=i%>&sort=<%=sort%>"><%=i%></a></li>
                             <% } %>
                             <% if (page < totalPage) { %>
                                 <li><a href="/shop?category=<%=cat%>&page=<%=page+1%>&sort=<%=sort%>"><i class="ion-ios-skipforward"></i></a></li>

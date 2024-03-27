@@ -1,5 +1,11 @@
 <%-include('adminheader')%>
-
+<style>
+       .pagination .page-item.active .page-link {
+    background-color: pink;
+    border-color: pink;
+    color: white; /* Change text color to ensure visibility */
+}
+</style>
 <body>
 
     <main class="main-wrap">
@@ -118,7 +124,7 @@
                                 <li  class="page-item"><a href="/admin/productlist?page=<%=page-1%>" class="page-link"><i class="ion-ios-skipforward"></i></a></li>
                             <% } %>
                             <% for (let i = Math.max(1, page - 2); i <= Math.min(page + 2, totalPage); i++) { %>
-                                <li class="page-item"><a href="/admin/productlist?page=<%=i%>" class="page-link"><%=i%></a></li>
+                                <li class="page-item <%= page === i ? 'active' : '' %>"><a href="/admin/productlist?page=<%=i%>" class="page-link"><%=i%></a></li>
                             <% } %>
                             <% if (page < totalPage) { %>
                                 <li class="page-item"><a href="/admin/productlist?page=<%=page+1%>" class="page-link"><i class="ion-ios-skipforward"></i></a></li>

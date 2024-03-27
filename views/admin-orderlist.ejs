@@ -1,5 +1,11 @@
 <%-include('adminheader')-%>
 <style>
+    .pagination .page-item.active .page-link {
+    background-color: pink;
+    border-color: pink;
+    color: white; /* Change text color to ensure visibility */
+}
+
     .badge.shade-yellow {
        background-color: #FFD700;
      
@@ -161,22 +167,22 @@
                 </div> 
             </div> 
             <% if (totalPage && page) { %>
-            <div class="pagination-area mt-15 mb-50">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-start">
-                        <% if (page > 1) { %>
-                            <li class="page-item"><a class="page-link" href="/admin/order-list?page=<%=page-1%>"><i class="ion-ios-skipforward"></i></a></li>
+                <div class="pagination-area mt-15 mb-50">
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-start">
+                            <% if (page > 1) { %>
+                                <li class="page-item"><a class="page-link" href="/admin/order-list?page=<%=page-1%>"><i class="ion-ios-skipforward"></i></a></li>
                             <% } %>
                             <% for (let i = Math.max(1, page - 2); i <= Math.min(page + 2, totalPage); i++) { %>
-                                <li class="page-item"><a class="page-link" href="/admin/order-list?page=<%=i%>"><%=i%></a></li>
+                                <li class="page-item <%= page === i ? 'active' : '' %>"><a class="page-link" href="/admin/order-list?page=<%=i%>"><%=i%></a></li>
                             <% } %>
                             <% if (page < totalPage) { %>
                                 <li class="page-item"><a class="page-link" href="/admin/order-list?page=<%=page+1%>"><i class="ion-ios-skipforward"></i></a></li>
                             <% } %>
-                    </ul>
-                </nav>
-            </div>
-            <% } %>
+                        </ul>
+                    </nav>
+                </div>
+            <% } %>            
         </section> 
         <footer class="main-footer font-xs">
             <div class="row pb-30 pt-15">
