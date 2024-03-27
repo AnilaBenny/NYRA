@@ -127,10 +127,9 @@ async function salesReportmw(startDate, endDate) {
 
         let totalOrderCount = orders.length;
 
-        let stock = await productModel.find(); // Consider filtering or processing this only if necessary for the given date range
+        let stock = await productModel.find(); 
         let totalCountInStock = stock.reduce((total, product) => total + product.countInStock, 0);
 
-        // Since we're now looking at a specific range, the concept of "average sales" per day may or may not make sense depending on your application
         let daysInRange = (endDate - startDate) / (1000 * 60 * 60 * 24);
         let averageSales = totalOrderCount / daysInRange; 
         let averageRevenue = totalRevenue / daysInRange; 
@@ -143,11 +142,11 @@ async function salesReportmw(startDate, endDate) {
             averageSales,
             averageRevenue,
             productEntered: productEntered.length,
-            totalOrder: orders // This returns the orders, you might want to summarize this data further
+            totalOrder: orders 
         };
     } catch (err) {
         console.error('salesReport error', err.message);
-        throw err; // Rethrowing the error is usually a good practice so the caller knows something went wrong.
+        throw err; 
     }
 }
 
@@ -183,9 +182,6 @@ const getWeeksInMonth = (currentDate) => {
 
     return weeks;
 };
-
-
-
 
 const getMonthsInYear = (currentMonth) => {
     let months = [];
@@ -307,8 +303,6 @@ const generatePDF = (salesData, title, res) => {
 };
 
 
-
-
   const generateExcel = async (req, res, next) => {
     try {
       const salesDatas = await salesReport(365);
@@ -372,7 +366,6 @@ async function orderPieChart() {
 }
 
 
-
 let adminLogin = async (req, res) => {
     try {
         res.render('admin-login', { err: null });
@@ -390,9 +383,8 @@ let adminPost = async (req, res) => {
   
         
         const adminExist = await adminModel.findOne({
-            adminEmail: email,
-          });
-        
+            adminEmail: email });
+        console.log(adminExist);
 
         if (adminExist) {
            
@@ -513,7 +505,7 @@ const requestAccept = async (req, res) => {
             wallet.transactions.push({
                 amount: canceledOrder.billTotal,
                 type: 'credit',
-                description: 'Refund for order ' + orderId
+                reason: 'Refund for order ' + orderId
             });
     
             await wallet.save();
