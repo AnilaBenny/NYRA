@@ -301,8 +301,9 @@ const showproduct = async (req, res) => {
             const category = await categoryModel.findOne({ name: cat });
             const perPage=8;
             const page = parseInt(req.query.page) || 1;
-            const totalproducts= await productModel.countDocuments({list:true,});
+            const totalproducts= await productModel.countDocuments({list:true,category:category._id});
             const totalPage=Math.ceil(totalproducts / perPage)
+            
             if (!category) {
                 product = await productModel.find({list:true})
              
