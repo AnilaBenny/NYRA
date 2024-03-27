@@ -28,10 +28,10 @@ const Couponcart = async (req, res) => {
         let discountAmount = 0;
 
         if (cart.billTotal <= 500) {
-            discountAmount = (coupon.discountPercentage / 100) * cart.billTotal;
+            discountAmount = (coupon.discountPercentage / 100) * cart.billTotal.toFixed();
             cart.billTotal -= discountAmount;
         } else {
-            discountAmount = (coupon.discountPercentage / 100) * cart.billTotal;
+            discountAmount = (coupon.discountPercentage / 100) * cart.billTotal.toFixed();
             cart.billTotal *= (1 - coupon.discountPercentage / 100);
         }
         cart.billTotal = Number(cart.billTotal.toFixed());
