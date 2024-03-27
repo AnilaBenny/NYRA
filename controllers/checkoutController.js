@@ -110,7 +110,6 @@ const Postcheckout = async (req,res) => {
         if(paymentOption==='COD'){
           const orderData = new orderModel({
             user: user._id,
-            cart: cart._id,
             billTotal: cart.billTotal, 
             oId: order_id,
             paymentStatus: "Success",
@@ -191,14 +190,13 @@ const Postcheckout = async (req,res) => {
             wallet.transactions.push({
                 amount: -cart.billTotal,
                 type: 'debit',
-                description: 'purchase with wallet'
+                reason: 'purchase with wallet'
             });
     
             await wallet.save();
             
             const orderData = new orderModel({
               user: user._id,
-              cart: cart._id,
              
               billTotal: cart.billTotal, 
               oId: order_id,
@@ -316,7 +314,7 @@ const razorpayVerify = async (req, res) => {
     // if (expectedSignature === req.body.razorpay_signature) {
       const orderData = new orderModel({
         user: user._id,
-        cart: cart._id,
+      
         billTotal: cart.billTotal, 
         oId: req.body.razorpay_order_id, 
         paymentStatus: "Success",
@@ -386,7 +384,7 @@ const failedPayment = async (req, res) => {
       const order_id = await generateUniqueOrderID();
       const orderData = new orderModel({
           user: user._id,
-          cart: cart._id,
+          
           
           billTotal: cart.billTotal, 
           oId: order_id, 
