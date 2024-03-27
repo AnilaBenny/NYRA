@@ -8,10 +8,6 @@ const orderSchema = new Schema({
         ref: 'user',
         required: true,
       },
-      cart: {
-        type: ObjectID,
-        ref: 'carts',
-      },
       oId: {
         type: String,
         required: true,
