@@ -130,6 +130,7 @@
                                                         <th>Date</th>
                                                         <th>Time</th>
                                                         <th>Amount</th>
+                                                        <th>reason</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -142,6 +143,10 @@
                                                         <td><%= new Date(transaction.updatedAt).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', second: '2-digit' }) %></td>
                                                         <td>
                                                             <%= transaction.type === 'credit' ? '+' : '-' %>INR <%= transaction.amount %>
+                                                        </td>
+                                                        <td>
+                                                            <%= transaction.reason%>
+
                                                         </td>
                                                     </tr>
                                                     <% }); %>

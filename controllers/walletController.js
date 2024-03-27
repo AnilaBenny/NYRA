@@ -32,7 +32,7 @@ const addtoWallet = async (req, res) => {
         wallet.transactions.push({
             amount: order.billTotal,
             type: 'credit',
-            description: 'Refund for order ' + orderId
+            reason: 'Refund for order ' + orderId
         });
 
         await wallet.save();
