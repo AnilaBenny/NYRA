@@ -117,16 +117,18 @@
                                     <div class="mb-4">
                                         <p> <%=pro.category.name%></p>
                                         <p>update category</p>
-                                       <% if(cate.length > 0) {
-                                            for(let i=0; i<cate.length; i++) { %>
-                                        <label class="mb-2 form-check form-check-inline" style="width: 45%;">
-                                           <%if(pro.category.name===cate[i].name){%><input class="form-check-input" checked=""  value="<%=cate[i]._id%>" name="category" checked="" type="radio" required>
-                                           <span class="form-check-label"> <%=cate[i].name%> </span>
-                                           <%}else{%>
-                                            <input class="form-check-input"   value="<%=cate[i]._id%>" name="category" type="radio" required>
-                                            <span class="form-check-label"> <%=cate[i].name%> </span><%}%>
-                                           </label>
-                                      <%}}%>
+                                        <% if(cate.length > 0) { %>
+                                            <select class="form-select" name="category" required>
+                                                <% for(let i=0; i<cate.length; i++) { %>
+                                                    <% if(pro.category.name === cate[i].name) { %>
+                                                        <option value="<%= cate[i]._id %>" selected><%= cate[i].name %></option>
+                                                    <% } else { %>
+                                                        <option value="<%= cate[i]._id %>"><%= cate[i].name %></option>
+                                                    <% } %>
+                                                <% } %>
+                                            </select>
+                                        <% } %>
+                                        
                                     </div>
                                 </div> 
                             </div> 
