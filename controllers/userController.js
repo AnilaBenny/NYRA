@@ -547,7 +547,7 @@ const loaduserAc = async (req, res) => {
         if (req.session.email) {
           const user = await userModel.findOne({ email: req.session.email });
           if (!user) {
-            // Handle case where user is not found
+         
             return res.status(404).send('User not found');
           }
     
@@ -557,7 +557,7 @@ const loaduserAc = async (req, res) => {
           let wallet = await walletModel.findOne({ user: user._id }) || null;
     
           if (req.query.wallet) {
-            const amount = Number(req.query.wallet) / 100; // Assuming amount is in smallest currency unit (e.g., cents)
+            const amount = Number(req.query.wallet) / 100; 
             if (wallet===null) {
               wallet = new walletModel({
                 user: user._id,
@@ -569,15 +569,17 @@ const loaduserAc = async (req, res) => {
             wallet.transactions.push({
               amount: amount,
               type: 'credit',
-              description: 'Add to wallet'
+              reason: 'Add to wallet'
             });
             await wallet.save();
-            wallet.transactions.sort((a, b) => b.updatedAt - a.updatedAt);
+            
           }
+            wallet.transactions.reverse();
+          
     
           res.render('user-detail', { user, address, wallet, wish, cart });
         } else {
-          // Handle case where user is not logged in or session is not established
+          
           res.status(401).send('User not logged in');
         }
       } catch (error) {
