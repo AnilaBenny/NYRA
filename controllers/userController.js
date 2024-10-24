@@ -577,7 +577,7 @@ const loaduserAc = async (req, res) => {
             wallet.transactions.reverse();
           
     
-          res.render('user-detail', { user, address, wallet, wish, cart });
+          res.render('user-detail', { user, address, wallet , wish, cart });
         } else {
           
           res.status(401).send('User not logged in');
