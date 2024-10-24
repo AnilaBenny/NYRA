@@ -547,7 +547,6 @@ const loaduserAc = async (req, res) => {
         if (req.session.email) {
           const user = await userModel.findOne({ email: req.session.email });
           if (!user) {
-         
             return res.status(404).send('User not found');
           }
     
@@ -566,15 +565,15 @@ const loaduserAc = async (req, res) => {
               });
             }
             wallet.balance += amount;
-            wallet.transactions.push({
+            wallet?.transactions.push({
               amount: amount,
               type: 'credit',
               reason: 'Add to wallet'
             });
             await wallet.save();
-            
+            wallet?.transactions.reverse();
           }
-            wallet.transactions.reverse();
+            
           
     
           res.render('user-detail', { user, address, wallet , wish, cart });
